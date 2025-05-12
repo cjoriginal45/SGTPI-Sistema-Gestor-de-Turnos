@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="principal.component.css" />
+    <title>Pagina Principal</title>
+  </head>
+  <body>
+    <div id="modalAsignarTurno" class="modal">
+      <div class="modal-contenido">
+        <div class="modal-header">
+          <h2 id="modalTitulo">Asignar Turno</h2>
+          <span class="cerrar-modal">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="pacienteNombre">Paciente:</label>
+            <input
+              type="text"
+              id="pacienteNombre"
+              placeholder="Nombre y apellido del paciente"
+            />
+          </div>
+          <div class="form-group">
+            <label for="duracionTurno">Duración:</label>
+            <select id="duracionTurno">
+              <option value="30">30 minutos</option>
+              <option value="50" selected>50 minutos</option>
+              <option value="60">60 minutos</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="btnConfirmarModal" class="btn-confirmarModal">
+            Confirmar
+          </button>
+          <button id="btnCancelarModal" class="btn-cancelarModal">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="header-container" class="header-container">
+      <app-header></app-header>
+    </div>
+
+
+    <!-- Arranca el main -->
+    <div class="main-container">
+      <main class="main">
+
+        <!-- Todo esto es el calendario -->
+        <div class="agenda-container">
+          <div class="filtro-fecha"></div>
+          <div class="agenda-header">
+            <button id="btnHoy" (click)="toggleCalendar()">Hoy</button>
+          </div>
+          <app-calendar 
+            #calendarComponent
+            (daySelected)="onDaySelected($event)">
+          </app-calendar>
+        </div>
+
+        <div class="datos-container">
+          <span>Turnos para Hoy: </span>
+          <span>Horas libres: </span>
+          <span>Turnos Cancelados: </span>
+        </div>
+
+        <!-- Reemplaza el div #actividadesDia con este código -->
+        <div id="actividadesDia" class="actividades-container">
+          <h3 class="titulo-actividades"></h3>
+          <div class="lista-horas">
+            <!-- Mañana -->
+            <div class="bloque-horas">
+              <h4 class="periodo-dia">MAÑANA</h4>
+
+              <div class="hora-actividad" id="hora-actividad">
+                <span class="hora">08:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Bloqueado</span>
+                </div>
+                <div class="turno-centro"></div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-desbloquear">
+                    <span class="material-symbols-outlined">Lock_Open</span>
+                    Desbloquear
+                  </button>
+                </div>
+              </div>
+
+              <div class="hora-actividad">
+                <span class="hora">09:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Disponible</span>
+                </div>
+                <div class="turno-centro">
+                  <span class="turno-info">Teléfono: -</span>
+                  <span class="turno-info">Estado: Disponible</span>
+                </div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-bloquear">
+                    <span class="material-symbols-outlined">Lock</span>
+                    Bloquear hora
+                  </button>
+                  <button class="btn-turno btn-asignar">
+                    <span class="material-symbols-outlined"
+                      >calendar_today</span
+                    >
+                    Asignar turno
+                  </button>
+                </div>
+              </div>
+
+              <div class="hora-actividad">
+                <span class="hora">10:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Pérez Enzo</span>
+                </div>
+                <div class="turno-centro">
+                  <span class="turno-info">Teléfono: 547778235</span>
+                  <span class="turno-info">Estado: Confimado</span>
+                </div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-modificar">
+                    <span class="material-symbols-outlined">Edit</span>
+                    Modificar turno
+                  </button>
+                  <button class="btn-turno btn-cancelar">
+                    <span class="material-symbols-outlined">Dangerous</span>
+                    Cancelar turno
+                  </button>
+                </div>
+              </div>
+
+              <div class="hora-actividad">
+                <span class="hora">11:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Disponible</span>
+                </div>
+                <div class="turno-centro">
+                  <span class="turno-info">Teléfono: -</span>
+                  <span class="turno-info">Estado: Disponible</span>
+                </div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-bloquear">
+                    <span class="material-symbols-outlined">Lock</span>
+                    Bloquear hora
+                  </button>
+                  <button class="btn-turno btn-asignar">
+                    <span class="material-symbols-outlined"
+                      >calendar_today</span
+                    >
+                    Asignar turno
+                  </button>
+                </div>
+              </div>
+
+              <div class="hora-actividad">
+                <span class="hora">12:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Diaz José</span>
+                </div>
+                <div class="turno-centro">
+                  <span class="turno-info">Teléfono: 54777821235</span>
+                  <span class="turno-info">Estado: Confimado</span>
+                </div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-cancelar">
+                    <span class="material-symbols-outlined">Dangerous</span>
+                    Cancelar turno
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="bloque-horas">
+              <h4 class="periodo-dia">TARDE</h4>
+
+              <div class="hora-actividad">
+                <span class="hora">13:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Bloqueado</span>
+                </div>
+                <div class="turno-centro"></div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-desbloquear">
+                    <span class="material-symbols-outlined">Lock_Open</span>
+                    Desbloquear
+                  </button>
+                </div>
+              </div>
+
+              <div class="hora-actividad">
+                <span class="hora">14:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Bloqueado</span>
+                </div>
+                <div class="turno-centro"></div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-desbloquear">
+                    <span class="material-symbols-outlined">Lock_Open</span>
+                    Desbloquear
+                  </button>
+                </div>
+              </div>
+
+              <div class="hora-actividad">
+                <span class="hora">15:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Disponible</span>
+                </div>
+                <div class="turno-centro">
+                  <span class="turno-info">Teléfono: -</span>
+                  <span class="turno-info">Estado: Disponible</span>
+                </div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-bloquear">
+                    <span class="material-symbols-outlined">Lock</span>
+                    Bloquear hora
+                  </button>
+                  <button class="btn-turno btn-asignar">
+                    <span class="material-symbols-outlined"
+                      >calendar_today</span
+                    >
+                    Asignar turno
+                  </button>
+                </div>
+              </div>
+
+              <div class="hora-actividad">
+                <span class="hora">16:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Ribarola Joaquin</span>
+                </div>
+                <div class="turno-centro">
+                  <span class="turno-info">Teléfono: 544378123</span>
+                  <span class="turno-info">Estado: Confimado</span>
+                </div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-cancelar">
+                    <span class="material-symbols-outlined">Dangerous</span>
+                    Cancelar turno
+                  </button>
+                </div>
+              </div>
+
+              <div class="hora-actividad">
+                <span class="hora">17:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Disponible</span>
+                </div>
+                <div class="turno-centro">
+                  <span class="turno-info">Teléfono: -</span>
+                  <span class="turno-info">Estado: Disponible</span>
+                </div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-bloquear">
+                    <span class="material-symbols-outlined">Lock</span>
+                    Bloquear hora
+                  </button>
+                  <button class="btn-turno btn-asignar">
+                    <span class="material-symbols-outlined"
+                      >calendar_today</span
+                    >
+                    Asignar turno
+                  </button>
+                </div>
+              </div>
+
+              <div class="hora-actividad">
+                <span class="hora">18:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Disponible</span>
+                </div>
+                <div class="turno-centro">
+                  <span class="turno-info">Teléfono: -</span>
+                  <span class="turno-info">Estado: Disponible</span>
+                </div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-bloquear">
+                    <span class="material-symbols-outlined">Lock</span>
+                    Bloquear hora
+                  </button>
+                  <button class="btn-turno btn-asignar">
+                    <span class="material-symbols-outlined"
+                      >calendar_today</span
+                    >
+                    Asignar turno
+                  </button>
+                </div>
+              </div>
+
+              <div class="hora-actividad">
+                <span class="hora">19:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Disponible</span>
+                </div>
+                <div class="turno-centro">
+                  <span class="turno-info">Teléfono: -</span>
+                  <span class="turno-info">Estado: Disponible</span>
+                </div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-bloquear">
+                    <span class="material-symbols-outlined">Lock</span>
+                    Bloquear hora
+                  </button>
+                  <button class="btn-turno btn-asignar">
+                    <span class="material-symbols-outlined"
+                      >calendar_today</span
+                    >
+                    Asignar turno
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="bloque-horas">
+              <h4 class="periodo-dia">NOCHE</h4>
+
+              <div class="hora-actividad">
+                <span class="hora">20:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Bloqueado</span>
+                </div>
+                <div class="turno-centro"></div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-desbloquear">
+                    <span class="material-symbols-outlined">Lock_Open</span>
+                    Desbloquear
+                  </button>
+                </div>
+              </div>
+
+              <div class="hora-actividad">
+                <span class="hora">21:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Bloqueado</span>
+                </div>
+                <div class="turno-centro"></div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-desbloquear">
+                    <span class="material-symbols-outlined">Lock_Open</span>
+                    Desbloquear
+                  </button>
+                </div>
+              </div>
+
+              <div class="hora-actividad">
+                <span class="hora">22:00</span>
+                <div class="turno-izquierda">
+                  <span class="turno-info">Turno: Bloqueado</span>
+                </div>
+                <div class="turno-centro"></div>
+                <div class="turno-derecha">
+                  <button class="btn-turno btn-desbloquear">
+                    <span class="material-symbols-outlined">Lock_Open</span>
+                    Desbloquear
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script src="01_header.js"></script>
+    <script src="01_modal.js"></script>
+  </body>
+</html>

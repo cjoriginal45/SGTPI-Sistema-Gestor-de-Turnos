@@ -1,0 +1,22 @@
+<div id="calendario-container" [style.display]="isOpen() ? 'block' : 'none'">
+  <!-- Resto de tu template del calendario -->
+  <div class="mes-container">
+    <div class="calendario-header">
+      <button class="btn-mes prev-mes" (click)="changeMonth(-1)">←</button>
+      <h2>{{ monthNames[currentDate().getMonth()] }} {{ currentDate().getFullYear() }}</h2>
+      <button class="btn-mes next-mes" (click)="changeMonth(1)">→</button>
+    </div>
+    <div class="calendario-semana">
+      @for (day of weekDays; track $index) {
+        <div>{{ day }}</div>
+      }
+    </div>
+    <div class="calendario-grid">
+      @for (day of days(); track $index) {
+        <div [class]="day.class" (click)="selectDay(day)">
+          {{ day.dayNumber }}
+        </div>
+      }
+    </div>
+  </div>
+</div>

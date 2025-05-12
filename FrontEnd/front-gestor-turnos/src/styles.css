@@ -1,0 +1,23 @@
+/* ---------------------------- */
+/* Reset y estilos base        */
+/* ---------------------------- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+  
+  :root{
+    --color-header: #1b2631;
+    --celeste: #237ab5;
+    --light-celeste:#4ab2f7;
+    --dia-bloqueado: #7f8c8d;
+    --color-dia-otromes: #aaa;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  
+  body, html {
+    width: 100%;
+    max-width: 100%;
+    background-color: rgb(243, 241, 238);
+  }

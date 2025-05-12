@@ -1,0 +1,629 @@
+
+/* ---------------------------- */
+/* Estilos del HEADER          */
+/* ---------------------------- */
+
+/* Contenedor principal del header */
+.header-container {
+    background-color: var(--color-header);
+    color: white;
+    padding: 1rem;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  
+  .main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .datos-container{
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+    justify-items: center;
+  }
+  
+  .datos-container span{
+    display: block;
+    margin: auto;
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 3px;
+    font-weight: 500;
+  }
+  
+  /* Logo */
+  .logo-container {
+    flex: 0 0 auto;
+  }
+  
+  .logo {
+    height: 45px;
+    border-radius: 30%;
+  }
+  
+  /* Navbar principal */
+  .main-nav {
+    display: none; /* Oculto en móvil por defecto */
+  }
+  
+  .nav-list {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 1.5rem;
+  }
+  
+  .nav-link {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s;
+    padding: 0.5rem 0;
+  }
+  
+  .nav-link:hover {
+    color: var(--celeste);
+  }
+  
+  /* Configuración */
+  .config-container {
+    position: relative;
+    margin-left: auto;
+  }
+  
+  .config-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+  }
+  
+  .config-icon {
+    height: 24px;
+    width: 24px;
+    filter: invert(1);
+  }
+  
+  .config-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    background: white;
+    min-width: 180px;
+    border-radius: 4px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    z-index: 1001;
+  }
+  
+  .dropdown-item {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: #333;
+    text-decoration: none;
+  }
+  
+  .dropdown-item:hover {
+    background: #f5f5f5;
+  }
+  
+  /* Menú hamburguesa */
+  .hamburger-btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+  }
+  
+  .hamburger-line {
+    width: 100%;
+    height: 3px;
+    background: white;
+    border-radius: 2px;
+  }
+  
+  /* Header interior adicional */
+  .header_nav--container {
+    background-color: var(--color-header);
+    color: white;
+    padding: 0.8rem 1rem;
+  }
+  
+  /* Versión desktop del HEADER */
+  @media (min-width: 768px) {
+    .main-nav {
+      display: block; /* Mostrar navbar en desktop */
+      flex: 1;
+      margin: 0 2rem;
+    }
+  
+    .hamburger-btn {
+      display: none; /* Ocultar hamburguesa */
+    }
+  
+    #materials{
+      color:white;
+    }
+  
+    #materials:hover{
+      color: var(--celeste);
+    }
+  }
+  
+  /* Versión móvil - menú activo */
+  .menu-active .main-nav {
+    display: block;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: var(--color-header);
+    padding: 1rem;
+  }
+  
+  .menu-active .nav-list {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .config-active .config-dropdown {
+    display: block;
+  }
+  
+  /* ---------------------------- */
+  /* Estilos del MAIN            */
+  /* ---------------------------- */
+  
+  .main-container {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 40px;
+  }
+  
+  /* Contenedor del botón centrado */
+  .agenda-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 1rem;
+    position: relative;
+    width: 100%;
+  }
+  
+  .btn-container {
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Botón Hoy */
+  #btnHoy {
+    background-color: var(--celeste);
+    color: white;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    display: block;
+    margin: 0 auto;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 10;
+    margin-top: 20px;
+  }
+  
+  #btnHoy:hover {
+    background-color: var(--light-celeste);
+    transform: translateY(1px);
+  }
+  
+  /* Actividades */
+  .actividades-container {
+    width: 100%;
+    padding: 1rem;
+  }
+  
+  .titulo-actividades {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--color-header);
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .lista-horas {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .bloque-horas {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .periodo-dia {
+    font-size: 0.9rem;
+    color: var(--dia-bloqueado);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.3rem;
+    font-weight: 500;
+  }
+  
+  .hora-actividad {
+    display: flex;
+    flex-direction: row; /* Cambiado de column a row */
+    justify-content: space-between;
+    align-items: center; /* Opcional, alinea verticalmente */
+    padding: 1.2rem;
+    margin: 0.5rem 0;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    gap: 1rem; /* Opcional para espaciado entre columnas */
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+  }
+  
+  
+  .hora {
+    font-weight: bold;
+    color: #222;
+  }
+  
+  .turno-izquierda {
+    width: 30%;
+  }
+  
+  .turno-centro {
+    display: flex;
+    justify-content: center;
+    gap: 35px; /* Espacio entre los spans */
+    margin-right: 70px;
+  }
+  
+  .turno-derecha {
+    width: 30%;
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  /* Info del turno (Turno: Disponible o con nombre) */
+  .turno-info {
+    font-weight: 550;
+    color: #444;
+  }
+  
+  .turno-izquierda,
+  .turno-centro,
+  .turno-derecha {
+    flex: 1;
+    font-weight: 550;
+    font-family: Arial, Helvetica, sans-serif;
+  }
+  
+  /* Teléfono y estado (solo visibles si hay asignación) */
+  .detalles-turno {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  
+  /* Botones */
+  /* Botones de turno adaptables */
+  .btn-turno {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .btn-asignar {
+    background-color: #079070;
+    margin-left: 2px;
+    color: white;
+  }
+  .btn-asignar:hover {
+    color: #079070;
+    background-color: white;
+    border: 1px solid #079070;
+  }
+  
+  .btn-cancelar {
+    background-color:#c82333;
+    margin-left: 2px;
+    color: white;
+  }
+  .btn-cancelar:hover {
+    color: #dc3545;
+    background-color: white;
+    border: 1px solid #dc3545;
+  }
+  
+  .btn-bloquear{
+    background-color: var(--color-header);
+    color: white;
+  }
+  
+  .btn-bloquear:hover{
+    color: var(--color-header);
+    background-color: white;
+    border: 1px solid var(--color-header);
+  }
+  
+  .btn-desbloquear{
+    background-color: var(--celeste);
+    color: white;
+  }
+  
+  .btn-desbloquear:hover{
+    color: var(--celeste);
+    background-color: white;
+    border: 1px solid var(--celeste);
+  }
+  
+  .btn-modificar{
+    background-color: var(--color-header);
+    color: white;
+  }
+  
+  .btn-modificar:hover{
+    background-color: white;
+    color: var(--color-header);
+    border: 1px solid var(--color-header);
+  }
+  
+  .actividad {
+    flex-grow: 1;
+    padding: 0.6rem 0.8rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border-left: 3px solid var(--celeste);
+    min-height: 100%;
+    transition: all 0.2s;
+  }
+  
+  .actividad[contenteditable="true"]:empty::before {
+    content: "Agregar actividad...";
+    color: var(--color-dia-otromes);
+    font-style: italic;
+  }
+  
+  .actividad[contenteditable="true"]:focus {
+    background-color: white;
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+    outline: none;
+  }
+  
+  #calendario-container.mostrar {
+    display: block;
+    animation: fadeInDown 0.3s ease-out;
+  }
+  
+  /* Media Queries para el MAIN en desktop */
+  @media (min-width: 768px) {
+    .main-container {
+      max-width: none;
+      padding: 1rem 2rem;
+      margin-top: 40px;
+    }
+  
+    .btn-turno {
+      width: 40%;
+    }
+  }
+  
+  @media (max-width: 768px) and (min-width: 1200px) {
+    #btnHoy {
+      padding: 0.6rem 1.2rem;
+      font-size: 0.9rem;
+      margin-left: 45%;
+      margin-top: 20px;
+    }
+  
+    .hora {
+      flex: 0 0 70px;
+      font-size: 1rem;
+    }
+    .hora-actividad {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+    }
+  
+    .turno-izquierda {
+      flex: 1;
+    }
+  
+    .turno-centro {
+      flex: 1;
+      flex-direction: row;
+      gap: 2rem;
+    }
+  
+    .turno-derecha {
+      flex: 0 0 auto;
+    }
+  
+  }
+  
+  
+  /*     Estilos ventana Modal asignar turno     */
+  
+  /* Estilos base (mobile first) */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    overflow-y: auto;
+  }
+  
+  .modal-contenido {
+    background-color: #fefefe;
+    margin: 20% auto 15px;
+    padding: 15px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 100%;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  }
+  
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .modal-header h2 {
+    margin: 0;
+    color: #333;
+    font-size: 1.2rem;
+  }
+  
+  .cerrar-modal {
+    color: #aaa;
+    font-size: 24px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .cerrar-modal:hover {
+    color: #333;
+  }
+  
+  .form-group {
+    margin-bottom: 12px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+  
+  .form-group input, 
+  .form-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.9rem;
+  }
+  
+  .modal-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+  }
+  
+  .btn-confirmarModal,
+  .btn-cancelarModal {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    flex: 1;
+    margin: 0 5px;
+  }
+  
+  .btn-confirmarModal {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .btn-confirmarModal:hover {
+    background-color: #45a049;
+  }
+  
+  .btn-cancelarModal {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  .btn-cancelarModal:hover {
+    background-color: #d32f2f;
+  }
+  
+  /* Media queries para desktop */
+  @media (min-width: 768px) {
+    .modal-contenido {
+      margin: 10% auto;
+      padding: 20px;
+      width: 70%;
+      max-width: 500px;
+    }
+  
+    .modal-header h2 {
+      font-size: 1.5rem;
+    }
+  
+    .cerrar-modal {
+      font-size: 28px;
+    }
+  
+    .form-group label {
+      font-size: 1rem;
+    }
+  
+    .form-group input, 
+    .form-group select {
+      font-size: 1rem;
+      padding: 10px;
+    }
+  
+    .modal-footer {
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+  
+    .btn-confirmarModal,
+    .btn-cancelarModal {
+      padding: 10px 15px;
+      font-size: 1rem;
+      flex: 0;
+      margin: 0 0 0 10px;
+    }
+  }
+  
+  @media (min-width: 992px) {
+    .modal-contenido {
+      margin: 8% auto;
+      width: 50%;
+    }
+  }
+  
