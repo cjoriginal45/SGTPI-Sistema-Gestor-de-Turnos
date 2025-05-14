@@ -7,12 +7,16 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "patient_tbl")
 public class Patient {
@@ -22,15 +26,15 @@ public class Patient {
     private Integer id;
     
     @Column(nullable=false)
-    private String firstname;
+    private String firstName;
     @Column(nullable=false)
-    private String lastname;
+    private String lastName;
     
     @Column(nullable = true)
     private String email;
     
     @Column(nullable=false)
-    private Integer phoneNumber;
+    private String phoneNumber;
     
     @Column(nullable = true)
     private String firstConsultation;
@@ -41,5 +45,13 @@ public class Patient {
 
     @OneToMany(mappedBy="patient")
     private List<Appointment> appointment;
+
+    public Patient(String firstName, String lastName, String email, String phoneNumber) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+    }
+    
     
 }
