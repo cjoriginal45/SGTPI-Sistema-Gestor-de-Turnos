@@ -1,12 +1,15 @@
 package com.SGTPI.SystemProject.controllers;
 
 import com.SGTPI.SystemProject.dto.PatientDto;
-import com.SGTPI.SystemProject.models.Patient;
 import com.SGTPI.SystemProject.services.PatientService;
+import com.SGTPI.SystemProject.services.PatientService.Observations;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -54,4 +57,29 @@ public class PatientController {
                 : ResponseEntity.ok(patients);        // 200 con los datos
     }
 
+    //modificar paciente
+    @PatchMapping("/patch-patient/{id}")
+    public ResponseEntity<?> patchPatient(@PathVariable Integer id,
+            @RequestBody Map<String, Object> updates) {
+
+        PatientDto updatedPatient = patientService.partialUpdate(id, updates);
+        return ResponseEntity.ok(updatedPatient);
+    }
+
+    @PostMapping("/patient-observations")
+    public ResponseEntity<?> setObservations(@RequestBody Observations observations){
+        return ResponseEntity.ok(patientService.setObservations(observations));
+    }
+    
+    @GetMapping("/patient-observations/{id}")
+    public ResponseEntity<?> getObservations(@PathVariable int id){
+        Optional<String> obser = patientService.getObservations(id);
+        if(!obser.isEmpty()){
+        return ResponseEntity.ok().body(obser);
+        }
+        return ResponseEntity.notFound().build();
+    }
+    //set y get observations
+    //set horario preferido
+  
 }

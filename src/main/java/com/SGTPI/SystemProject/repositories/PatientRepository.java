@@ -1,6 +1,7 @@
 package com.SGTPI.SystemProject.repositories;
 
 import com.SGTPI.SystemProject.models.Patient;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,5 +14,10 @@ public interface PatientRepository extends JpaRepository<Patient, Integer> {
     int updateObservations(
             @Param("patientId")int patientId,
             @Param("observations") String observations);
+    
+    
+    @Query("SELECT p.observations FROM Patient p WHERE p.id = :patientId")
+    Optional<String> getObservations(
+            @Param("patientId")int patientId);
 
 }

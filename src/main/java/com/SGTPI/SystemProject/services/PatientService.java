@@ -6,6 +6,7 @@ import com.SGTPI.SystemProject.models.Patient;
 import com.SGTPI.SystemProject.repositories.PatientRepository;
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -43,14 +44,14 @@ public class PatientService {
         // Conversión y guardado
         Patient patient = patientMapper.dtoToPatient(patientDto);
         Patient savedPatient = patientRepository.save(patient);
-        
+
         return patientMapper.patientToDto(savedPatient);
     }
 
     //obtener paciente por Id
     public PatientDto findPatientById(int id) {
         Optional<Patient> pat = patientRepository.findById(id);
-        return !pat.isEmpty() 
+        return !pat.isEmpty()
                 ? patientMapper.patientToDto(pat.get())
                 : null;
     }
@@ -66,7 +67,7 @@ public class PatientService {
     //actualizar las observaciones de un paciente
     @Transactional
     public String setObservations(Observations observations) {
-        if (observations == null || observations.getId() == 0) {
+        if (observations.getObservations() == null || observations.getId() == 0) {
             throw new IllegalArgumentException("Observations data is invalid");
         }
 
@@ -80,24 +81,35 @@ public class PatientService {
                 : "No se encontró el paciente con ID: " + observations.getId();
     }
 
-    //validar paciente
-    
-    private void validatePatient(Patient patient){
-        // 2. Validar nombres (evitando espacios en blanco)
-        if (patient.getFirstName() == null || patient.getFirstName().trim().isEmpty()) {
-            throw new IllegalArgumentException("El nombre es obligatorio");
-        }
+    public Optional<String> getObservations(Integer id) {
+        return patientRepository.getObservations(id);
+    }
 
-        if (patient.getLastName() == null || patient.getLastName().trim().isEmpty()) {
-            throw new IllegalArgumentException("El apellido es obligatorio");
-        }
+    //modificar paciente pasando id y datos
+    @Transactional
+    public PatientDto partialUpdate(Integer id, Map<String, Object> updates) {
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Paciente no encontrado"));
 
-        if (patient.getPhoneNumber() == null) {
-            throw new IllegalArgumentException("Numero de telefono es obligatorio");
-        } else if (patient.getPhoneNumber().length() != 10) {
-            throw new IllegalArgumentException("Numero de telefono invalido");
-        }
+        updates.forEach((key, value) -> {
+            switch (key) {
+                case "firstName":
+                    patient.setFirstName((String) value);
+                    break;
+                case "lastName":
+                    patient.setLastName((String) value);
+                    break;
+                case "email":
+                    patient.setEmail((String) value);
+                    break;
+                case "phoneNumber":
+                    patient.setPhoneNumber(value.toString());
+                    break;
+            }
+        });
 
+        Patient updated = patientRepository.save(patient);
+        return patientMapper.patientToDto(updated);
     }
 
     @Data // Lombok
