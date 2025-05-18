@@ -20,4 +20,7 @@ public interface PatientRepository extends JpaRepository<Patient, Integer> {
     Optional<String> getObservations(
             @Param("patientId")int patientId);
 
+    @Query("SELECT p FROM Patient p WHERE p.phoneNumber = :phoneNumber")
+    Optional<Patient> findByPhoneNumber(@Param("phoneNumber") String phoneNumber);
+
 }

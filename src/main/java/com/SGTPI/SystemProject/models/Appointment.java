@@ -12,13 +12,17 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name="appointment_tbl")
 public class Appointment {
@@ -52,4 +56,12 @@ public class Appointment {
     @ManyToOne
     @JoinColumn(name="professional_id")
     private Professional professional;
+
+    public Appointment(Integer duration, LocalDateTime date, AppointmentStatus status, Patient patient) {
+        this.duration = duration;
+        this.date = date;
+        this.status = status;
+        this.patient = patient;
+    }
+
 }

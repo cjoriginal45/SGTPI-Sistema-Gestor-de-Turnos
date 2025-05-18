@@ -13,6 +13,7 @@ public record PatientDto(
         @Email(message = "Debe ser un email válido")
         String email,
         @JsonProperty("phoneNumber")
+        @NotBlank(message = "El telefono es obligatorio")
         String phoneNumber) {
 
 }
