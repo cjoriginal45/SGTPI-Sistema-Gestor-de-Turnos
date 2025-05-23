@@ -57,11 +57,13 @@ public class Appointment {
     @JoinColumn(name="professional_id")
     private Professional professional;
 
-    public Appointment(Integer duration, LocalDateTime date, AppointmentStatus status, Patient patient) {
+    public Appointment(Integer duration, LocalDateTime date,
+            AppointmentStatus status, Patient patient,Professional professional) {
         this.duration = duration;
         this.date = date;
         this.status = status;
         this.patient = patient;
+        this.professional=professional;
     }
 
 }

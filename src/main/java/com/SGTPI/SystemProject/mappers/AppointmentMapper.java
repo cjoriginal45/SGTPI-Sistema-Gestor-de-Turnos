@@ -5,7 +5,9 @@ import com.SGTPI.SystemProject.dto.AppointmentResponseDto;
 import com.SGTPI.SystemProject.models.Appointment;
 import com.SGTPI.SystemProject.models.AppointmentStatus;
 import com.SGTPI.SystemProject.models.Patient;
+import com.SGTPI.SystemProject.models.Professional;
 import com.SGTPI.SystemProject.repositories.PatientRepository;
+import com.SGTPI.SystemProject.repositories.ProfessionalRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -18,14 +20,13 @@ public class AppointmentMapper {
     
     private final PatientMapper patientMapper;
     private final PatientRepository patientRepository;
+    private final ProfessionalRepository professionalRepository;
 
-    public AppointmentMapper(PatientMapper patientMapper, PatientRepository patientRepository) {
+    public AppointmentMapper(PatientMapper patientMapper, PatientRepository patientRepository, ProfessionalRepository professionalRepository) {
         this.patientMapper = patientMapper;
         this.patientRepository = patientRepository;
+        this.professionalRepository = professionalRepository;
     }
-
-    
-    
 
     //dtoRequest a dto Response
     public AppointmentResponseDto requestToResponse(AppointmentRequestDto dto) {
@@ -42,7 +43,8 @@ public class AppointmentMapper {
     public Appointment requestToAppointment(AppointmentRequestDto dto) {
         
         Optional<Patient> patient = patientRepository.findByPhoneNumber(dto.patient().phoneNumber());
-            
+        Professional professional = professionalRepository.findById(1);
+        
         if(patient.isEmpty()){
             return null;
         }
@@ -50,7 +52,8 @@ public class AppointmentMapper {
                 dto.duration(),
                 convertirFechaHora(dto.fecha(), dto.hora()),
                 AppointmentStatus.CONFIRMADO,
-                patient.get()
+                patient.get(),
+                professional
         );
     }
 
