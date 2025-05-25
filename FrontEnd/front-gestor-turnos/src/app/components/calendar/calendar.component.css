@@ -1,0 +1,144 @@
+/* Variables de color (asegúrate de tenerlas definidas en tu :root o aquí) */
+:host {
+  --celeste: #007bff; /* Un azul más estándar */
+  --light-celeste: #409cff;
+  --color-header: #2c3e50;
+  --color-dia-otromes: #ced4da;
+  --color-deshabilitado: #f0f2f5;
+}
+
+.calendario-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+/* Botón principal que activa el calendario */
+.calendar-toggle-btn {
+  background-color: var(--celeste);
+  color: white;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 25px; /* Más redondeado */
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
+  z-index: 10;
+  min-width: 120px; /* Ancho mínimo para que no cambie de tamaño bruscamente */
+  text-align: center;
+}
+
+.calendar-toggle-btn:hover {
+  background-color: var(--light-celeste);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+/* Contenedor del Calendario */
+.calendario-container {
+  position: absolute;
+  top: calc(100% + 10px); /* Se posiciona debajo del botón con 10px de margen */
+  width: 96vw;
+  max-width: 380px;
+  background: white;
+  z-index: 100;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  padding: 15px;
+  border: 1px solid #eee;
+}
+
+/* Estructura interna del calendario */
+.mes-container {
+  width: 100%;
+}
+
+.calendario-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.calendario-header h2 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--color-header);
+  margin: 0 10px;
+}
+
+.btn-mes {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: var(--celeste);
+  padding: 0.5rem;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.btn-mes:hover {
+    background-color: #f0f0f0;
+}
+
+.calendario-semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #999;
+  font-size: 0.8rem;
+}
+
+.calendario-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+.dia {
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.dia:not(.deshabilitado):not(.otro-mes):hover {
+  background-color: #eaf5fb;
+  color: var(--celeste);
+}
+
+.dia.hoy {
+  border: 2px solid var(--celeste);
+  font-weight: bold;
+}
+
+.dia.seleccionado {
+  background-color: var(--celeste) !important;
+  color: white !important;
+  font-weight: bold;
+  border: none;
+}
+
+.dia.otro-mes {
+  color: var(--color-dia-otromes);
+  cursor: default;
+}
+
+/* Estilo para días deshabilitados */
+.dia.deshabilitado {
+  color: #ccc;
+  pointer-events: none; /* No se puede hacer clic */
+  background-color: var(--color-deshabilitado);
+}

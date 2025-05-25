@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="principal.component.css" />
+    <title>Pagina Principal</title>
+  </head>
+
+  <div class="main-container">
+    <!-- Modal para asignar/modificar turno -->
+    <div class="modal" [class.active]="showModal()" (click)="cerrarModal()">
+      <div class="modal-contenido" (click)="$event.stopPropagation()">
+        <div class="modal-header">
+          <h2>{{ modalTurno()?.estado === 'ocupado' ? 'Modificar Turno' : 'Asignar Turno' }}</h2>
+          <span class="cerrar-modal" (click)="cerrarModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="pacienteNombre">Paciente:</label>
+            <input
+              type="text"
+              id="pacienteNombre"
+              placeholder="Nombre y apellido del paciente"
+              [value]="pacienteNombre()"
+              (input)="pacienteNombre.set($any($event.target).value)"
+            />
+          </div>
+          <div class="form-group">
+            <label for="telefonoPaciente">Teléfono:</label>
+            <input
+              type="tel"
+              id="telefonoPaciente"
+              placeholder="Teléfono del paciente"
+              [value]="telefonoPaciente()"
+              (input)="telefonoPaciente.set($any($event.target).value)"
+            />
+          </div>
+          <div class="form-group">
+            <label for="duracionTurno">Duración:</label>
+            <select 
+              id="duracionTurno"
+              [value]="duracionTurno()"
+              (change)="duracionTurno.set(+$any($event.target).value)"
+            >
+              <option value="30">30 minutos</option>
+              <option value="50">50 minutos</option>
+              <option value="60">60 minutos</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button 
+            class="btn-confirmarModal" 
+            (click)="confirmarModal()"
+            [disabled]="!pacienteNombre().trim()"
+          >
+            Confirmar
+          </button>
+          <button class="btn-cancelarModal" (click)="cancelarModal()">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Header -->
+    <div class="header-container">
+      <header class="main-header">
+        <!-- Logo a la izquierda -->
+        <div class="logo-container">
+          <img src="logoPag.png" alt="Logo" class="logo">
+        </div>
+    
+        <!-- Navbar con las 3 opciones -->
+        <nav class="main-nav">
+          <ul class="nav-list">
+            <li class="nav-item"><a href="#" class="nav-link">Lista de pacientes</a></li>
+            <li class="nav-item"><a href="#" class="nav-link">Historial de turnos</a></li>
+            <li class="nav-item"><a href="#" class="nav-link">Reportes</a></li>
+          </ul>
+        </nav>
+    
+        <!-- Configuración a la derecha -->
+        <div class="config-container">
+          <button class="config-btn">
+            <span class="material-symbols-outlined search-icon">settings</span>
+          </button>
+          <div class="config-dropdown">
+            <a href="#" class="dropdown-item">Mi cuenta</a>
+            <a href="#" class="dropdown-item">Configuración</a>
+            <a href="#" class="dropdown-item">Cerrar sesión</a>
+          </div>
+        </div>
+        
+        <!-- Botón hamburguesa -->
+        <button class="hamburger-btn">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+      </header>
+    </div>
+  
+    <!-- Contenido principal -->
+    <main class="main">
+      <!-- Sección del calendario -->
+      <div class="agenda-container">
+        
+        <!-- Calendario -->
+        <app-calendar (dateSelected)="onDateSelected($event)"></app-calendar>
+      </div>
+  
+      <!-- Estadísticas del día 
+       /*
+      <div class="datos-container">
+        <span>Turnos para Hoy: {{ estadisticasDelDia().turnosHoy }}</span>
+        <span>Horas libres: {{ estadisticasDelDia().horasLibres }}</span>
+        <span>Turnos Cancelados: {{ estadisticasDelDia().turnosCancelados }}</span>
+      </div>-->
+  
+      <!-- Lista de turnos -->
+      <div class="actividades-container">
+        <h3 class="titulo-actividades">{{tituloAgenda()}}</h3>
+        
+        <div class="lista-horas">
+          <!-- Mañana -->
+          <div class="bloque-horas">
+            <h4 class="periodo-dia">MAÑANA</h4>
+            
+            <div class="hora-actividad" *ngFor="let turno of turnosPorPeriodo().manana" [attr.data-estado]="turno.estado">
+              <span class="hora">{{ turno.hora }}</span>
+              
+              <div class="turno-izquierda">
+                <span class="turno-info">
+                  <span class="material-symbols-outlined">{{ getIconoPorEstado(turno.estado) }}</span>
+                  Turno: {{ turno.estado === 'ocupado' ? turno.paciente : turno.estado | titlecase }}
+                </span>
+              </div>
+              
+              <div class="turno-centro" *ngIf="turno.estado !== 'bloqueado'">
+                <span class="turno-info">Teléfono: {{ turno.telefono || '-' }}</span>
+              </div>
+              
+              <div class="turno-derecha">
+                <ng-container *ngIf="turno.estado === 'bloqueado'">
+                  <button class="btn-turno btn-desbloquear" (click)="desbloquearHora(turno.id)">
+                    <span class="material-symbols-outlined">lock_open</span>
+                    Desbloquear
+                  </button>
+                </ng-container>
+                
+                <ng-container *ngIf="turno.estado === 'disponible'">
+                  <button class="btn-turno btn-bloquear" (click)="bloquearHora(turno.id)">
+                    <span class="material-symbols-outlined">lock</span>
+                    Bloquear
+                  </button>
+                  <button class="btn-turno btn-asignar" (click)="asignarTurno(turno)">
+                    <span class="material-symbols-outlined">person_add</span>
+                    Asignar
+                  </button>
+                </ng-container>
+                
+                <ng-container *ngIf="turno.estado === 'ocupado'">
+                  <button class="btn-turno btn-modificar" (click)="modificarTurno(turno)">
+                    <span class="material-symbols-outlined">edit</span>
+                    Modificar
+                  </button>
+                  <button class="btn-turno btn-cancelar" (click)="cancelarTurno(turno.id)">
+                    <span class="material-symbols-outlined">cancel</span>
+                    Cancelar
+                  </button>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+  
+          <!-- TARDE -->
+          <div class="bloque-horas">
+            <h4 class="periodo-dia">TARDE</h4>
+            
+            <div class="hora-actividad" *ngFor="let turno of turnosPorPeriodo().tarde" [attr.data-estado]="turno.estado">
+              <span class="hora">{{ turno.hora }}</span>
+              
+              <div class="turno-izquierda">
+                <span class="turno-info">
+                  <span class="material-symbols-outlined">{{ getIconoPorEstado(turno.estado) }}</span>
+                  Turno: {{ turno.estado === 'ocupado' ? turno.paciente : turno.estado | titlecase }}
+                </span>
+              </div>
+              
+              <div class="turno-centro" *ngIf="turno.estado !== 'bloqueado'">
+                <span class="turno-info">Teléfono: {{ turno.telefono || '-' }}</span>
+              </div>
+              
+              <div class="turno-derecha">
+                <ng-container *ngIf="turno.estado === 'bloqueado'">
+                  <button class="btn-turno btn-desbloquear" (click)="desbloquearHora(turno.id)">
+                    <span class="material-symbols-outlined">lock_open</span>
+                    Desbloquear
+                  </button>
+                </ng-container>
+                
+                <ng-container *ngIf="turno.estado === 'disponible'">
+                  <button class="btn-turno btn-bloquear" (click)="bloquearHora(turno.id)">
+                    <span class="material-symbols-outlined">lock</span>
+                    Bloquear
+                  </button>
+                  <button class="btn-turno btn-asignar" (click)="asignarTurno(turno)">
+                    <span class="material-symbols-outlined">person_add</span>
+                    Asignar
+                  </button>
+                </ng-container>
+                
+                <ng-container *ngIf="turno.estado === 'ocupado'">
+                  <button class="btn-turno btn-modificar" (click)="modificarTurno(turno)">
+                    <span class="material-symbols-outlined">edit</span>
+                    Modificar
+                  </button>
+                  <button class="btn-turno btn-cancelar" (click)="cancelarTurno(turno.id)">
+                    <span class="material-symbols-outlined">cancel</span>
+                    Cancelar
+                  </button>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+  
+          <!-- NOCHE -->
+          <div class="bloque-horas">
+            <h4 class="periodo-dia">NOCHE</h4>
+            
+            <div class="hora-actividad" *ngFor="let turno of turnosPorPeriodo().noche" [attr.data-estado]="turno.estado">
+              <span class="hora">{{ turno.hora }}</span>
+              
+              <div class="turno-izquierda">
+                <span class="turno-info">
+                  <span class="material-symbols-outlined">{{ getIconoPorEstado(turno.estado) }}</span>
+                  Turno: {{ turno.estado === 'ocupado' ? turno.paciente : turno.estado | titlecase }}
+                </span>
+              </div>
+              
+              <div class="turno-centro" *ngIf="turno.estado !== 'bloqueado'">
+                <span class="turno-info">Teléfono: {{ turno.telefono || '-' }}</span>
+              </div>
+              
+              <div class="turno-derecha">
+                <ng-container *ngIf="turno.estado === 'bloqueado'">
+                  <button class="btn-turno btn-desbloquear" (click)="desbloquearHora(turno.id)">
+                    <span class="material-symbols-outlined">lock_open</span>
+                    Desbloquear
+                  </button>
+                </ng-container>
+                
+                <ng-container *ngIf="turno.estado === 'disponible'">
+                  <button class="btn-turno btn-bloquear" (click)="bloquearHora(turno.id)">
+                    <span class="material-symbols-outlined">lock</span>
+                    Bloquear
+                  </button>
+                  <button class="btn-turno btn-asignar" (click)="asignarTurno(turno)">
+                    <span class="material-symbols-outlined">person_add</span>
+                    Asignar
+                  </button>
+                </ng-container>
+                
+                <ng-container *ngIf="turno.estado === 'ocupado'">
+                  <button class="btn-turno btn-modificar" (click)="modificarTurno(turno)">
+                    <span class="material-symbols-outlined">edit</span>
+                    Modificar
+                  </button>
+                  <button class="btn-turno btn-cancelar" (click)="cancelarTurno(turno.id)">
+                    <span class="material-symbols-outlined">cancel</span>
+                    Cancelar
+                  </button>
+                </ng-container>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+</html>

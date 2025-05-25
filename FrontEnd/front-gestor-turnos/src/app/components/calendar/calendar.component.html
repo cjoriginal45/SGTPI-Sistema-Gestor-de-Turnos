@@ -1,0 +1,29 @@
+<div class="calendario-wrapper">
+  <button class="calendar-toggle-btn" (click)="onToggleClick()">
+    {{ buttonText() }}
+  </button>
+
+  <div *ngIf="isOpen()" class="calendario-container">
+    <div class="mes-container">
+      <div class="calendario-header">
+        <button class="btn-mes prev-mes" (click)="changeMonth(-1)">←</button>
+        <h2>{{ currentMonthName() }} {{ currentYear() }}</h2>
+        <button class="btn-mes next-mes" (click)="changeMonth(1)">→</button>
+      </div>
+
+      <div class="calendario-semana">
+        <div *ngFor="let day of weekDays">{{ day }}</div>
+      </div>
+
+      <div class="calendario-grid">
+        <div 
+          *ngFor="let day of days()"
+          [ngClass]="day.class"
+          [class.deshabilitado]="day.disabled"
+          (click)="selectDay(day)">
+          {{ day.dayNumber }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
