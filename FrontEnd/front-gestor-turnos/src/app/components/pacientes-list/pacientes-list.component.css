@@ -1,0 +1,603 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root{
+  --color-header: #1b2631;
+  --celeste: #237ab5;
+  --light-celeste:#4ab2f7;
+  --dia-bloqueado: #7f8c8d;
+  --color-dia-otromes: #aaa;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+body, html {
+  width: 100%;
+  max-width: 100%;
+  background-color: rgb(243, 241, 238);
+}
+
+/* ---------------------------- */
+/* Estilos del HEADER          */
+/* ---------------------------- */
+
+/* Contenedor principal del header */
+.header-container {
+  background-color: var(--color-header);
+  color: white;
+  padding: 1rem;
+  width: 100%;
+  top: 0;
+  flex-direction: column;
+  align-items: flex-end;
+  position:fixed;
+  z-index: 1000; 
+}
+
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.datos-container{
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  justify-items: center;
+}
+
+.datos-container span{
+  display: block;
+  margin: auto;
+  font-family: Arial, Helvetica, sans-serif;
+  padding: 3px;
+  font-weight: 500;
+}
+
+/* Logo */
+.logo-container {
+  flex: 0 0 auto;
+}
+
+.logo {
+  height: 45px;
+  border-radius: 30%;
+}
+
+/* Navbar principal */
+.main-nav {
+  display: none; /* Oculto en móvil por defecto */
+}
+
+.nav-list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+  padding: 0.5rem 0;
+}
+
+.nav-link:hover {
+  color: var(--celeste);
+}
+
+/* Configuración */
+.config-container {
+  position: relative;
+  margin-left: auto;
+}
+
+.config-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.config-icon {
+  height: 24px;
+  width: 24px;
+  filter: invert(1);
+}
+
+.config-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  background: white;
+  min-width: 180px;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 1001;
+}
+
+.dropdown-item {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #333;
+  text-decoration: none;
+}
+
+.dropdown-item:hover {
+  background: #f5f5f5;
+}
+
+/* Menú hamburguesa */
+.hamburger-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 3px;
+  background: white;
+  border-radius: 2px;
+}
+
+/* Header interior adicional */
+.header_nav--container {
+  background-color: var(--color-header);
+  color: white;
+  padding: 0.8rem 1rem;
+}
+
+/* Versión desktop del HEADER */
+@media (min-width: 768px) {
+  .main-nav {
+    display: block; /* Mostrar navbar en desktop */
+    flex: 1;
+    margin: 0 2rem;
+  }
+
+  .hamburger-btn {
+    display: none; /* Ocultar hamburguesa */
+  }
+
+  #materials{
+    color:white;
+  }
+
+  #materials:hover{
+    color: var(--celeste);
+  }
+}
+
+/* Versión móvil - menú activo */
+.menu-active .main-nav {
+  display: block;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  background: var(--color-header);
+  padding: 1rem;
+}
+
+.menu-active .nav-list {
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.config-active .config-dropdown {
+  display: block;
+}
+
+
+/*CONTENEDOR PRINCIPAL*/
+/* Contenedor principal */
+.main-container {
+  padding: 1rem;
+  margin-top: 6rem; /* Ajusta este valor según la altura de tu header */
+  width: 100%;
+}
+
+/* Buscador - visible y adaptado */
+.search-container {
+  display: flex;
+  margin-bottom: 1.5rem;
+  width: 100%;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px 0 0 4px;
+  font-size: 1rem;
+  min-width: 0; /* Evita problemas de overflow en flex */
+}
+
+.search-button {
+  padding: 0 1rem;
+  background-color: var(--color-header);
+  color: white;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  font-size: 1rem;
+  white-space: nowrap;
+}
+
+.search-button:hover {
+  background-color: color-mix(in srgb, var(--color-header) 85%, white 15%);
+}
+
+
+/* Contenedor de pacientes */
+.patients-container {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.patients-header {
+  display: none; /* Oculto en móvil por defecto */
+}
+
+.patient-item {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  gap: 0.5rem;
+}
+
+.patient-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.patient-name {
+  flex: 1 1 100%;
+  font-weight: 500;
+}
+
+.patient-email {
+  flex: 1 1 100%;
+  color: #555;
+  font-size: 0.9em;
+}
+
+.patient-id {
+  flex: 1;
+  color: #666;
+  min-width: 100px;
+}
+
+.patient-actions {
+  flex: 1 1 100%;
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.action-button {
+  padding: 0.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.assign-button {
+  background-color: #079070;
+  color: white;
+}
+
+.assign-button:hover {
+  color: #079070;
+  background-color: white;
+  border: 0.5px solid #079070;
+}
+
+.notes-button {
+  background-color: #be8500;
+  color: white;
+}
+
+.notes-button:hover {
+  color: #e68a00;
+  background-color: white;
+  border: 0.5px solid #e68a00;
+}
+
+.material-symbols-outlined {
+  font-size: 1.2rem;
+  margin-right: 0.3rem;
+}
+
+/* Scrollbar personalizada */
+.patients-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.patients-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.patients-list::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+.patients-list::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+
+/* Estilos para el modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-content {
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  transform: translateY(-20px);
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .modal-content {
+  transform: translateY(0);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: var(--color-header);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--color-header);
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #5f5e5e;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: var(--celeste);
+  box-shadow: 0 0 0 2px rgba(35, 122, 181, 0.2);
+}
+
+.modal-footer {
+  display: flex;
+  justify-content:center;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.btn-cancel, .btn-submit {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.btn-cancel {
+  background-color: #a10c0c;
+  color: white;
+  border:1px solid white;
+}
+
+.btn-cancel:hover {
+  background-color: #f0f0f0;
+  color: #a10c0c;
+  border:1px solid #a10c0c;
+}
+
+.btn-submit {
+  background-color: #067a5e;
+  color: white;
+}
+
+.btn-submit:hover {
+  background-color: white;
+  border: 1px solid #067a5e;
+  color: #067a5e;
+}
+
+.button-container{
+  display: flex;
+  justify-content: center;
+  margin: auto;
+  padding: 0;
+  margin-top: 0;
+}
+
+/* Estilo para el botón de registrar paciente */
+.patient-btn {
+  background-color: var(--celeste);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.3s ease;
+  margin-bottom: 1.5rem;
+  margin-top: 0;
+}
+
+.patient-btn:hover {
+  background-color: var(--light-celeste);
+}
+
+/* MEDIA QUERIES - Versión Desktop */
+@media (min-width: 768px) {
+  .main-container {
+      margin-top: 6rem; /* Ajusta según la altura de tu header en desktop */
+      padding: 2rem;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+  }
+  
+  .patients-header {
+      display: flex;
+      padding: 1rem 1.5rem;
+      background-color: #f8f9fa;
+      border-bottom: 1px solid #eee;
+      font-weight: bold;
+      gap: 1rem;
+  }
+  
+  .patient-item {
+      flex-direction: row;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      gap: 1rem;
+  }
+  
+  .patient-info {
+      flex: 1;
+      flex-wrap: nowrap;
+      align-items: center;
+      margin-bottom: 0;
+  }
+  
+  .patient-name {
+      flex: 2;
+      min-width: 150px;
+  }
+  
+  .patient-email {
+      flex: 3;
+      min-width: 200px;
+      font-size: 1em;
+  }
+  
+  .patient-id {
+      flex: 1;
+      min-width: 100px;
+      text-align: center;
+  }
+  
+  .patient-actions {
+      flex: 2;
+      min-width: 200px;
+      margin-top: 0;
+      justify-content: flex-end;
+  }
+  
+  /* Definición de columnas del header para que coincidan con los items */
+  .header-name {
+      flex: 2;
+      min-width: 150px;
+      color: var(--color-header);
+  }
+  
+  .header-email {
+      flex: 3;
+      min-width: 200px;
+      color: var(--color-header);
+  }
+  
+  .header-id {
+      flex: 1;
+      min-width: 100px;
+      text-align: center;
+      color: var(--color-header);
+  }
+  
+  .header-actions {
+      flex: 2;
+      min-width: 200px;
+      text-align: center;
+      color: var(--color-header);
+  }
+  
+  .action-button {
+    padding: 0.5rem 1rem;
+    flex: 0;
+    white-space: nowrap;
+  }
+  
+  .search-container {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+  }
+}

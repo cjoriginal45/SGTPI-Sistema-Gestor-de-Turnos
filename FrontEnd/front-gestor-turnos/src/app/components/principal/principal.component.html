@@ -1,15 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="principal.component.css" />
-    <title>Pagina Principal</title>
-  </head>
+
 
   <div class="main-container">
     <!-- Modal para asignar/modificar turno -->
@@ -69,42 +58,7 @@
     </div>
   
     <!-- Header -->
-    <div class="header-container">
-      <header class="main-header">
-        <!-- Logo a la izquierda -->
-        <div class="logo-container">
-          <img src="logoPag.png" alt="Logo" class="logo">
-        </div>
-    
-        <!-- Navbar con las 3 opciones -->
-        <nav class="main-nav">
-          <ul class="nav-list">
-            <li class="nav-item"><a href="#" class="nav-link">Lista de pacientes</a></li>
-            <li class="nav-item"><a href="#" class="nav-link">Historial de turnos</a></li>
-            <li class="nav-item"><a href="#" class="nav-link">Reportes</a></li>
-          </ul>
-        </nav>
-    
-        <!-- Configuración a la derecha -->
-        <div class="config-container">
-          <button class="config-btn">
-            <span class="material-symbols-outlined search-icon">settings</span>
-          </button>
-          <div class="config-dropdown">
-            <a href="#" class="dropdown-item">Mi cuenta</a>
-            <a href="#" class="dropdown-item">Configuración</a>
-            <a href="#" class="dropdown-item">Cerrar sesión</a>
-          </div>
-        </div>
-        
-        <!-- Botón hamburguesa -->
-        <button class="hamburger-btn">
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-          <span class="hamburger-line"></span>
-        </button>
-      </header>
-    </div>
+    <app-header></app-header>
   
     <!-- Contenido principal -->
     <main class="main">
@@ -284,5 +238,3 @@
       </div>
     </main>
   </div>
-
-</html>

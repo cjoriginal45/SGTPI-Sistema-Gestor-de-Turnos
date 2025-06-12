@@ -1,0 +1,116 @@
+<div class="main-container">
+  <!-- Header -->
+  <app-header></app-header>
+
+  <div
+    class="modal-overlay"
+    [class.active]="showModal()"
+    (click)="closeModal()"
+  >
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Registrar Nuevo Paciente</h2>
+        <button class="close-btn" (click)="closeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form (submit)="registerPatient()">
+          <div class="form-group">
+            <label for="name">Nombre*</label>
+            <input
+              type="text"
+              id="name"
+              [(ngModel)]="firstName"
+              name="firstname"
+              required
+            />
+            <label for="lastName">Apellido*</label>
+            <input
+              type="text"
+              id="lastName"
+              [(ngModel)]="lastName"
+              name="lastName"
+              required
+            />
+            <label for="phone">Teléfono*</label>
+            <input
+              type="tel"
+              id="phone"
+              [(ngModel)]="phoneNumber"
+              name="phone"
+              required
+            />
+            <label for="email">Email (opcional)</label>
+            <input type="email" id="email" [(ngModel)]="email" name="email" />
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="closeModal()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-submit">Registrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenido principal -->
+  <div class="button-container">
+    <button class="patient-btn" (click)="openRegisterModal()">
+      Registrar Paciente
+    </button>
+  </div>
+
+  <!-- Buscador -->
+  <div class="search-container">
+    <input
+      type="text"
+      class="search-input"
+      placeholder="Buscar paciente..."
+      (input)="onSearch($event)"
+    />
+    <button class="search-button">Buscar</button>
+  </div>
+
+  <!-- Lista de pacientes -->
+  <div class="patients-container">
+    <div class="patients-header">
+      <div class="header-name">Nombre</div>
+      <div class="header-email">Email</div>
+      <div class="header-id">Teléfono</div>
+      <div class="header-actions">Acciones</div>
+    </div>
+
+    <div class="patients-list">
+      <div
+        *ngIf="filteredPatients().length === 0"
+        style="text-align: center; padding: 20px; color: gray"
+      >
+        <p>No hay pacientes registrados aún.</p>
+        <button class="patient-btn" (click)="openRegisterModal()">
+          ¡Haz clic para registrar el primer paciente!
+        </button>
+      </div>
+      <div class="patient-item" *ngFor="let patient of filteredPatients()">
+        <div class="patient-name">{{ patient.firstName }}</div>
+        <div class="patient-email">{{ patient.email }}</div>
+        <div class="patient-id">{{ patient.phoneNumber }}</div>
+        <div class="patient-actions">
+          <button
+            class="action-button assign-button"
+            (click)="assignAppointment(patient.id!)"
+          >
+            <span class="material-symbols-outlined">calendar_today</span>
+            Asignar turno
+          </button>
+          <button
+            class="action-button notes-button"
+            (click)="addNotes(patient.id!)"
+          >
+            <span class="material-symbols-outlined">note_add</span>
+            Notas
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

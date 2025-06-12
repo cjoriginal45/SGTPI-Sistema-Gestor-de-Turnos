@@ -1,5 +1,8 @@
-import { Component } from '@angular/core';
+import { Component,OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { PatientService } from './services/patient.service';
+import { Patient } from './interfaces/patient';
+
 
 @Component({
   selector: 'app-root',
@@ -10,4 +13,5 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'front-gestor-turnos';
+
 }
