@@ -41,7 +41,6 @@ public class AppointmentMapper {
                 "CONFIRMADO" // Estado por defecto
         );
     }*/
-
     //dtoRequest a Entity
     public Appointment requestToAppointment(AppointmentRequestDto dto) {
         Optional<Patient> patient = patientRepository.findByPhoneNumber(dto.patient().phoneNumber());
@@ -54,7 +53,7 @@ public class AppointmentMapper {
         return new Appointment(
                 dto.duration(),
                 convertirFechaHora(dto.fecha(), dto.hora()),
-                AppointmentStatus.CONFIRMADO,
+                AppointmentStatus.CONFIRMADO, // Al crear, siempre es CONFIRMADO
                 patient.get(),
                 professional
         );
@@ -62,15 +61,33 @@ public class AppointmentMapper {
 
     //Entity a dtoResponse
     public AppointmentResponseDto entityToResponse(Appointment appointment) {
+        // Obtenemos el objeto Patient, que puede ser null si el Appointment esta BLOQUEADO
+        Patient patient = appointment.getPatient();
+
+        // Inicializamos los campos del paciente con valores por defecto (null o vacíos)
+        String patientFirstName = null;
+        String patientLastName = null;
+        String patientPhoneNumber = null;
+        String patientEmail = null;
+
+        // Si el objeto Patient no es null, entonces extraemos sus datos
+        if (patient != null) {
+            patientFirstName = patient.getFirstName();
+            patientLastName = patient.getLastName();
+            patientPhoneNumber = patient.getPhoneNumber();
+            patientEmail = patient.getEmail();
+        }
+
         return new AppointmentResponseDto(
                 appointment.getId(),
-                appointment.getPatient().getFirstName(),
-                appointment.getPatient().getLastName(),
-                appointment.getPatient().getPhoneNumber(),
-                appointment.getPatient().getEmail(),
-                appointment.getDate().toLocalDate().toString(),
-                appointment.getDate().toLocalTime().toString(),
-                appointment.getStatus().toString() // Aquí se incluye el estado en la respuesta
+                // Usamos los valores que pueden ser null, que es lo esperado para un turno bloqueado
+                patientFirstName,
+                patientLastName,
+                patientPhoneNumber,
+                patientEmail,
+                appointment.getDate().toLocalDate().toString(), // Fecha en formato YYYY-MM-DD
+                appointment.getDate().toLocalTime().toString(), // Hora en formato HH:mm:ss
+                appointment.getStatus().toString() // Estado del turno
         );
     }
 
