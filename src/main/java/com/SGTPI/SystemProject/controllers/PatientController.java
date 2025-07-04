@@ -71,9 +71,9 @@ public class PatientController {
         return ResponseEntity.ok(patientService.setObservations(observations));
     }
     
-    @GetMapping("/patient-observations/{id}")
-    public ResponseEntity<?> getObservations(@PathVariable int id){
-        Optional<String> obser = patientService.getObservations(id);
+    @GetMapping("/patient-observations/{phoneNumber}")
+    public ResponseEntity<?> getObservations(@PathVariable String phoneNumber){
+        Optional<String> obser = patientService.getObservations(phoneNumber);
         if(!obser.isEmpty()){
         return ResponseEntity.ok().body(obser);
         }

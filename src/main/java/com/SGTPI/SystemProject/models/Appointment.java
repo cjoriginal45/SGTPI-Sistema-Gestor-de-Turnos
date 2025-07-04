@@ -34,16 +34,18 @@ public class Appointment {
     @Column(nullable=false)
     private Integer duration;
     
-    @Column(name = "fecha_hora", nullable=false)
+    @Column(name = "fecha_hora", nullable=false,unique = true)
     private LocalDateTime date;
     
     @Column(length=255)
     private String sessionNotes;
     
     @Enumerated(EnumType.STRING)
+    @Column(length = 25)
     private AppointmentStatus status;
     
     private boolean isUrgent;
+    
     
     @ManyToOne
     @JoinColumn(name="patient_id")

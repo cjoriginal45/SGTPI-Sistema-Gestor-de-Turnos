@@ -4,6 +4,7 @@ import com.SGTPI.SystemProject.dto.AppointmentRequestDto;
 import com.SGTPI.SystemProject.dto.AppointmentResponseDto;
 import com.SGTPI.SystemProject.services.AppointmentService;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,7 +58,7 @@ public class AppointmentController {
     }
 
     //lista de turnos por paciente
-    @GetMapping("/appointments/{id}")
+    @GetMapping("/appointments/patient/{id}")
     public ResponseEntity<?> getAppointments(@PathVariable int id) {
         List<AppointmentResponseDto> dto = appService.getAppointmentsById(id);
 
@@ -74,4 +76,38 @@ public class AppointmentController {
         AppointmentResponseDto updated = appService.patchAppointment(id, updates);
         return ResponseEntity.ok().body(updated);
     }
+
+    //bloquear turno
+    //cancelar turno
+    @PutMapping("/appointment/cancel/{id}")
+    public ResponseEntity<?> cancelAppointment(@PathVariable int id) {
+        try {
+            String result = appService.cancelAppointment(id);
+
+            if (result.equals("Turno cancelado exitosamente")) {
+                return ResponseEntity.ok(result);
+            } else {
+                return ResponseEntity.badRequest().body(result);
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error al procesar la cancelación: " + e.getMessage());
+        }
+    }
+
+    @PutMapping("/appointments/{slotTime}/{block}")
+    public ResponseEntity<?> handleBlockRequest(
+            @PathVariable
+            @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss") LocalDateTime slotTime,
+            @PathVariable boolean block) {
+
+        String result = appService.toggleBlock(slotTime, block);
+
+        if (result.startsWith("Error") || result.startsWith("No existe")) {
+            return ResponseEntity.badRequest().body(result); // 400 para casos esperados
+        }
+
+        return ResponseEntity.ok(result);
+    }
+
 }

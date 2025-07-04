@@ -10,15 +10,15 @@ import org.springframework.data.repository.query.Param;
 public interface PatientRepository extends JpaRepository<Patient, Integer> {
 
     @Modifying
-    @Query("UPDATE Patient p SET p.observations = :observations WHERE p.id = :patientId")
+    @Query("UPDATE Patient p SET p.observations = :observations WHERE p.phoneNumber = :phoneNumber")
     int updateObservations(
-            @Param("patientId")int patientId,
+            @Param("phoneNumber")String phoneNumber,
             @Param("observations") String observations);
     
     
-    @Query("SELECT p.observations FROM Patient p WHERE p.id = :patientId")
+    @Query("SELECT p.observations FROM Patient p WHERE p.phoneNumber = :phoneNumber")
     Optional<String> getObservations(
-            @Param("patientId")int patientId);
+            @Param("phoneNumber")String phoneNumber);
 
     @Query("SELECT p FROM Patient p WHERE p.phoneNumber = :phoneNumber")
     Optional<Patient> findByPhoneNumber(@Param("phoneNumber") String phoneNumber);

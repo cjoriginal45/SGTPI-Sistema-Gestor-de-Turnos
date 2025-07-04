@@ -1,7 +1,5 @@
 import { Component,OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { PatientService } from './services/patient.service';
-import { Patient } from './interfaces/patient';
 
 
 @Component({

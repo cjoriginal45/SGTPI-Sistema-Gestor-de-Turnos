@@ -67,22 +67,22 @@ public class PatientService {
     //actualizar las observaciones de un paciente
     @Transactional
     public String setObservations(Observations observations) {
-        if (observations.getObservations() == null || observations.getId() == 0) {
+        if (observations.getObservations() == null || observations.getPhoneNumber() == null) {
             throw new IllegalArgumentException("Observations data is invalid");
         }
 
         int updatedRows = patientRepository.updateObservations(
-                observations.getId(),
+                observations.getPhoneNumber(),
                 observations.getObservations()
         );
 
         return updatedRows > 0
                 ? "Observaciones actualizadas correctamente"
-                : "No se encontró el paciente con ID: " + observations.getId();
+                : "No se encontró el paciente con ID: " + observations.getPhoneNumber();
     }
 
-    public Optional<String> getObservations(Integer id) {
-        return patientRepository.getObservations(id);
+    public Optional<String> getObservations(String phoneNumber) {
+        return patientRepository.getObservations(phoneNumber);
     }
 
     //modificar paciente pasando id y datos
@@ -117,7 +117,7 @@ public class PatientService {
     @AllArgsConstructor
     public static class Observations {
 
-        private int id;
+        private String phoneNumber;
         private String observations;
     }
 }

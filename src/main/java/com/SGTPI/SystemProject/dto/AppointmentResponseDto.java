@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Email;
 
 
 public record AppointmentResponseDto(
+        @JsonProperty("id")
+        int id,
         @JsonProperty("patientName")
         String patientName,
         @JsonProperty("patientLastName")
@@ -16,7 +18,10 @@ public record AppointmentResponseDto(
         @Email(message = "Debe ser un email válido")
         String patientEmail,
         @JsonProperty("fecha")
-        String fecha
+        String fecha,
+        @JsonProperty("hora")
+        String hora,
+        @JsonProperty("state")
+        String state
         ) {
-    
 }

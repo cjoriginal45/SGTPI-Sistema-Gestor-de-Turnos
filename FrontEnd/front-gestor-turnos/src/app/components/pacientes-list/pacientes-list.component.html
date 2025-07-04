@@ -1,5 +1,4 @@
 <div class="main-container">
-  <!-- Header -->
   <app-header></app-header>
 
   <div
@@ -23,6 +22,8 @@
               name="firstname"
               required
             />
+          </div>
+          <div class="form-group">
             <label for="lastName">Apellido*</label>
             <input
               type="text"
@@ -31,6 +32,8 @@
               name="lastName"
               required
             />
+          </div>
+          <div class="form-group">
             <label for="phone">Teléfono*</label>
             <input
               type="tel"
@@ -39,6 +42,8 @@
               name="phone"
               required
             />
+          </div>
+          <div class="form-group">
             <label for="email">Email (opcional)</label>
             <input type="email" id="email" [(ngModel)]="email" name="email" />
           </div>
@@ -53,14 +58,117 @@
     </div>
   </div>
 
-  <!-- Contenido principal -->
+  <div
+    class="modal-overlay"
+    
+    [class.active]="showAssignAppointmentModal()"
+    (click)="closeAssignAppointmentModal()"
+  >
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Asignar Turno</h2>
+        <button class="close-btn" (click)="closeAssignAppointmentModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form (submit)="saveAppointment()">
+          <div class="form-group">
+            <label>Paciente:</label>
+            <span>{{ selectedPatientForAppointment()?.firstName }} {{ selectedPatientForAppointment()?.lastName }}</span>
+          </div>
+
+          <div class="form-group">
+            <label for="appointmentDate">Fecha del Turno:</label>
+            <app-calendar (dateSelected)="onDateSelected($event)"></app-calendar>
+            <div *ngIf="selectedAppointmentDate()">
+              Fecha seleccionada: **{{ selectedAppointmentDate()?.toLocaleDateString('es-AR') }}**
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="selectedAppointmentDate()">
+            <label for="appointmentTime">Hora del Turno:</label>
+            <select
+              id="appointmentTime"
+              class="form-control"
+              [(ngModel)]="selectedAppointmentTime"
+              name="appointmentTime"
+              required
+            >
+              <option [ngValue]="null" disabled>Seleccione una hora</option>
+              <option *ngFor="let time of availableTimeSlots()" [value]="time">{{ time }}</option>
+            </select>
+            <div *ngIf="availableTimeSlots().length === 0 && selectedAppointmentDate()" class="no-slots-message">
+              No hay horarios disponibles para esta fecha.
+            </div>
+          </div>
+
+          <div class="form-group" *ngIf="selectedAppointmentTime()">
+            <label for="appointmentDuration">Duración del Turno (minutos):</label>
+            <select id="appointmentDuration" [(ngModel)]="selectedDuration" name="appointmentDuration" class="form-control" required>
+              <option [ngValue]="null" disabled>Seleccione una duración</option>
+              <option value="30">30 minutos</option>
+              <option value="50">50 minutos</option>
+              <option value="60">60 minutos</option>
+            </select>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="closeAssignAppointmentModal()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-submit">Guardar Turno</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="modal-overlay"
+    [class.active]="showAddNotesModal()"
+    (click)="closeAddNotesModal()"
+  >
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Agregar Notas</h2>
+        <button class="close-btn" (click)="closeAddNotesModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form (submit)="saveNotes()">
+          <div class="form-group">
+            <label>Paciente:</label>
+            <span>{{ selectedPatientForNotes()?.firstName }} {{ selectedPatientForNotes()?.lastName }}</span>
+          </div>
+
+          <div class="form-group">
+            <label for="notes">Notas:</label>
+            <textarea
+              id="notes"
+              rows="5"
+              [(ngModel)]="patientNotes"
+              name="patientNotes"
+              class="form-control"
+              required
+            ></textarea>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" (click)="closeAddNotesModal()">
+              Cancelar
+            </button>
+            <button type="submit" class="btn-submit">Guardar Notas</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
   <div class="button-container">
     <button class="patient-btn" (click)="openRegisterModal()">
       Registrar Paciente
     </button>
   </div>
 
-  <!-- Buscador -->
   <div class="search-container">
     <input
       type="text"
@@ -71,7 +179,6 @@
     <button class="search-button">Buscar</button>
   </div>
 
-  <!-- Lista de pacientes -->
   <div class="patients-container">
     <div class="patients-header">
       <div class="header-name">Nombre</div>
@@ -91,20 +198,20 @@
         </button>
       </div>
       <div class="patient-item" *ngFor="let patient of filteredPatients()">
-        <div class="patient-name">{{ patient.firstName }}</div>
+        <div class="patient-name">{{ patient.firstName +" "+patient.lastName}}</div>
         <div class="patient-email">{{ patient.email }}</div>
         <div class="patient-id">{{ patient.phoneNumber }}</div>
         <div class="patient-actions">
           <button
             class="action-button assign-button"
-            (click)="assignAppointment(patient.id!)"
+            (click)="assignAppointment(patient.phoneNumber)"
           >
             <span class="material-symbols-outlined">calendar_today</span>
             Asignar turno
           </button>
           <button
             class="action-button notes-button"
-            (click)="addNotes(patient.id!)"
+            (click)="addNotes(patient.phoneNumber)"
           >
             <span class="material-symbols-outlined">note_add</span>
             Notas

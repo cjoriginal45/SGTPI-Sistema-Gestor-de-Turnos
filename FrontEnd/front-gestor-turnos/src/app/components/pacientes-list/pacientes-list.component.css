@@ -506,6 +506,12 @@ body, html {
   background-color: var(--light-celeste);
 }
 
+.form-control{
+  width: 100%;
+  height: max-content;
+  border-color: var(--color-header);
+}
+
 /* MEDIA QUERIES - Versión Desktop */
 @media (min-width: 768px) {
   .main-container {
