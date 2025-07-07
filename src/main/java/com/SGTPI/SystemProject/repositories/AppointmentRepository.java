@@ -28,4 +28,14 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
     @Query("DELETE FROM Appointment a WHERE a.date = :date AND a.status = :status")
     int deleteByDateAndStatus(@Param("date") LocalDateTime date, @Param("status") AppointmentStatus status);
 
+    @Query("SELECT a FROM Appointment a WHERE a.date = :date AND a.status = :status")
+    Optional<Appointment> findByDateAndStatus(@Param("date") LocalDateTime date,
+                                              @Param("status") AppointmentStatus status);
+
+    @Query("SELECT a FROM Appointment a WHERE a.date = :date AND a.id != :excludeId AND a.status = :status")
+    Optional<Appointment> findByDateAndIdIsNotAndStatus(
+            @Param("date") LocalDateTime date,
+            @Param("excludeId") int excludeId,
+            @Param("status") AppointmentStatus status // <--- ¡CAMBIO CLAVE AQUÍ!
+    );
 }

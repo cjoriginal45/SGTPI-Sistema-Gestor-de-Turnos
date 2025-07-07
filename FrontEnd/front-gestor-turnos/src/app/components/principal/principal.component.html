@@ -1,46 +1,71 @@
+<!-- src/app/components/principal/principal.component.html -->
+
 <div class="main-container">
-  <div class="modal" [class.active]="showModal()" (click)="cerrarModal()">
+
+  <!-- MODAL PARA ASIGNAR TURNO (SIN CALENDARIO) -->
+  <div class="modal" [class.active]="showAssignModal()" (click)="cerrarModal()">
     <div class="modal-contenido" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>{{ modalTurno()?.estado === 'CONFIRMADO' ? 'Modificar Turno' : 'Asignar Turno' }}</h2>
+        <h2>Asignar Turno</h2>
         <span class="cerrar-modal" (click)="cerrarModal()">&times;</span>
       </div>
       <div class="modal-body">
         <div class="form-group">
-          <label for="pacienteNombre">Paciente:</label>
-          <input
-            type="text"
-            id="pacienteNombre"
-            placeholder="Nombre y apellido del paciente"
-            [value]="pacienteNombre()"
-            (input)="pacienteNombre.set($any($event.target).value)"
-          />
+          <label for="pacienteSelectAssign">Paciente:</label>
+          <select
+            id="pacienteSelectAssign"
+            [value]="selectedPatient()?.id ?? ''"
+            (change)="onPatientSelected($event)"
+            class="form-control"
+          >
+            <option value="" disabled>Seleccionar Paciente</option>
+            <option *ngFor="let patient of patientsList()" [value]="patient.id">
+              {{ patient.firstName }} {{ patient.lastName }}
+            </option>
+          </select>
         </div>
+
+        <!-- Campos de input de Teléfono y Email (visibles y readonly) -->
         <div class="form-group">
-          <label for="telefonoPaciente">Teléfono:</label>
+          <label for="telefonoPacienteAssign">Teléfono:</label>
           <input
             type="tel"
-            id="telefonoPaciente"
+            id="telefonoPacienteAssign"
             placeholder="Teléfono del paciente"
-            [value]="telefonoPaciente()"
-            (input)="telefonoPaciente.set($any($event.target).value)"
+            [value]="selectedPatient()?.phoneNumber || ''"
+            readonly
+            class="form-control"
           />
         </div>
         <div class="form-group">
-          <label for="emailPaciente">Email:</label> <input
+          <label for="emailPacienteAssign">Email:</label>
+          <input
             type="email"
-            id="emailPaciente"
+            id="emailPacienteAssign"
             placeholder="Email del paciente"
-            [value]="emailPaciente()"
-            (input)="emailPaciente.set($any($event.target).value)"
+            [value]="selectedPatient()?.email || ''"
+            readonly
+            class="form-control"
           />
         </div>
+
+        <!-- Fecha y hora del turno a asignar (solo display, no editable aquí) -->
         <div class="form-group">
-          <label for="duracionTurno">Duración:</label>
+          <label>Fecha del Turno:</label>
+          <p>{{ modalSelectedDate() | date:'fullDate' }}</p>
+        </div>
+        <div class="form-group">
+          <label>Hora del Turno:</label>
+          <p>{{ modalSelectedTime() }}</p>
+        </div>
+
+        <div class="form-group">
+          <label for="duracionTurnoAssign">Duración:</label>
           <select
-            id="duracionTurno"
+            id="duracionTurnoAssign"
             [value]="duracionTurno()"
             (change)="duracionTurno.set(+$any($event.target).value)"
+            class="form-control"
           >
             <option value="30">30 minutos</option>
             <option value="50">50 minutos</option>
@@ -48,12 +73,13 @@
           </select>
         </div>
         <div class="form-group">
-          <label for="observaciones">Observaciones:</label>
+          <label for="observacionesAssign">Observaciones:</label>
           <textarea
-            id="observaciones"
+            id="observacionesAssign"
             placeholder="Observaciones adicionales del turno"
             [value]="observaciones()"
             (input)="observaciones.set($any($event.target).value)"
+            class="form-control"
           ></textarea>
         </div>
       </div>
@@ -61,11 +87,130 @@
         <button
           class="btn-confirmarModal"
           (click)="confirmarModal()"
-          [disabled]="!pacienteNombre().trim()"
+          [disabled]="!selectedPatient()"
         >
           Confirmar
         </button>
-        <button class="btn-cancelarModal" (click)="cancelarModal()">
+        <button class="btn-cancelarModal" (click)="cerrarModal()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL PARA MODIFICAR TURNO (CON CALENDARIO) -->
+  <div class="modal" [class.active]="showModifyModal()" (click)="cerrarModal()">
+    <div class="modal-contenido" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Modificar Turno</h2>
+        <span class="cerrar-modal" (click)="cerrarModal()">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="pacienteSelectModify">Paciente:</label>
+          <select
+            id="pacienteSelectModify"
+            [value]="selectedPatient()?.id ?? ''"
+            (change)="onPatientSelected($event)"
+            class="form-control"
+          >
+            <option value="" disabled>Seleccionar Paciente</option>
+            <option *ngFor="let patient of patientsList()" [value]="patient.id">
+              {{ patient.firstName }} {{ patient.lastName }}
+            </option>
+          </select>
+        </div>
+
+        <!-- Mostrar email y teléfono del paciente seleccionado -->
+        <div class="patient-details" *ngIf="selectedPatient()">
+          <p><strong>Email:</strong> {{ selectedPatient()?.email || 'No disponible' }}</p>
+          <p><strong>Teléfono:</strong> {{ selectedPatient()?.phoneNumber || 'No disponible' }}</p>
+        </div>
+
+        <!-- Campos de input de Teléfono y Email (visibles y readonly) -->
+        <div class="form-group">
+          <label for="telefonoPacienteModify">Teléfono:</label>
+          <input
+            type="tel"
+            id="telefonoPacienteModify"
+            placeholder="Teléfono del paciente"
+            [value]="selectedPatient()?.phoneNumber || ''"
+            readonly
+            class="form-control"
+          />
+        </div>
+        <div class="form-group">
+          <label for="emailPacienteModify">Email:</label>
+          <input
+            type="email"
+            id="emailPacienteModify"
+            placeholder="Email del paciente"
+            [value]="selectedPatient()?.email || ''"
+            readonly
+            class="form-control"
+          />
+        </div>
+
+        <!-- Sección para cambiar Fecha y Hora del Turno (con calendario) -->
+        <div class="form-group date-time-selection">
+          <label>Nueva Fecha y Hora del Turno:</label>
+          <div class="date-time-controls">
+            <!-- Calendario dentro del modal de modificar -->
+            <app-calendar
+              (dateSelected)="onModalDateSelected($event)"
+              [initialDate]="modalSelectedDate() || turnosService.fechaSeleccionadaSignal()"
+              [showToggle]="false"
+            ></app-calendar>
+
+            <!-- Selector de hora -->
+            <select
+              id="modalTimeSelectModify"
+              [value]="modalSelectedTime()"
+              (change)="modalSelectedTime.set($any($event.target).value)"
+              class="form-control time-select"
+            >
+              <option *ngFor="let hour of [8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]"
+                      [value]="(hour < 10 ? '0' : '') + hour + ':00'">
+                {{ (hour < 10 ? '0' : '') + hour }}:00
+              </option>
+            </select>
+          </div>
+        </div>
+        <!-- FIN Sección para cambiar Fecha y Hora del Turno -->
+
+        <div class="form-group">
+          <label for="duracionTurnoModify">Duración:</label>
+          <select
+            id="duracionTurnoModify"
+            [value]="duracionTurno()"
+            (change)="duracionTurno.set(+$any($event.target).value)"
+            class="form-control"
+          >
+            <option value="30">30 minutos</option>
+            <option value="50">50 minutos</option>
+            <option value="60">60 minutos</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="observacionesModify">Observaciones:</label>
+          <textarea
+            id="observacionesModify"
+            placeholder="Observaciones adicionales del turno"
+            [value]="observaciones()"
+            (input)="observaciones.set($any($event.target).value)"
+            class="form-control"
+          ></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          class="btn-confirmarModal"
+          (click)="confirmarModal()"
+          [disabled]="!selectedPatient() || !modalSelectedDate() || !modalSelectedTime()"
+        >
+          Confirmar
+        </button>
+        <button class="btn-cancelarModal" (click)="cerrarModal()">
           Cancelar
         </button>
       </div>
@@ -107,13 +252,17 @@
                 Turno: {{ getTextoEstado(turno) | titlecase }}
               </span>
             </div>
-            <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO'">
+            <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO' || turno.estado === 'CANCELADO'">
+              <span class="turno-info"
+                >Paciente: {{ turno.paciente || "-" }}</span
+              >
               <span class="turno-info"
                 >Teléfono: {{ turno.telefono || "-" }}</span
               >
               <span class="turno-info"
                 >Email: {{ turno.email || "-" }}</span
-              > <span class="turno-info"
+              >
+              <span class="turno-info"
                 >Duración: {{ turno.duracion }}</span
               >
             </div>
@@ -146,6 +295,10 @@
                   <span class="material-symbols-outlined">cancel</span>
                   Cancelar
                 </button>
+              </ng-container>
+              <!-- NEW: Show only patient name for CANCELADO state, no buttons -->
+              <ng-container *ngIf="turno.estado === 'CANCELADO'">
+                 <span class="turno-info">{{ turno.paciente || 'Paciente desconocido' }}</span>
               </ng-container>
             </div>
           </div>
@@ -165,13 +318,17 @@
                 Turno: {{ getTextoEstado(turno) | titlecase }}
               </span>
             </div>
-            <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO'">
+            <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO' || turno.estado === 'CANCELADO'">
+              <span class="turno-info"
+                >Paciente: {{ turno.paciente || "-" }}</span
+              >
               <span class="turno-info"
                 >Teléfono: {{ turno.telefono || "-" }}</span
               >
               <span class="turno-info"
                 >Email: {{ turno.email || "-" }}</span
-              > <span class="turno-info"
+              >
+              <span class="turno-info"
                 >Duración: {{ turno.duracion }}</span
               >
             </div>
@@ -204,6 +361,10 @@
                   <span class="material-symbols-outlined">cancel</span>
                   Cancelar
                 </button>
+              </ng-container>
+              <!-- NEW: Show only patient name for CANCELADO state, no buttons -->
+              <ng-container *ngIf="turno.estado === 'CANCELADO'">
+                <span class="turno-info">{{ turno.paciente || 'Paciente desconocido' }}</span>
               </ng-container>
             </div>
           </div>
@@ -223,13 +384,17 @@
                 Turno: {{ getTextoEstado(turno) | titlecase }}
               </span>
             </div>
-            <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO'">
+            <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO' || turno.estado === 'CANCELADO'">
+              <span class="turno-info"
+                >Paciente: {{ turno.paciente || "-" }}</span
+              >
               <span class="turno-info"
                 >Teléfono: {{ turno.telefono || "-" }}</span
               >
               <span class="turno-info"
                 >Email: {{ turno.email || "-" }}</span
-              > <span class="turno-info"
+              >
+              <span class="turno-info"
                 >Duración: {{ turno.duracion }}</span
               >
             </div>
@@ -262,6 +427,10 @@
                   <span class="material-symbols-outlined">cancel</span>
                   Cancelar
                 </button>
+              </ng-container>
+              <!-- NEW: Show only patient name for CANCELADO state, no buttons -->
+              <ng-container *ngIf="turno.estado === 'CANCELADO'">
+                <span class="turno-info">{{ turno.paciente || 'Paciente desconocido' }}</span>
               </ng-container>
             </div>
           </div>

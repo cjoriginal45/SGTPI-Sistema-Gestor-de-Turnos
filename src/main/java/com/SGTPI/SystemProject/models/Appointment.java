@@ -68,4 +68,15 @@ public class Appointment {
         this.professional=professional;
     }
 
+    public Appointment(Integer duration, LocalDateTime date,
+                       AppointmentStatus status, Patient patient,Professional professional, String sessionNotes) {
+        this.duration = duration;
+        this.date = date;
+        this.status = status;
+        this.patient = patient;
+        this.professional=professional;
+        this.sessionNotes=sessionNotes;
+    }
+
+
 }

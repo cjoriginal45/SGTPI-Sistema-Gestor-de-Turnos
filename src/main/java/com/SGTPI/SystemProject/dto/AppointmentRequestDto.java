@@ -23,7 +23,9 @@ public record AppointmentRequestDto(
         @JsonProperty("patient")
         @Valid
         @NotBlank(message = "El paciente es obligatorio")
-        PatientDto patient
+        PatientDto patient,
+        @JsonProperty("sessionNotes")
+        String sessionNotes
         ) {
     
 }

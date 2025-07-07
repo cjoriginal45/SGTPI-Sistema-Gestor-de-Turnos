@@ -15,10 +15,53 @@ import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
 
   constructor(private http: HttpClient) {}
 
-  getPatients(): Observable<Patient[]> {
-    return this.http.get<Patient[]>(`${this.baseUrl}/patients`).pipe(
-      catchError(this.handleError)
-    );
+  async getPatients(): Promise<Patient[]> {
+    return new Promise((resolve, reject) => {
+      this.http.get<Patient[]>(`${this.baseUrl}/patients`) // Asegúrate de que este endpoint sea correcto
+        .pipe(
+          catchError(this.handleError<Patient[]>('getAllPatients', []))
+        )
+        .subscribe({
+          next: (patients: Patient[]) => {
+            // Ordena los pacientes por nombre y apellido
+            const sortedPatients = patients.sort((a, b) => {
+              const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
+              const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
+              return nameA.localeCompare(nameB);
+            });
+            resolve(sortedPatients);
+          },
+          error: (err) => {
+            console.error('Error al obtener pacientes:', err);
+            reject(err);
+          }
+        });
+    });
+  }
+
+  async updatePatient(patient: Patient): Promise<Patient | string> {
+    if (patient.id === undefined || patient.id === null) {
+      return Promise.reject(new Error('No se puede actualizar un paciente sin ID.'));
+    }
+    return new Promise((resolve, reject) => {
+      // Asume que tu backend tiene un endpoint PUT/PATCH para pacientes por ID
+      // y que devuelve el objeto Patient actualizado o un mensaje de texto.
+      this.http.put<Patient>(`${this.baseUrl}/patients/${patient.id}`, patient)
+        .pipe(
+          catchError(this.handleError<Patient>('updatePatient'))
+        )
+        .subscribe({
+          next: (response: Patient) => {
+            console.log('Paciente actualizado exitosamente:', response);
+            // Puedes devolver el objeto paciente actualizado o un mensaje de éxito.
+            resolve(response);
+          },
+          error: (err) => {
+            console.error('Error al actualizar paciente:', err);
+            reject(err);
+          }
+        });
+    });
   }
 
   createPatient(patient: Patient): Observable<Patient> {
@@ -47,19 +90,20 @@ import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
     );
   }
 
-  private handleError(error: HttpErrorResponse) {
-    console.error('Error en la solicitud:', error);
-    
-    if (error.status === 0) {
-      // Error de red o cliente
-      console.error('Error de conexión con el backend');
-      return throwError(() => new Error('No se pudo conectar con el servidor. Verifique su conexión.'));
-    } else {
-      // El backend respondió con un código de error
-      console.error(`Backend returned code ${error.status}, body was: `, error.error);
-      return throwError(() => new Error('Error en la respuesta del servidor'));
-    }
+  private handleError<T>(operation = 'operation', result?: T) {
+    return (error: HttpErrorResponse): Observable<T> => {
+      let errorMessage = `Error en ${operation}: `;
+      if (error.error instanceof ErrorEvent) {
+        errorMessage += `Error del cliente o de red: ${error.error.message}`;
+      } else {
+        errorMessage += `Código ${error.status}, Cuerpo: ${JSON.stringify(error.error)}`;
+      }
+      console.error(errorMessage);
+      // Re-lanza el error para que sea manejado por el componente que llamó al servicio
+      return throwError(() => new Error(errorMessage));
+    };
   }
+
 
   savePatientObservation(observation: PatientObservation): Observable<string> {
     // IMPORTANT: Specify responseType: 'text' because the backend returns a String.

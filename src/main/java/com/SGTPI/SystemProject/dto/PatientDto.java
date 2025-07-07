@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 
 public record PatientDto(
+        @JsonProperty("id")
+        Integer id,
         @JsonProperty("firstName")
         @NotBlank(message = "El nombre es obligatorio")
         String firstName,

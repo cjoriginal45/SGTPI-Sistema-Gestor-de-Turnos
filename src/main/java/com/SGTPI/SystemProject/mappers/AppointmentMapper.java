@@ -55,7 +55,8 @@ public class AppointmentMapper {
                 convertirFechaHora(dto.fecha(), dto.hora()),
                 AppointmentStatus.CONFIRMADO, // Al crear, siempre es CONFIRMADO
                 patient.get(),
-                professional
+                professional,
+                dto.sessionNotes()
         );
     }
 

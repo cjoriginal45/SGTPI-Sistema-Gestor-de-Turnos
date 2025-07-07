@@ -22,6 +22,7 @@ public class PatientMapper {
     //mapper de paciente a dto
     public PatientDto patientToDto(Patient patient) {
         return new PatientDto(
+                patient.getId(),
                 patient.getFirstName(),
                 patient.getLastName(),
                 patient.getEmail(),

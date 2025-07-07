@@ -52,6 +52,10 @@ public class Patient {
         this.email = email;
         this.phoneNumber = phoneNumber;
     }
-    
-    
+
+    public Patient(String firstName, String lastName, String phoneNumber) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
+    }
 }

@@ -2,6 +2,7 @@ package com.SGTPI.SystemProject.controllers;
 
 import com.SGTPI.SystemProject.dto.AppointmentRequestDto;
 import com.SGTPI.SystemProject.dto.AppointmentResponseDto;
+import com.SGTPI.SystemProject.exceptions.AppointmentConflictException;
 import com.SGTPI.SystemProject.services.AppointmentService;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -10,13 +11,7 @@ import java.util.Map;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class AppointmentController {
@@ -110,4 +105,10 @@ public class AppointmentController {
         return ResponseEntity.ok(result);
     }
 
+
+    @ExceptionHandler(AppointmentConflictException.class)
+    public ResponseEntity<String> handleAppointmentConflictException(AppointmentConflictException ex) {
+        System.err.println("Manejando excepción de conflicto de turno: " + ex.getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
 }

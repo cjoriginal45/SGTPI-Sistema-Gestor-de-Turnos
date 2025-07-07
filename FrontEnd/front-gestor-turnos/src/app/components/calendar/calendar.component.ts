@@ -4,6 +4,8 @@ import {
   Output,
   signal,
   computed,
+  Input, // ¡Importa Input!
+  effect, // ¡Importa effect!
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -16,6 +18,10 @@ import { CommonModule } from '@angular/common';
 })
 export class CalendarComponent {
   @Output() dateSelected = new EventEmitter<Date>();
+
+  // --- NUEVOS INPUTS ---
+  @Input() initialDate: Date | undefined; // ¡Aquí está el Input que faltaba!
+  @Input() showToggle: boolean = true; // Para controlar la visibilidad del botón en el modal
 
   // Signals para estado reactivo
   currentDate = signal(new Date());
@@ -63,18 +69,46 @@ export class CalendarComponent {
   });
 
   constructor() {
-    // 1. Renderiza el calendario con los días del mes actual
+    // 1. Efecto para reaccionar a cambios en `initialDate`
+    // Este `effect` se ejecutará cuando el componente se inicialice y cuando `initialDate` cambie.
+    effect(() => {
+      if (this.initialDate) {
+        const newDate = new Date(this.initialDate);
+        newDate.setHours(0, 0, 0, 0); // Normalizar a medianoche
+
+        // Solo actualiza si la fecha recibida es diferente a la ya seleccionada
+        if (!this.selectedDate() || this.selectedDate()!.getTime() !== newDate.getTime()) {
+          this.selectedDate.set(newDate); // Establece la fecha seleccionada
+          // Establece el `currentDate` del calendario al primer día del mes de la nueva fecha
+          this.currentDate.set(new Date(newDate.getFullYear(), newDate.getMonth(), 1));
+          this.renderCalendar(); // Vuelve a renderizar el calendario con la nueva fecha
+          this.dateSelected.emit(newDate); // Emite la fecha si fue actualizada por el input
+          console.log('[CalendarComponent] initialDate input changed/set, updated to:', newDate);
+        }
+      } else {
+        // Si `initialDate` es undefined o null (ej. al abrir el calendario por primera vez sin una fecha específica)
+        // Puedes decidir si quieres resetear a "hoy" o dejar la selección como está.
+        // Aquí lo dejaremos sin hacer nada específico si `initialDate` se quita,
+        // asumiendo que siempre se le pasará algo cuando sea relevante.
+      }
+    }, { allowSignalWrites: true }); // `allowSignalWrites: true` es necesario para modificar signals dentro de un effect
+
+    // 2. Renderiza el calendario inicialmente
     this.renderCalendar();
 
-    // 2. Establece "Hoy" como valor inicial de forma segura (reemplaza el 'effect')
+    // 3. Establece "Hoy" como valor inicial de forma segura si no hay `initialDate` proporcionado
+    // Este método solo actúa si `selectedDate` aún no ha sido establecido por el `effect`
     this.initializeSelection();
   }
 
   // --- API PÚBLICA / MANEJO DE EVENTOS ---
 
   onToggleClick() {
+    // Si el calendario se está abriendo, asegúrate de que la fecha actual sea la que se muestre
     if (!this.isOpen()) {
-      this.currentDate.set(new Date());
+      // Si ya hay una fecha seleccionada, ir a esa fecha. Si no, ir a hoy.
+      const dateToShow = this.selectedDate() || new Date();
+      this.currentDate.set(new Date(dateToShow.getFullYear(), dateToShow.getMonth(), 1));
       this.renderCalendar();
     }
     this.isOpen.update((state) => !state);
@@ -92,57 +126,60 @@ export class CalendarComponent {
 
     const date = this.currentDate();
     const selectedDate = new Date(date.getFullYear(), date.getMonth(), day.dayNumber);
-    
+
     this.selectedDate.set(selectedDate);
     this.dateSelected.emit(selectedDate); // Asegúrate que esto se está ejecutando
-    this.isOpen.set(false);
-    
+    this.isOpen.set(false); // Cierra el calendario al seleccionar un día
+
     this.highlightSelectedDay(day.dayNumber);
-}
+  }
 
   private highlightSelectedDay(dayNumber: number) {
     this.days.update((days) =>
-      days.map((d) => ({
-        ...d,
-        class:
+      days.map((d) => {
+        const isSelected =
           d.dayNumber === dayNumber &&
           d.selectable &&
-          !d.class.includes('otro-mes')
+          this.isCurrentMonth(this.createDateFromDay(d.dayNumber)); // Asegúrate de que es del mes visible
+
+        return {
+          ...d,
+          class: isSelected
             ? `${d.class.replace(' seleccionado', '')} seleccionado`
             : d.class.replace(' seleccionado', ''),
-      }))
+        };
+      })
     );
   }
 
   // --- LÓGICA INTERNA ---
 
   private initializeSelection() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const currentCalDate = this.currentDate();
+    // Solo inicializa la selección si `selectedDate` aún no ha sido establecido por el `effect`
+    if (this.selectedDate() === null) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const currentCalDate = this.currentDate();
 
-    // Solo pre-selecciona si el calendario está mostrando el mes y año actual
-    if (
-      today.getFullYear() === currentCalDate.getFullYear() &&
-      today.getMonth() === currentCalDate.getMonth()
-    ) {
-      const todayObject = this.days().find(
-        (d) =>
-          d.dayNumber === today.getDate() &&
-          !d.class.includes('otro-mes') &&
-          !d.disabled
-      );
+      if (
+        today.getFullYear() === currentCalDate.getFullYear() &&
+        today.getMonth() === currentCalDate.getMonth()
+      ) {
+        const todayObject = this.days().find(
+          (d) =>
+            d.dayNumber === today.getDate() &&
+            !d.class.includes('otro-mes') &&
+            !d.disabled
+        );
 
-      if (todayObject) {
-        // Establece la fecha seleccionada directamente
-        this.selectedDate.set(new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          today.getDate()
-        ));
+        if (todayObject) {
+          this.selectedDate.set(new Date(today.getFullYear(), today.getMonth(), today.getDate()));
+          // No emitir aquí para evitar doble emisión si el padre ya estableció initialDate
+        }
       }
     }
   }
+
 
   private renderCalendar() {
     const date = this.currentDate();
@@ -152,12 +189,15 @@ export class CalendarComponent {
     today.setHours(0, 0, 0, 0); // Normalizar 'today' para evitar problemas con la hora
 
     const firstDay = new Date(year, month, 1);
+    // getDay() devuelve 0 para domingo, 1 para lunes...
+    // Queremos que lunes sea el primer día (índice 0 en weekDays), por eso (day === 0 ? 6 : day - 1)
+    const firstDayIndex = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Convertir 0 (Domingo) a 6
+
     const lastDay = new Date(year, month + 1, 0);
     const prevLastDay = new Date(year, month, 0).getDate();
 
-    const firstDayIndex = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
-    const lastDayIndex = lastDay.getDay() === 0 ? 6 : lastDay.getDay() - 1;
-    const nextDays = (7 - lastDayIndex - 1 + 7) % 7;
+    const lastDayIndex = lastDay.getDay() === 0 ? 6 : lastDay.getDay() - 1; // Convertir 0 (Domingo) a 6
+    const nextDays = (7 - lastDayIndex - 1 + 7) % 7; // Días para rellenar la última semana
 
     const daysArray = [];
 
@@ -169,11 +209,18 @@ export class CalendarComponent {
     // Días del mes actual
     for (let i = 1; i <= lastDay.getDate(); i++) {
       const dayDate = new Date(year, month, i);
+      dayDate.setHours(0, 0, 0, 0); // Normalizar
       const isToday = dayDate.getTime() === today.getTime();
       const isDisabled = dayDate < today || dayDate > this.maxSelectableDate();
+      const isSelected = this.selectedDate() && dayDate.getTime() === this.selectedDate()!.getTime();
+
+      let classes = isToday ? 'hoy' : '';
+      if (isSelected) {
+        classes += ' seleccionado';
+      }
 
       daysArray.push(
-        this.createDay(i, isToday ? 'hoy' : '', isDisabled, !isDisabled)
+        this.createDay(i, classes, isDisabled, !isDisabled)
       );
     }
 
@@ -199,8 +246,18 @@ export class CalendarComponent {
     };
   }
 
-  private getDayName(year: number, month: number, day: number): string {
-    const date = new Date(year, month, day);
-    return date.toLocaleDateString('es-ES', { weekday: 'long' });
+  // Helper para verificar si un día pertenece al mes que se está mostrando
+  private isCurrentMonth(date: Date): boolean {
+    return date.getMonth() === this.currentDate().getMonth() &&
+           date.getFullYear() === this.currentDate().getFullYear();
+  }
+
+  // Helper para crear un objeto Date a partir de un `dayNumber` y el `currentDate` del calendario
+  private createDateFromDay(dayNumber: number): Date {
+    const year = this.currentDate().getFullYear();
+    const month = this.currentDate().getMonth();
+    const date = new Date(year, month, dayNumber);
+    date.setHours(0, 0, 0, 0);
+    return date;
   }
 }

@@ -6,4 +6,5 @@ export interface AppointmentRequestDto {
   hora: string; // Formatted as 'HH:mm:ss'
   patient: AppointmentPatientDto; // Nested patient DTO
   state: string;
+  sessionNotes?:string;
 }
