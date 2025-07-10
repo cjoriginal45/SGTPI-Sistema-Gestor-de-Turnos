@@ -110,22 +110,17 @@
           <label for="pacienteSelectModify">Paciente:</label>
           <select
             id="pacienteSelectModify"
-            [value]="selectedPatient()?.id ?? ''"
-            (change)="onPatientSelected($event)"
+            [ngModel]="selectedPatient()?.id ?? ''"
+            (ngModelChange)="onPatientSelected($event)"
             class="form-control"
           >
-            <option value="" disabled>Seleccionar Paciente</option>
+            <option [ngValue]="null" disabled>Seleccionar Paciente</option>
             <option *ngFor="let patient of patientsList()" [value]="patient.id">
               {{ patient.firstName }} {{ patient.lastName }}
             </option>
           </select>
         </div>
 
-        <!-- Mostrar email y teléfono del paciente seleccionado -->
-        <div class="patient-details" *ngIf="selectedPatient()">
-          <p><strong>Email:</strong> {{ selectedPatient()?.email || 'No disponible' }}</p>
-          <p><strong>Teléfono:</strong> {{ selectedPatient()?.phoneNumber || 'No disponible' }}</p>
-        </div>
 
         <!-- Campos de input de Teléfono y Email (visibles y readonly) -->
         <div class="form-group">
@@ -246,25 +241,27 @@
             [attr.data-estado]="turno.estado"
           >
             <span class="hora">{{ turno.hora }}</span>
-            <div class="turno-izquierda">
-              <span class="turno-info">
-                <span class="material-symbols-outlined">{{ getIconoPorEstado(turno.estado) }}</span>
-                Turno: {{ getTextoEstado(turno) | titlecase }}
-              </span>
-            </div>
-            <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO' || turno.estado === 'CANCELADO'">
-              <span class="turno-info"
-                >Paciente: {{ turno.paciente || "-" }}</span
-              >
-              <span class="turno-info"
-                >Teléfono: {{ turno.telefono || "-" }}</span
-              >
-              <span class="turno-info"
-                >Email: {{ turno.email || "-" }}</span
-              >
-              <span class="turno-info"
-                >Duración: {{ turno.duracion }}</span
-              >
+            <div class="turno-info-group"> <!-- New wrapper for left/center info -->
+              <div class="turno-izquierda">
+                <span class="turno-info">
+                  <span class="material-symbols-outlined">{{ getIconoPorEstado(turno.estado) }}</span>
+                  Turno: {{ getTextoEstado(turno) | titlecase }}
+                </span>
+              </div>
+              <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO' || turno.estado === 'CANCELADO'">
+                <span class="turno-info"
+                  ><p class="turno-title">Paciente:</p> {{ turno.paciente || "-" }}</span
+                >
+                <span class="turno-info"
+                  ><p class="turno-title">Teléfono:</p> {{ turno.telefono || "-" }}</span
+                >
+                <span class="turno-info"
+                  ><p class="turno-title">Email:</p> {{ turno.email || "No tiene" }}</span
+                >
+                <span class="turno-info"
+                  ><p class="turno-title">Duración:</p> {{ turno.duracion}}</span
+                >
+              </div>
             </div>
 
             <div class="turno-derecha">
@@ -298,7 +295,7 @@
               </ng-container>
               <!-- NEW: Show only patient name for CANCELADO state, no buttons -->
               <ng-container *ngIf="turno.estado === 'CANCELADO'">
-                 <span class="turno-info">{{ turno.paciente || 'Paciente desconocido' }}</span>
+                  <span class="turno-info">{{ turno.paciente || 'Paciente desconocido' }}</span>
               </ng-container>
             </div>
           </div>
@@ -312,25 +309,27 @@
             [attr.data-estado]="turno.estado"
           >
             <span class="hora">{{ turno.hora }}</span>
-            <div class="turno-izquierda">
-              <span class="turno-info">
-                <span class="material-symbols-outlined">{{ getIconoPorEstado(turno.estado) }}</span>
-                Turno: {{ getTextoEstado(turno) | titlecase }}
-              </span>
-            </div>
-            <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO' || turno.estado === 'CANCELADO'">
-              <span class="turno-info"
-                >Paciente: {{ turno.paciente || "-" }}</span
-              >
-              <span class="turno-info"
-                >Teléfono: {{ turno.telefono || "-" }}</span
-              >
-              <span class="turno-info"
-                >Email: {{ turno.email || "-" }}</span
-              >
-              <span class="turno-info"
-                >Duración: {{ turno.duracion }}</span
-              >
+            <div class="turno-info-group">
+              <div class="turno-izquierda">
+                <span class="turno-info">
+                  <span class="material-symbols-outlined">{{ getIconoPorEstado(turno.estado) }}</span>
+                  Turno: {{ getTextoEstado(turno) | titlecase }}
+                </span>
+              </div>
+              <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO' || turno.estado === 'CANCELADO'">
+                <span class="turno-info"
+                  ><p class="turno-title">Paciente:</p> {{ turno.paciente || "-" }}</span
+                >
+                <span class="turno-info"
+                  ><p class="turno-title">Teléfono:</p> {{ turno.telefono || "-" }}</span
+                >
+                <span class="turno-info"
+                  ><p class="turno-title">Email:</p> {{ turno.email || "No tiene" }}</span
+                >
+                <span class="turno-info"
+                  ><p class="turno-title">Duración:</p> {{ turno.duracion }}</span
+                >
+              </div>
             </div>
 
             <div class="turno-derecha">
@@ -378,25 +377,27 @@
             [attr.data-estado]="turno.estado"
           >
             <span class="hora">{{ turno.hora }}</span>
-            <div class="turno-izquierda">
-              <span class="turno-info">
-                <span class="material-symbols-outlined">{{ getIconoPorEstado(turno.estado) }}</span>
-                Turno: {{ getTextoEstado(turno) | titlecase }}
-              </span>
-            </div>
-            <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO' || turno.estado === 'CANCELADO'">
-              <span class="turno-info"
-                >Paciente: {{ turno.paciente || "-" }}</span
-              >
-              <span class="turno-info"
-                >Teléfono: {{ turno.telefono || "-" }}</span
-              >
-              <span class="turno-info"
-                >Email: {{ turno.email || "-" }}</span
-              >
-              <span class="turno-info"
-                >Duración: {{ turno.duracion }}</span
-              >
+            <div class="turno-info-group">
+              <div class="turno-izquierda">
+                <span class="turno-info">
+                  <span class="material-symbols-outlined">{{ getIconoPorEstado(turno.estado) }}</span>
+                  Turno: {{ getTextoEstado(turno) | titlecase }}
+                </span>
+              </div>
+              <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO' || turno.estado === 'CANCELADO'">
+                <span class="turno-info"
+                  ><p class="turno-title">Paciente:</p> {{ turno.paciente || "-" }}</span
+                >
+                <span class="turno-info"
+                  ><p class="turno-title">Teléfono:</p> {{ turno.telefono }}</span
+                >
+                <span class="turno-info"
+                  ><p class="turno-title">Email:</p> {{ turno.email || "No tiene" }}</span
+                >
+                <span class="turno-info"
+                  ><p class="turno-title">Duración:</p> {{ turno.duracion }}</span
+                >
+              </div>
             </div>
 
             <div class="turno-derecha">

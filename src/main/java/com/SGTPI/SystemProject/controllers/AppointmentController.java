@@ -2,6 +2,8 @@ package com.SGTPI.SystemProject.controllers;
 
 import com.SGTPI.SystemProject.dto.AppointmentRequestDto;
 import com.SGTPI.SystemProject.dto.AppointmentResponseDto;
+import com.SGTPI.SystemProject.exceptions.AppointmentBlockedException;
+import com.SGTPI.SystemProject.exceptions.AppointmentCancellationException;
 import com.SGTPI.SystemProject.exceptions.AppointmentConflictException;
 import com.SGTPI.SystemProject.services.AppointmentService;
 import java.time.LocalDate;
@@ -72,23 +74,24 @@ public class AppointmentController {
         return ResponseEntity.ok().body(updated);
     }
 
-    //bloquear turno
+
+
     //cancelar turno
     @PutMapping("/appointment/cancel/{id}")
     public ResponseEntity<?> cancelAppointment(@PathVariable int id) {
         try {
-            String result = appService.cancelAppointment(id);
-
-            if (result.equals("Turno cancelado exitosamente")) {
-                return ResponseEntity.ok(result);
-            } else {
-                return ResponseEntity.badRequest().body(result);
-            }
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError()
-                    .body("Error al procesar la cancelación: " + e.getMessage());
+            String message = appService.cancelAppointment(id); // El servicio devuelve el mensaje de éxito
+            return ResponseEntity.ok(message); // <--- ¡Devuelve 200 OK con el mensaje!
+        } catch (AppointmentCancellationException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage()); // 400 Bad Request
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage()); // 404 Not Found si el ID no existe
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error interno del servidor al cancelar el turno."); // 500 Internal Server Error
         }
     }
+
+
 
     @PutMapping("/appointments/{slotTime}/{block}")
     public ResponseEntity<?> handleBlockRequest(
@@ -106,9 +109,14 @@ public class AppointmentController {
     }
 
 
+    // --- MANEJADORES DE EXCEPCIONES GENERALES (mantenerlos) ---
     @ExceptionHandler(AppointmentConflictException.class)
     public ResponseEntity<String> handleAppointmentConflictException(AppointmentConflictException ex) {
-        System.err.println("Manejando excepción de conflicto de turno: " + ex.getMessage());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(AppointmentBlockedException.class)
+    public ResponseEntity<String> handleAppointmentBlockedException(AppointmentBlockedException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 }

@@ -579,8 +579,10 @@ export class TurnosService {
         const backendErrorBody = typeof error.error === 'string' ? error.error : JSON.stringify(error.error);
         errorMessage += `Código ${error.status}, Cuerpo: ${backendErrorBody}`;
 
-        // Try to extract a readable message from the backend error
-        if (customMessage) { // Prioritize custom message if provided
+        // --- Lógica añadida para manejar el conflicto de horario ---
+        if (error.status === 409 && typeof error.error === 'string' && error.error.includes('La fecha y hora seleccionadas ya están ocupadas')) {
+          userDisplayMessage = '¡Conflicto de horario! La fecha y hora seleccionadas ya están ocupadas por otro turno.';
+        } else if (customMessage) { // Prioritize custom message if provided
           userDisplayMessage = customMessage;
         } else if (error.error && typeof error.error === 'object' && 'message' in error.error) { // Check for 'message' property
           userDisplayMessage = (error.error as any).message; // Cast to any to access message
@@ -603,4 +605,5 @@ export class TurnosService {
     // Throw the error so subscribers can handle it
     return throwError(() => new Error(userDisplayMessage));
   }
+
 }

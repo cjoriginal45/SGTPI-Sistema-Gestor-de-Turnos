@@ -2,12 +2,14 @@ package com.SGTPI.SystemProject;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication
-public class SystemProjectApplication {
+@EnableScheduling
+public class SGTPIApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SystemProjectApplication.class, args);
+		SpringApplication.run(SGTPIApplication.class, args);
 	}
 
 }

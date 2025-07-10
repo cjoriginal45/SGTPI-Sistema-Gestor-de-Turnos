@@ -1,0 +1,887 @@
+/* ---------------------------- */
+/* Variables de color (Asegúrate de que estas estén definidas en un archivo global o aquí) */
+/* ---------------------------- */
+:root {
+  --color-header: #3498db; /* Azul original */
+  --celeste: #007bff; /* Celeste original */
+  --light-celeste: #66b3ff; /* Celeste claro original */
+  --dia-bloqueado: #6c757d; /* Gris para días bloqueados original */
+}
+
+/* ---------------------------- */
+/* Estilos del HEADER (Mobile-First) */
+/* ---------------------------- */
+.header-container {
+  background-color: var(--color-header);
+  color: white;
+  padding: 1rem;
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.logo-container {
+  flex-shrink: 0;
+}
+
+.logo {
+  height: 40px; /* Ajuste para móvil */
+  border-radius: 30%;
+}
+
+.main-nav {
+  display: none; /* Oculto en móvil */
+}
+
+.nav-list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+  padding: 0.5rem 0;
+}
+
+.nav-link:hover {
+  color: var(--celeste);
+}
+
+.config-container {
+  position: relative;
+}
+
+.config-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: white;
+}
+
+.config-icon {
+  height: 24px;
+  width: 24px;
+}
+
+.config-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  background: white;
+  min-width: 180px;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  z-index: 1001;
+}
+
+.dropdown-item {
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #333;
+  text-decoration: none;
+}
+
+.dropdown-item:hover {
+  background: #f5f5f5;
+}
+
+.hamburger-btn {
+  display: flex; /* Visible en móvil */
+  flex-direction: column;
+  justify-content: space-between;
+  width: 28px;
+  height: 22px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 1rem;
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 3px;
+  background: white;
+  border-radius: 2px;
+}
+
+/* ---------------------------- */
+/* Estilos del MAIN (Mobile-First) */
+/* ---------------------------- */
+.main-container {
+  width: 100%;
+  padding: 1rem; /* Padding general para móvil */
+  margin-top: 60px; /* Ajustado para el header fijo en móvil */
+  box-sizing: border-box;
+}
+
+.main {
+  display: flex;
+  flex-direction: column; /* Siempre apila los contenedores */
+  gap: 1.5rem;
+  padding: 0;
+  align-items: center; /* Centra los elementos apilados */
+}
+
+.agenda-container {
+  margin-bottom: 0;
+  width: 100%; /* Ocupa todo el ancho disponible en móvil */
+  padding: 1rem;
+  box-sizing: border-box;
+  background-color: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.agenda-header button {
+  background-color: var(--celeste);
+  color: white;
+  border: none;
+  padding: 0.6rem 1.5rem;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  display: block;
+  margin: 0 auto;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+}
+
+.agenda-header button:active {
+  background-color: var(--light-celeste);
+  transform: translateY(1px);
+}
+
+.datos-container { /* Si existen */
+  display: flex;
+  flex-direction: column;
+  margin: 1rem 0;
+  padding: 1rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.datos-container span {
+  display: block;
+  margin: 0.25rem 0;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+}
+
+.actividades-container {
+  width: 100%; /* Ocupa todo el ancho disponible en móvil */
+  padding: 1rem;
+  box-sizing: border-box;
+  background-color: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.titulo-actividades {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: var(--color-header);
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #eee;
+  text-align: center;
+}
+
+.lista-horas {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.bloque-horas {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.periodo-dia {
+  font-size: 0.8rem;
+  color: #555;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+  text-align: center;
+}
+
+.hora-actividad {
+  display: flex;
+  flex-direction: column; /* Apila los elementos en móvil */
+  justify-content: flex-start;
+  align-items: flex-start;
+  padding: 0.8rem;
+  margin: 0.3rem 0;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+}
+
+/* Estados de los turnos - Colores originales */
+.hora-actividad[data-estado="bloqueado"] {
+  background-color: #f8f9fa; /* Original */
+  border-left: 4px solid #6c757d; /* Original */
+}
+
+.hora-actividad[data-estado="disponible"] {
+  background-color: #e8f5e9; /* Original */
+  border-left: 4px solid #4caf50; /* Original */
+}
+
+.hora-actividad[data-estado="confirmado"] {
+  background-color: #e3f2fd; /* Original */
+  border-left: 4px solid #2196f3; /* Original */
+}
+
+.hora-actividad[data-estado="cancelado"] {
+  background-color: #ffebee; /* Original */
+  border-left: 4px solid #f44336; /* Original */
+}
+
+.hora {
+  font-weight: bold;
+  color: #222;
+  width: 100%;
+  text-align: left;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+}
+
+.turno-info-group {
+  display: flex;
+  flex-direction: column; /* Apila izquierda y centro en móvil */
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.turno-izquierda {
+  flex: none;
+  width: 100%;
+}
+
+.turno-centro {
+  display: flex;
+  flex-direction: column; /* Apila los detalles del paciente en móvil */
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 0.2rem;
+  width: 100%;
+  border-top: 1px dashed #eee;
+  padding-top: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.turno-centro span p {
+  font-weight: bold;
+  color: #111;
+  margin-bottom: 0;
+  margin-right: 0.3rem;
+  display: inline;
+}
+
+.turno-info {
+  font-weight: 500;
+  color: #444;
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+}
+
+.turno-derecha {
+  display: flex;
+  justify-content: flex-start; /* Alinea botones al inicio en móvil */
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  width: 100%;
+  margin-top: 1rem;
+  border-top: 1px solid #eee;
+  padding-top: 0.8rem;
+}
+
+/* Botones de acciones - Colores originales */
+.btn-turno {
+  padding: 0.6rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  /* Eliminado flex-grow: 1; para evitar que se estiren en móvil */
+  justify-content: center;
+}
+
+.btn-asignar {
+  background-color: #079070; /* Original */
+  color: white;
+}
+.btn-asignar:active {
+  background-color: white;
+  color: #079070;
+  border: 1px solid #079070;
+}
+
+.btn-cancelar {
+  background-color: #c82333; /* Original */
+  color: white;
+}
+.btn-cancelar:active {
+  background-color: white;
+  color: #dc3545;
+  border: 1px solid #dc3545;
+}
+
+.btn-bloquear {
+  background-color: var(--color-header); /* Original */
+  color: white;
+}
+.btn-bloquear:active {
+  background-color: white;
+  color: var(--color-header);
+  border: 1px solid var(--color-header);
+}
+
+.btn-desbloquear {
+  background-color: var(--celeste); /* Original */
+  color: white;
+}
+.btn-desbloquear:active {
+  background-color: white;
+  color: var(--celeste);
+  border: 1px solid var(--celeste);
+}
+
+.btn-modificar {
+  background-color: var(--color-header); /* Original */
+  color: white;
+  margin-left: 3px;
+}
+.btn-modificar:active {
+  background-color: white;
+  color: var(--color-header);
+  border: 1px solid var(--color-header);
+}
+
+/* ---------------------------- */
+/* Estilos del MODAL (Mobile-First) */
+/* ---------------------------- */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1050;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.6);
+  overflow-y: auto;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-contenido {
+  background-color: #fefefe;
+  margin: 10% auto;
+  padding: 1.2rem;
+  border: 1px solid #888;
+  width: 95%;
+  max-width: 400px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  animation: fadeIn 0.3s ease-out;
+  box-sizing: border-box;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.cerrar-modal {
+  color: #aaa;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.cerrar-modal:active {
+  color: #333;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: bold;
+  font-size: 0.85rem;
+}
+
+.form-group .form-control {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-size: 0.85rem;
+}
+
+.form-group textarea.form-control {
+  min-height: 70px;
+  resize: vertical;
+}
+
+.modal-display-info {
+  font-weight: 500;
+  color: #555;
+  margin-top: 0.2rem;
+  padding: 0.6rem;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.date-time-selection .date-time-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.date-time-selection .time-select {
+  width: 100%;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+
+.btn-confirmarModal,
+.btn-cancelarModal {
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  flex-grow: 1;
+  justify-content: center;
+}
+
+.btn-confirmarModal {
+  background-color: #4CAF50; /* Original */
+  color: white;
+}
+
+.btn-confirmarModal:active {
+  background-color: #45a049;
+}
+
+.btn-confirmarModal:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.btn-cancelarModal {
+  background-color: #f44336; /* Original */
+  color: white;
+}
+
+.btn-cancelarModal:active {
+  background-color: #d32f2f;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------------------------- */
+/* Estilos de NOTIFICACIÓN */
+/* ---------------------------- */
+.notification {
+  position: fixed;
+  top: 70px; /* Justo debajo del header fijo */
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1100; /* Más alto que los modales para que se vea por encima */
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  display: none; /* Oculto por defecto */
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out, top 0.3s ease-in-out;
+  width: 90%; /* Ocupa la mayor parte del ancho en móvil */
+  max-width: 400px; /* Ancho máximo en escritorio */
+  text-align: center;
+}
+
+.notification.active {
+  display: block; /* Visible cuando está activo */
+  opacity: 1;
+  top: 60px; /* Pequeño ajuste para la animación de entrada */
+}
+
+.notification.success {
+  background-color: #4CAF50; /* Verde */
+}
+
+.notification.error {
+  background-color: #f44336; /* Rojo */
+}
+
+.notification.info {
+  background-color: #2196F3; /* Azul */
+}
+
+.notification .close-btn {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.notification .close-btn:hover {
+  color: white;
+}
+
+/* ---------------------------- */
+/* Estilos del MODAL DE CONFIRMACIÓN PERSONALIZADO */
+/* ---------------------------- */
+.custom-confirm-modal {
+  display: none; /* Oculto por defecto */
+  position: fixed;
+  z-index: 2000; /* Más alto que otros modales para que siempre esté al frente */
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7); /* Overlay más oscuro */
+  display: flex; /* Usar flexbox para centrar */
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-out; /* Animación de entrada */
+}
+
+.custom-confirm-modal.active {
+  display: flex; /* Visible cuando está activo */
+}
+
+.custom-confirm-content {
+  background-color: #fefefe;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 450px; /* Ancho máximo para el modal */
+  text-align: center;
+  font-family: 'Inter', sans-serif; /* Fuente consistente */
+}
+
+.custom-confirm-content p {
+  margin-bottom: 25px;
+  font-size: 1.1rem;
+  color: #333;
+  line-height: 1.5;
+}
+
+.custom-confirm-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn-confirm-yes,
+.btn-confirm-no {
+  padding: 10px 25px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.btn-confirm-yes {
+  background-color: #4CAF50; /* Verde para aceptar */
+  color: white;
+}
+
+.btn-confirm-yes:hover {
+  background-color: #45a049;
+  transform: translateY(-1px);
+}
+
+.btn-confirm-no {
+  background-color: #f44336; /* Rojo para cancelar */
+  color: white;
+}
+
+.btn-confirm-no:hover {
+  background-color: #d32f2f;
+  transform: translateY(-1px);
+}
+
+
+/* ---------------------------- */
+/* Media Queries (Desktop - Sobrescribe estilos de móvil) */
+/* ---------------------------- */
+@media (min-width: 768px) {
+  /* HEADER */
+  .header-container {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+  }
+
+  .logo {
+    height: 45px;
+  }
+
+  .main-nav {
+    display: block;
+    flex: 1;
+    margin: 0 2rem;
+  }
+
+  .nav-list {
+    justify-content: center;
+  }
+
+  .hamburger-btn {
+    display: none;
+  }
+
+  .config-btn:hover {
+    color: var(--celeste);
+  }
+
+  /* MAIN */
+  .main-container {
+    padding: 1rem 2rem;
+    margin-top: 90px;
+  }
+
+  .main {
+    flex-direction: column; /* Mantiene la columna para calendario arriba y lista abajo */
+    justify-content: center;
+    align-items: center; /* Centra los elementos principales */
+    gap: 2rem;
+  }
+
+  .agenda-container {
+    width: 100%;
+    max-width: 600px; /* Ancho máximo para el calendario en desktop */
+    margin: 0 auto 2rem auto; /* Centra y añade margen inferior */
+  }
+
+  .actividades-container {
+    width: 100%;
+    max-width: 1300px; /* AUMENTADO AÚN MÁS el ancho máximo para la lista de actividades en desktop */
+    margin: 0 auto; /* Centra la lista de actividades */
+  }
+
+  .datos-container {
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 1rem;
+  }
+
+  .datos-container span {
+    margin: 0;
+    text-align: left;
+  }
+
+  .titulo-actividades {
+    font-size: 1.5rem;
+    text-align: left;
+  }
+
+  .hora-actividad {
+    flex-direction: row; /* Vuelve a fila para los elementos de turno */
+    justify-content: space-between; /* Distribuye el espacio */
+    align-items: center; /* CLAVE: Centra verticalmente los elementos principales */
+    padding: 1.2rem;
+    gap: 1rem;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+  }
+
+  .hora {
+    width: auto;
+    margin-bottom: 0;
+    font-size: 1.125rem;
+  }
+
+  .turno-info-group {
+    display: flex; /* Asegura flexbox */
+    flex-direction: row; /* Vuelve a fila */
+    width: auto;
+    gap: 1rem;
+    flex-grow: 1;
+    align-items: center; /* CLAVE: Centra verticalmente los elementos dentro de este grupo (izquierda y centro) */
+  }
+
+  .turno-izquierda {
+    width: auto;
+  }
+
+  .turno-centro {
+    display: flex; /* Asegura flexbox */
+    flex-direction: row; /* Vuelve a fila para detalles del paciente */
+    justify-content: flex-start;
+    align-items: center; /* CLAVE: Centra verticalmente los elementos de info del paciente */
+    gap: 20px; /* Ajustado el gap para que quepa mejor */
+    width: auto;
+    border-top: none;
+    padding-top: 0;
+    margin-top: 0;
+    border-left: 1px solid #848484;
+    padding-left: 1rem;
+    flex-grow: 3;
+    flex-wrap: nowrap;
+  }
+
+  .turno-centro span {
+    white-space: nowrap; /* Asegura que cada pieza de información no se rompa */
+  }
+
+  .turno-centro span p {
+    display: inline; /* Vuelve a inline para que el título y el valor estén en la misma línea */
+    margin-right: 0.3rem; /* Espacio entre título y valor */
+  }
+
+  .turno-info {
+    font-weight: 500;
+    color: #444;
+    display: flex;
+    align-items: center; /* CLAVE: Alinea el icono y el texto dentro de cada span.turno-info */
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    padding: 0;
+    white-space: nowrap; /* Evita que la info del turno se rompa en varias líneas */
+  }
+
+  .turno-info .material-symbols-outlined {
+    font-size: 1.2rem;
+    color: #007bff;
+  }
+
+  .turno-derecha {
+    justify-content: flex-end;
+    gap: 10px;
+    width: auto;
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
+    flex-shrink: 0;
+  }
+
+  .btn-turno {
+    padding: 8px 12px;
+    font-size: 14px;
+    flex-grow: 0;
+    min-width: 130px; /* Añadido para consistencia de tamaño en escritorio */
+  }
+
+  /* MODAL */
+  .modal-contenido {
+    margin: 10% auto;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+  }
+
+  .modal-header h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-group label {
+    font-size: 1rem;
+  }
+
+  .form-group .form-control {
+    font-size: 1rem;
+    padding: 10px;
+  }
+
+  .btn-confirmarModal,
+  .btn-cancelarModal {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    flex-grow: 0;
+  }
+
+  .date-time-selection .date-time-controls {
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .date-time-selection .time-select {
+    width: auto;
+  }
+}
+
+@media (min-width: 992px) {
+  .modal-contenido {
+    margin: 8% auto;
+    width: 50%;
+  }
+
+  .hora-actividad {
+    flex-wrap: nowrap;
+  }
+
+  .turno-derecha {
+    flex-wrap: nowrap;
+  }
+}
