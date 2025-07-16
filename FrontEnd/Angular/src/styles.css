@@ -1,23 +1,513 @@
+/* src/styles.css */
+
 /* ---------------------------- */
-/* Reset y estilos base        */
+/* Reset y estilos base         */
 /* ---------------------------- */
 * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* --- CSS Variables for consistent theming (TODAS LAS VARIABLES SE DEFINEN AQUÍ Y SOLO AQUÍ) --- */
+:root {
+  /* Tus variables existentes */
+  --color-header: #1b2631;
+  --celeste: #237ab5;
+  --light-celeste: #4ab2f7;
+  --dia-bloqueado: #7f8c8d;
+  --color-dia-otromes: #aaa;
+
+  /* Nuevas variables para el diseño mejorado, mapeadas a tus colores si es posible */
+  --primary-blue: var(--celeste); /* Usar tu --celeste como primary-blue */
+  --light-blue: var(--light-celeste); /* Usar tu --light-celeste como light-blue */
+  --dark-blue: #1A5C8A; /* Un azul más oscuro para títulos */
+
+  --success-green: #28A745;
+  --light-success-green: #218838;
+
+  --purple: #6F42C1;
+  --light-purple: #5A359B;
+
+  --secondary-gray: #6C757D;
+  --light-secondary-gray: #5A6268;
+
+  --error-red: #DC3545;
+  --light-error-red: #C82333;
+
+  --warning-yellow: #FFC107; /* Para estado "EN_CURSO" */
+
+  --background-light: rgb(243, 241, 238); /* Tu color de fondo existente */
+  --card-background: #FFFFFF;
+  --border-color: #E2E8F0;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  --text-dark: #2D3748;
+  --text-medium: #4A5568;
+  --text-light: #718096;
+}
+
+body, html {
+  width: 100%;
+  max-width: 100%;
+  background-color: var(--background-light); /* Usar la variable */
+  font-family: 'Inter', sans-serif; /* ¡Aplicar Inter aquí! */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ---------------------------- */
+/* Estilos del HEADER (MOVIDOS AQUÍ PARA SER GLOBALES) */
+/* ---------------------------- */
+
+/* Contenedor principal del header */
+.app-header { /* Renombrado de .main-header a .app-header para consistencia */
+  background-color: var(--color-header); /* Usa tu variable de color de header */
+  color: white;
+  padding: 0.75rem 1.5rem; /* Ajusta el padding para un look más moderno */
+  width: 100%;
+  position: fixed; /* Header fijo en la parte superior */
+  top: 0;
+  left: 0;
+  z-index: 1000; /* Asegura que esté por encima de otros elementos */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); /* Sombra sutil */
+  display: flex;
+  justify-content: center; /* Centra el contenido del header */
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px; /* Ancho máximo para el contenido del header */
+}
+
+/* Logo */
+.logo-container {
+  flex-shrink: 0; /* Evita que el logo se encoja */
+}
+
+.logo {
+  height: 45px;
+  border-radius: 50%; /* Logo completamente redondo */
+  transition: transform 0.3s ease;
+}
+.logo:hover {
+  transform: scale(1.05);
+}
+
+/* Navbar principal */
+.main-nav {
+  display: none; /* Oculto en móvil por defecto */
+  flex-grow: 1; /* Permite que la navegación ocupe espacio */
+  margin: 0 2rem; /* Espacio a los lados del nav */
+}
+
+.nav-list {
+  display: flex;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  gap: 1.8rem; /* Espacio entre los elementos del menú */
+  justify-content: center; /* Centra los elementos del menú en desktop */
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1.05rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: 0.5rem; /* Bordes redondeados para los enlaces */
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--celeste); /* Usa tu variable celeste para el hover */
+  background-color: rgba(255, 255, 255, 0.1); /* Fondo sutil en hover */
+  transform: translateY(-2px); /* Pequeño efecto de elevación */
+}
+
+/* Configuración */
+.config-container {
+  position: relative;
+  margin-left: auto; /* Empuja a la derecha en desktop */
+}
+
+.config-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  color: white; /* Color del icono */
+  transition: color 0.3s ease, transform 0.2s ease;
+}
+
+.config-btn:hover {
+  color: var(--light-celeste); /* Color en hover */
+  transform: rotate(30deg); /* Pequeña rotación en hover */
+}
+
+.config-icon {
+  font-size: 1.8rem; /* Tamaño del icono de configuración */
+  vertical-align: middle; /* Alineación vertical */
+}
+
+.config-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem); /* Posiciona debajo del botón */
+  background-color: var(--card-background); /* Fondo de tarjeta blanca */
+  min-width: 180px;
+  border-radius: 0.75rem; /* Bordes redondeados */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Sombra más pronunciada */
+  z-index: 1001; /* Asegura que esté por encima del header */
+  overflow: hidden; /* Para que los bordes redondeados se apliquen bien */
+  border: 1px solid var(--border-color); /* Borde sutil */
+  animation: fadeIn 0.2s ease-out; /* Animación de aparición */
+}
+
+.config-active .config-dropdown {
+  display: block; /* Mostrar cuando está activo */
+}
+
+.dropdown-item {
+  display: block;
+  padding: 0.8rem 1.2rem;
+  color: var(--text-dark); /* Color de texto oscuro */
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  border-bottom: 1px solid #f0f0f0; /* Separador entre items */
+}
+.dropdown-item:last-child {
+  border-bottom: none; /* No hay separador en el último item */
+}
+
+.dropdown-item:hover {
+  background-color: var(--background-light); /* Fondo más claro en hover */
+  color: var(--primary-blue); /* Color de texto principal en hover */
+}
+
+/* Menú Hamburguesa (Solo Móvil) */
+.hamburger-btn {
+  display: flex; /* Visible en móvil */
+  flex-direction: column;
+  justify-content: space-between;
+  width: 30px;
+  height: 24px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  z-index: 1002; /* Para que esté por encima del menú desplegado */
+}
+
+.hamburger-line {
+  width: 100%;
+  height: 3px;
+  background: white;
+  border-radius: 2px;
+  transition: all 0.3s ease-in-out; /* Animación para el icono */
+}
+
+/* Animación del icono hamburguesa a "X" */
+.app-header.menu-active .hamburger-line:nth-child(1) {
+  transform: translateY(10.5px) rotate(45deg);
+}
+.app-header.menu-active .hamburger-line:nth-child(2) {
+  opacity: 0;
+}
+.app-header.menu-active .hamburger-line:nth-child(3) {
+  transform: translateY(-10.5px) rotate(-45deg);
+}
+
+/* Estilos para el menú móvil desplegado */
+.app-header.menu-active .main-nav {
+  display: flex; /* Mostrar el menú móvil */
+  flex-direction: column;
+  position: absolute;
+  top: 100%; /* Debajo del header */
+  left: 0;
+  width: 100%;
+  background-color: var(--color-header); /* Mismo color que el header */
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  padding: 1rem 0;
+  animation: slideDown 0.3s ease-out; /* Animación de deslizamiento */
+}
+
+.app-header.menu-active .nav-list {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.app-header.menu-active .nav-link {
+  width: 100%;
+  text-align: center;
+  padding: 0.8rem 1rem;
+}
+
+/* --- Global Utilities and Animations (NUEVOS/MOVIDOS AQUÍ) --- */
+
+/* App Container - Reutilizable para el layout principal de la página */
+.app-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--background-light), #e0e7ff); /* Degradado sutil */
+  padding: 1rem; /* Padding por defecto */
+  color: var(--text-dark);
+  padding-top: 6rem; /* Ajuste para el header fijo */
+}
+
+@media (min-width: 640px) {
+  .app-container {
+    padding: 1.5rem;
   }
-  
-  :root{
-    --color-header: #1b2631;
-    --celeste: #237ab5;
-    --light-celeste:#4ab2f7;
-    --dia-bloqueado: #7f8c8d;
-    --color-dia-otromes: #aaa;
-    font-family: Arial, Helvetica, sans-serif;
+}
+@media (min-width: 1024px) {
+  .app-container {
+    padding: 2rem;
   }
-  
-  body, html {
-    width: 100%;
-    max-width: 100%;
-    background-color: rgb(243, 241, 238);
-  }
+}
+
+/* Botones Genéricos */
+.btn {
+  padding: 0.625rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: none;
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+.btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 6px var(--primary-blue);
+}
+.btn-icon {
+  margin-right: 0.5rem;
+  font-size: 1.25rem;
+}
+
+/* Variantes de Color de Botón */
+.btn-primary {
+  background: linear-gradient(to right, var(--primary-blue), var(--light-blue));
+  color: white;
+}
+.btn-primary:hover {
+  background: linear-gradient(to right, var(--light-blue), var(--primary-blue));
+}
+.btn-primary:focus {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 6px var(--primary-blue);
+}
+
+.btn-success {
+  background: linear-gradient(to right, var(--success-green), var(--light-success-green));
+  color: white;
+}
+.btn-success:hover {
+  background: linear-gradient(to right, var(--light-success-green), var(--success-green));
+}
+.btn-success:focus {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 6px var(--success-green);
+}
+
+.btn-secondary {
+  background-color: var(--secondary-gray);
+  color: white;
+}
+.btn-secondary:hover {
+  background-color: var(--light-secondary-gray);
+}
+.btn-secondary:focus {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 6px var(--secondary-gray);
+}
+
+.btn-purple {
+  background: linear-gradient(to right, var(--purple), var(--light-purple));
+  color: white;
+}
+.btn-purple:hover {
+  background: linear-gradient(to right, var(--light-purple), var(--purple));
+}
+.btn-purple:focus {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 6px var(--purple);
+}
+
+/* Campos de Formulario */
+.form-input {
+  display: block;
+  width: 100%;
+  padding: 0.625rem 1rem;
+  margin-top: 0.25rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  font-size: 1rem;
+  transition: all 0.15s ease-in-out;
+  color: var(--text-dark);
+}
+.form-input:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(35, 122, 181, 0.25);
+}
+
+/* Estilos de Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 50;
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+.modal-content {
+  background-color: var(--card-background);
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px var(--shadow-color), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 2rem;
+  width: 100%;
+  max-width: 28rem;
+  transform: scale(0.95);
+  animation: scaleIn 0.3s ease-out forwards;
+}
+
+.modal-header {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--text-dark);
+  margin-bottom: 1rem;
+}
+
+.modal-appointment-info {
+  color: var(--text-medium);
+  margin-bottom: 1.5rem;
+}
+.modal-appointment-info span {
+  font-weight: 600;
+}
+
+.modal-textarea {
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  color: var(--text-dark);
+  resize: vertical;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  transition: all 0.15s ease-in-out;
+}
+.modal-textarea:focus {
+  outline: none;
+  border-color: var(--primary-blue);
+  box-shadow: 0 0 0 3px rgba(35, 122, 181, 0.25);
+}
+
+.modal-button-group {
+  margin-top: 2rem;
+}
+
+/* Notificaciones */
+.notification-area {
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+}
+
+.notification-card {
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transform: translateX(100%);
+  animation: slideInRight 0.3s ease-out forwards;
+}
+
+.notification-icon {
+  font-size: 1.5rem;
+}
+
+.notification-message {
+  font-weight: 600;
+}
+
+.notification-close-btn {
+  margin-left: auto;
+  color: white;
+  background: none;
+  border: none;
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s ease-in-out;
+}
+.notification-close-btn:hover {
+  opacity: 1;
+}
+
+/* Colores de Tipo de Notificación */
+.notification-success {
+  background-color: var(--success-green);
+}
+.notification-error {
+  background-color: var(--error-red);
+}
+.notification-info {
+  background-color: var(--primary-blue);
+}
+
+/* Indicador de Carga */
+.loading-indicator {
+  text-align: center;
+  padding: 4rem;
+  color: var(--text-medium);
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid var(--primary-blue);
+  border-radius: 50%;
+  width: 3rem;
+  height: 3rem;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem auto;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

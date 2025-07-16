@@ -10,6 +10,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import com.SGTPI.SystemProject.services.PatientService;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,14 +60,21 @@ public class AppointmentController {
     //lista de turnos por paciente
     @GetMapping("/appointments/patient/{id}")
     public ResponseEntity<?> getAppointments(@PathVariable int id) {
-        List<AppointmentResponseDto> dto = appService.getAppointmentsById(id);
+        try {
+            List<AppointmentResponseDto> dto = appService.getAppointmentsById(id);
 
-        if (dto.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            if (dto.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+             return ResponseEntity.ok(dto);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // O un mensaje de error más específico
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-
-        return ResponseEntity.ok(appService.getAppointmentsById(id));
     }
+
 
     //modificar turno
     @PatchMapping("/patch-appointment/{id}")
@@ -106,6 +116,21 @@ public class AppointmentController {
         }
 
         return ResponseEntity.ok(result);
+    }
+
+
+    @PatchMapping("/session-notes/{id}")
+    public ResponseEntity<?> setObservations(@RequestBody String notes,@PathVariable int id){
+        return ResponseEntity.ok(appService.setSessionNotes(notes,id));
+    }
+
+    @GetMapping("/get-notes/{id}")
+    public ResponseEntity<?> getObservations(@PathVariable int id){
+        String notes = appService.getSessionNotes(id);
+        if(notes != null){
+            return ResponseEntity.ok().body(notes);
+        }
+        return ResponseEntity.notFound().build();
     }
 
 

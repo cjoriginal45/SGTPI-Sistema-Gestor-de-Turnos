@@ -1,42 +1,48 @@
-<header class="main-header" [class.menu-active]="isMenuActive()">
-  <!-- Logo con routerLink para navegación -->
-  <div class="logo-container">
-    <a routerLink="/">
-      <img src="logoPag.png" alt="Logo" class="logo">
-    </a>
-  </div>
+<!-- src/app/components/header/header.component.html -->
 
-  <!-- Navbar principal -->
-  <nav class="main-nav">
-    <ul class="nav-list">
-      <li class="nav-item">
-        <a routerLink="/pacientes" class="nav-link">Lista de pacientes</a>
-      </li>
-      <li class="nav-item">
-        <a routerLink="/historial" class="nav-link">Historial de turnos</a>
-      </li>
-      <li class="nav-item">
-        <a routerLink="/reportes" class="nav-link">Reportes</a>
-      </li>
-    </ul>
-  </nav>
-
-  <!-- Menú de configuración -->
-  <div class="config-container" [class.config-active]="isConfigActive()">
-    <button class="config-btn" (click)="toggleConfig($event)">
-      <span class="material-symbols-outlined">settings</span>
-    </button>
-    <div class="config-dropdown">
-      <a routerLink="/cuenta" class="dropdown-item">Mi cuenta</a>
-      <a routerLink="/configuracion" class="dropdown-item">Configuración</a>
-      <button class="dropdown-item">Cerrar sesión</button>
+<!-- Header principal con clase para el estado del menú móvil -->
+<header class="app-header" [class.menu-active]="isMenuActive()" (click)="$event.stopPropagation()">
+  <div class="header-content">
+    <!-- Logo con routerLink para navegación -->
+    <div class="logo-container">
+      <a routerLink="/">
+        <!-- Usar un placeholder si 'logoPag.png' no es accesible o no existe -->
+        <img src="https://placehold.co/45x45/237ab5/ffffff?text=LOGO" alt="Logo" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/45x45/237ab5/ffffff?text=LOGO';">
+      </a>
     </div>
+
+    <!-- Navbar principal (oculto en móvil por defecto, visible en desktop) -->
+    <nav class="main-nav">
+      <ul class="nav-list">
+        <li class="nav-item">
+          <a routerLink="/pacientes" class="nav-link" (click)="closeAllMenus()">Lista de pacientes</a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/historial" class="nav-link" (click)="closeAllMenus()">Historial de turnos</a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/reportes" class="nav-link" (click)="closeAllMenus()">Reportes</a>
+        </li>
+      </ul>
+    </nav>
+
+    <!-- Menú de configuración -->
+    <div class="config-container" [class.config-active]="isConfigActive()">
+      <button class="config-btn" (click)="toggleConfig($event)" aria-label="Configuración">
+        <span class="material-symbols-outlined config-icon">settings</span>
+      </button>
+      <div class="config-dropdown">
+        <a routerLink="/cuenta" class="dropdown-item" (click)="closeAllMenus()">Mi cuenta</a>
+        <a routerLink="/configuracion" class="dropdown-item" (click)="closeAllMenus()">Configuración</a>
+        <button class="dropdown-item" (click)="closeAllMenus()">Cerrar sesión</button>
+      </div>
+    </div>
+
+    <!-- Menú hamburguesa (solo móvil) -->
+    <button class="hamburger-btn" (click)="toggleMenu()" aria-label="Menú principal">
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+      <span class="hamburger-line"></span>
+    </button>
   </div>
-  
-  <!-- Menú hamburguesa (solo móvil) -->
-  <button class="hamburger-btn" (click)="toggleMenu()" aria-label="Menú principal">
-    <span class="hamburger-line"></span>
-    <span class="hamburger-line"></span>
-    <span class="hamburger-line"></span>
-  </button>
 </header>

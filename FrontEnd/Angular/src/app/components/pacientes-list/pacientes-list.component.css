@@ -4,204 +4,6 @@
   padding: 0;
 }
 
-:root{
-  --color-header: #1b2631;
-  --celeste: #237ab5;
-  --light-celeste:#4ab2f7;
-  --dia-bloqueado: #7f8c8d;
-  --color-dia-otromes: #aaa;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-body, html {
-  width: 100%;
-  max-width: 100%;
-  background-color: rgb(243, 241, 238);
-}
-
-/* ---------------------------- */
-/* Estilos del HEADER          */
-/* ---------------------------- */
-
-/* Contenedor principal del header */
-.header-container {
-  background-color: var(--color-header);
-  color: white;
-  padding: 1rem;
-  width: 100%;
-  top: 0;
-  flex-direction: column;
-  align-items: flex-end;
-  position:fixed;
-  z-index: 1000; 
-}
-
-.main-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.datos-container{
-  display: flex;
-  flex-direction: column;
-  margin: auto;
-  justify-items: center;
-}
-
-.datos-container span{
-  display: block;
-  margin: auto;
-  font-family: Arial, Helvetica, sans-serif;
-  padding: 3px;
-  font-weight: 500;
-}
-
-/* Logo */
-.logo-container {
-  flex: 0 0 auto;
-}
-
-.logo {
-  height: 45px;
-  border-radius: 30%;
-}
-
-/* Navbar principal */
-.main-nav {
-  display: none; /* Oculto en móvil por defecto */
-}
-
-.nav-list {
-  display: flex;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  gap: 1.5rem;
-}
-
-.nav-link {
-  color: white;
-  text-decoration: none;
-  font-weight: 500;
-  transition: color 0.3s;
-  padding: 0.5rem 0;
-}
-
-.nav-link:hover {
-  color: var(--celeste);
-}
-
-/* Configuración */
-.config-container {
-  position: relative;
-  margin-left: auto;
-}
-
-.config-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.5rem;
-}
-
-.config-icon {
-  height: 24px;
-  width: 24px;
-  filter: invert(1);
-}
-
-.config-dropdown {
-  display: none;
-  position: absolute;
-  right: 0;
-  background: white;
-  min-width: 180px;
-  border-radius: 4px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  z-index: 1001;
-}
-
-.dropdown-item {
-  display: block;
-  padding: 0.75rem 1rem;
-  color: #333;
-  text-decoration: none;
-}
-
-.dropdown-item:hover {
-  background: #f5f5f5;
-}
-
-/* Menú hamburguesa */
-.hamburger-btn {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 30px;
-  height: 24px;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-}
-
-.hamburger-line {
-  width: 100%;
-  height: 3px;
-  background: white;
-  border-radius: 2px;
-}
-
-/* Header interior adicional */
-.header_nav--container {
-  background-color: var(--color-header);
-  color: white;
-  padding: 0.8rem 1rem;
-}
-
-/* Versión desktop del HEADER */
-@media (min-width: 768px) {
-  .main-nav {
-    display: block; /* Mostrar navbar en desktop */
-    flex: 1;
-    margin: 0 2rem;
-  }
-
-  .hamburger-btn {
-    display: none; /* Ocultar hamburguesa */
-  }
-
-  #materials{
-    color:white;
-  }
-
-  #materials:hover{
-    color: var(--celeste);
-  }
-}
-
-/* Versión móvil - menú activo */
-.menu-active .main-nav {
-  display: block;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 100%;
-  background: var(--color-header);
-  padding: 1rem;
-}
-
-.menu-active .nav-list {
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.config-active .config-dropdown {
-  display: block;
-}
 
 
 /*CONTENEDOR PRINCIPAL*/
@@ -256,19 +58,42 @@ body, html {
   display: none; /* Oculto en móvil por defecto */
 }
 
+/* Estilos para el enlace que envuelve el patient-item */
+/* ELIMINADO: .patient-item-link ya no se usa para envolver todo el item */
+
 .patient-item {
-  display: flex;
-  flex-direction: column;
+  display: flex; /* Mantenemos flex para el layout móvil por defecto */
+  flex-direction: column; /* Apilado en móvil */
   padding: 1rem;
   border-bottom: 1px solid #eee;
   gap: 0.5rem;
+  transition: background-color 0.2s ease; /* Transición suave para el hover */
 }
 
-.patient-info {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
+.patient-item:hover {
+  background-color: #f5f5f5; /* Color de fondo al pasar el ratón */
 }
+
+/* NUEVO: Estilos para el enlace que envuelve solo el nombre y el email */
+.patient-info-link {
+  text-decoration: none; /* Elimina el subrayado por defecto del enlace */
+  color: inherit; /* Hereda el color del texto de su padre */
+  display: flex; /* Permite que el nombre y el email estén en línea o en columna */
+  flex-direction: column; /* Para que nombre y email se apilen en móvil */
+  cursor: pointer; /* Cambia el cursor para indicar que es clicable */
+  /* Añadir un poco de padding o margen si es necesario para el área de clic */
+  padding: 0.2rem 0; /* Pequeño padding para el área clicable */
+}
+
+.patient-info-link:hover .patient-name {
+  text-decoration: underline; /* Subraya el nombre al pasar el ratón */
+}
+
+.patient-info-link .patient-email{
+  font-size: 0.97em; /* Tamaño de fuente más pequeño para el email */
+}
+
+
 
 .patient-name {
   flex: 1 1 100%;
@@ -312,21 +137,20 @@ body, html {
 }
 
 .assign-button:hover {
-  color: #079070;
-  background-color: white;
-  border: 0.5px solid #079070;
+  background-color: #15b992;
+  transition: 0.7s ease;
 }
 
 .notes-button {
-  background-color: #be8500;
+  background: var(--light-purple); /* Asumo que estas variables están definidas en algún lugar */
   color: white;
 }
 
 .notes-button:hover {
-  color: #e68a00;
-  background-color: white;
-  border: 0.5px solid #e68a00;
+  background: var(--purple); /* Asumo que estas variables están definidas en algún lugar */
+  transition: 0.7s ease;
 }
+
 
 .material-symbols-outlined {
   font-size: 1.2rem;
@@ -352,7 +176,7 @@ body, html {
 }
 
 
-/* Estilos para el modal */
+/* Estilos para el modal general (aplicado a showModal y showAssignAppointmentModal) */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -360,21 +184,22 @@ body, html {
   right: 0;
   bottom: 0;
   background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
+  display: none; /* CLAVE: Oculto por defecto */
   justify-content: center;
   align-items: center;
-  z-index: 1000;
+  z-index: 1050;
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
 }
 
 .modal-overlay.active {
+  display: flex; /* CLAVE: Visible cuando está activo */
   opacity: 1;
   visibility: visible;
 }
 
-.modal-content {
+.modal-content { /* Para los modales de "Registrar Paciente" y "Asignar Turno" */
   background-color: white;
   border-radius: 8px;
   width: 90%;
@@ -403,13 +228,18 @@ body, html {
   color: var(--color-header);
 }
 
-.close-btn {
+.close-btn { /* Para los modales de "Registrar Paciente" y "Asignar Turno" */
   background: none;
   border: none;
   font-size: 1.5rem;
   cursor: pointer;
-  color: #666;
+  color: #aaa;
+  font-weight: bold;
 }
+.close-btn:active {
+  color: #333;
+}
+
 
 .modal-body {
   padding: 1.5rem;
@@ -426,7 +256,8 @@ body, html {
   color: var(--color-header);
 }
 
-.form-group input {
+.form-group input,
+.form-group textarea.form-control {
   width: 100%;
   padding: 0.75rem;
   border: 1px solid #5f5e5e;
@@ -434,7 +265,8 @@ body, html {
   font-size: 1rem;
 }
 
-.form-group input:focus {
+.form-group input:focus,
+.form-group textarea.form-control:focus {
   outline: none;
   border-color: var(--celeste);
   box-shadow: 0 0 0 2px rgba(35, 122, 181, 0.2);
@@ -448,7 +280,10 @@ body, html {
   border-top: 1px solid #eee;
 }
 
-.btn-cancel, .btn-submit {
+/* ESTILOS DE BOTONES GENERALES PARA AMBOS MODALES (REGISTRAR Y NOTAS) */
+.btn-cancel {
+  background-color: #dc3545; /* Rojo más estándar */
+  color: white;
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 4px;
@@ -457,27 +292,23 @@ body, html {
   transition: all 0.3s ease;
 }
 
-.btn-cancel {
-  background-color: #a10c0c;
-  color: white;
-  border:1px solid white;
-}
-
 .btn-cancel:hover {
-  background-color: #f0f0f0;
-  color: #a10c0c;
-  border:1px solid #a10c0c;
+  background-color: #c82333; /* Rojo más oscuro al pasar el ratón */
 }
 
 .btn-submit {
-  background-color: #067a5e;
+  background-color: #28a745; /* Verde más estándar */
   color: white;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
 }
 
 .btn-submit:hover {
-  background-color: white;
-  border: 1px solid #067a5e;
-  color: #067a5e;
+  background-color: #218838; /* Verde más oscuro al pasar el ratón */
 }
 
 .button-container{
@@ -497,7 +328,7 @@ body, html {
   border-radius: 4px;
   cursor: pointer;
   font-size: 1rem;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.6s ease;
   margin-bottom: 1.5rem;
   margin-top: 0;
 }
@@ -506,16 +337,154 @@ body, html {
   background-color: var(--light-celeste);
 }
 
+
 .form-control{
   width: 100%;
   height: max-content;
   border-color: var(--color-header);
 }
 
+/* ---------------------------- */
+/* ESTILOS ESPECÍFICOS PARA EL MODAL DE REGISTRO DE PACIENTE */
+/* ---------------------------- */
+.register-patient-modal-content { /* Nueva clase para el modal de registro */
+  background-color: #f8f8f8; /* Un color de fondo ligeramente diferente */
+  border: 1px solid #ccc;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  max-width: 450px; /* Ancho similar al de notas */
+  padding: 1.5rem; /* Ajustar padding */
+}
+
+.register-patient-modal-content .modal-header {
+  background-color: var(--celeste); /* Color de encabezado similar al de notas */
+  color: white;
+  padding: 1rem 1.5rem;
+  border-bottom: none;
+  border-radius: 8px 8px 0 0;
+}
+
+.register-patient-modal-content .modal-header h2 {
+  color: white;
+  font-size: 1.2rem;
+}
+
+.register-patient-modal-content .close-btn {
+  color: white;
+}
+
+.register-patient-modal-content .close-btn:hover {
+  color: #eee;
+}
+
+.register-patient-modal-content .modal-body {
+  padding: 1.5rem;
+}
+
+.register-patient-modal-content .form-group label {
+  color: #333;
+}
+
+.register-patient-modal-content input[type="text"],
+.register-patient-modal-content input[type="tel"],
+.register-patient-modal-content input[type="email"] {
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  padding: 0.8rem;
+  font-size: 0.95rem;
+}
+
+.register-patient-modal-content input[type="text"]:focus,
+.register-patient-modal-content input[type="tel"]:focus,
+.register-patient-modal-content input[type="email"]:focus {
+  border-color: var(--celeste);
+  box-shadow: 0 0 0 0.2rem rgba(35, 122, 181, 0.25);
+}
+
+.register-patient-modal-content .modal-footer {
+  border-top: 1px solid #e9ecef;
+  padding-top: 1.5rem;
+}
+
+
+/* ---------------------------- */
+/* ESTILOS ESPECÍFICOS PARA EL MODAL DE NOTAS DE PACIENTE */
+/* ---------------------------- */
+.notes-modal-content { /* Clase específica para el modal de notas */
+  background-color: #f8f8f8; /* Un color de fondo ligeramente diferente */
+  border: 1px solid #ccc;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+  max-width: 450px; /* Un poco más ancho o más estrecho que otros si se desea */
+  padding: 1.5rem; /* Ajustar padding */
+}
+
+.notes-modal-content .modal-header {
+  background-color: var(--celeste); /* Color de encabezado diferente */
+  color: white;
+  padding: 1rem 1.5rem;
+  border-bottom: none; /* Eliminar borde inferior si no se desea */
+  border-radius: 8px 8px 0 0; /* Bordes redondeados en la parte superior */
+}
+
+.notes-modal-content .modal-header h2 {
+  color: white; /* Texto del título en blanco */
+  font-size: 1.2rem;
+}
+
+.notes-modal-content .close-btn {
+  color: white; /* Botón de cerrar en blanco */
+}
+
+.notes-modal-content .close-btn:hover {
+  color: #eee;
+}
+
+.notes-modal-content .modal-body {
+  padding: 1.5rem;
+}
+
+.notes-modal-content .form-group label {
+  color: #333; /* Color de las etiquetas */
+}
+
+.notes-modal-content .modal-display-info { /* Estilo para el nombre del paciente */
+  font-weight: bold;
+  color: #2c3e50; /* Color de texto más oscuro */
+  background-color: #e9ecef; /* Fondo suave */
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.notes-modal-content textarea.form-control {
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  padding: 0.8rem;
+  font-size: 0.95rem;
+  min-height: 120px; /* Altura mínima para el textarea */
+}
+
+.notes-modal-content textarea.form-control:focus {
+  border-color: var(--celeste);
+  box-shadow: 0 0 0 0.2rem rgba(35, 122, 181, 0.25);
+}
+
+.notes-modal-content .modal-footer {
+  border-top: 1px solid #e9ecef;
+  padding-top: 1.5rem;
+}
+
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
 /* MEDIA QUERIES - Versión Desktop */
 @media (min-width: 768px) {
   .main-container {
-      margin-top: 6rem; /* Ajusta según la altura de tu header en desktop */
+      margin-top: 6rem;
       padding: 2rem;
       max-width: 1200px;
       margin-left: auto;
@@ -523,74 +492,82 @@ body, html {
   }
   
   .patients-header {
-      display: flex;
+      display: grid; /* CAMBIO: Usar grid para el encabezado */
+      grid-template-columns: 2fr 3fr 1fr 2fr; /* Mismas columnas que .patient-item */
       padding: 1rem 1.5rem;
       background-color: #f8f9fa;
       border-bottom: 1px solid #eee;
       font-weight: bold;
-      gap: 1rem;
+      gap: 0.5rem; /* Ajustar el gap para que coincida con .patient-item */
+      align-items: center; /* Centrar verticalmente los textos del encabezado */
   }
   
   .patient-item {
-      flex-direction: row;
-      align-items: center;
-      padding: 1rem 1.5rem;
-      gap: 1rem;
+      display: grid; /* CAMBIO: Usar grid para las filas de pacientes */
+      grid-template-columns: 2fr 3fr 1fr 2fr; /* Name, Email, Phone, Actions */
+      align-items: center; /* Alinear verticalmente los elementos en la fila */
+      padding: 1rem;
+      border-bottom: 1px solid #eee;
+      gap: 0.5rem; /* Espacio entre columnas */
+      transition: background-color 0.2s ease; /* Transición suave para el hover */
   }
   
-  .patient-info {
-      flex: 1;
-      flex-wrap: nowrap;
-      align-items: center;
-      margin-bottom: 0;
+  .patient-info-link {
+      display: contents; /* CAMBIO: Hace que los hijos de .patient-info-link participen directamente en la cuadrícula del padre */
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+      padding: 0; /* Eliminar padding ya que display:contents lo ignora */
   }
-  
+
   .patient-name {
-      flex: 2;
-      min-width: 150px;
+      /* flex: 2; -- no longer needed */
+      font-weight: 500;
   }
   
   .patient-email {
-      flex: 3;
-      min-width: 200px;
-      font-size: 1em;
+      /* flex: 3; -- no longer needed */
+      color: #555;
+      font-size: 0.9em;
   }
   
   .patient-id {
-      flex: 1;
+      /* flex: 1; -- no longer needed */
+      color: #666;
       min-width: 100px;
       text-align: center;
   }
   
   .patient-actions {
-      flex: 2;
-      min-width: 200px;
-      margin-top: 0;
-      justify-content: flex-end;
+      /* flex: 2; -- no longer needed */
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0; /* Eliminar margen superior ya que ahora está en una fila */
+      justify-content: flex-end; /* Alinear acciones a la derecha */
   }
   
   /* Definición de columnas del header para que coincidan con los items */
   .header-name {
-      flex: 2;
+      /* flex: 2; -- no longer needed, handled by grid-template-columns */
       min-width: 150px;
       color: var(--color-header);
   }
   
   .header-email {
-      flex: 3;
+      /* flex: 3; -- no longer needed, handled by grid-template-columns */
       min-width: 200px;
       color: var(--color-header);
   }
   
   .header-id {
-      flex: 1;
+      /* flex: 1; -- no longer needed, handled by grid-template-columns */
       min-width: 100px;
       text-align: center;
       color: var(--color-header);
   }
   
   .header-actions {
-      flex: 2;
+      /* flex: 2; -- no longer needed, handled by grid-template-columns */
       min-width: 200px;
       text-align: center;
       color: var(--color-header);
@@ -605,5 +582,30 @@ body, html {
   .search-container {
     max-width: 600px;
     margin: 0 auto 2rem;
+  }
+
+  /* MODAL DE NOTAS (ESCRITORIO) */
+  .notes-modal-content,
+  .register-patient-modal-content { /* Aplicar estilos de escritorio a ambos */
+    margin: 8% auto;
+    width: 50%;
+    max-width: 500px;
+  }
+
+  .notes-modal-content .btn-submit,
+  .notes-modal-content .btn-cancel,
+  .register-patient-modal-content .btn-submit,
+  .register-patient-modal-content .btn-cancel { /* Aplicar estilos de botones de escritorio a ambos */
+    padding: 0.85rem 1.5rem;
+    font-size: 1rem;
+    flex-grow: 0;
+  }
+}
+
+@media (min-width: 992px) {
+  .notes-modal-content,
+  .register-patient-modal-content {
+    margin: 8% auto;
+    width: 50%;
   }
 }

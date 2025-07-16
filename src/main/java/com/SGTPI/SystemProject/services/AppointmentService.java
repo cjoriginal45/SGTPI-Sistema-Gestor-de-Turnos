@@ -390,7 +390,44 @@ public class AppointmentService {
         }
     }
 
+    @Transactional
+    public String setSessionNotes(String notes,Integer id) {
+        if(notes == null){
+            throw new IllegalArgumentException("No se puede ingresar un valor nulo");
+        }
 
+        if(id == null){
+            throw new IllegalStateException("id nulo");
+        }
+
+        Optional<Appointment> app = appRepository.findById(id);
+
+        if(app.isPresent()){
+            app.get().setSessionNotes(notes);
+            appRepository.save(app.get());
+            return app.get().getSessionNotes();
+        }
+
+        return "";
+    }
+
+
+    public String getSessionNotes(Integer id) {
+
+        if(id == null){
+            throw new IllegalArgumentException("id nulo");
+        }
+
+        Optional<Appointment> app = appRepository.findById(id);
+
+        if(app.isPresent()){
+            return app.get().getSessionNotes().toString();
+        }
+
+        return "";
+    }
+
+    /*
     @Scheduled(cron = "0 0 0 * * ?") // Se ejecuta a medianoche todos los días
     @Transactional // Asegura que la operación de actualización sea atómica
     public void markPastAppointmentsAsCompleted() {
@@ -414,6 +451,6 @@ public class AppointmentService {
             appRepository.save(appointment); // Guarda cada turno actualizado
         }
     }
-
+    */
 
 }

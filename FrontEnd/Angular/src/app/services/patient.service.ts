@@ -6,24 +6,29 @@ import { Patient } from '../interfaces/patient'
 import { PatientObservation } from '../interfaces/PatientObservation';
 import { AppointmentRequestDto } from '../interfaces/AppointmentRequestDto';
 import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
+import { environment } from '../environments/environment';
 
 
 @Injectable({
   providedIn: 'root'
-})export class PatientService {
-  private baseUrl = 'http://localhost:8080/SGTPI/api';
+})
+export class PatientService { // <-- ¡Asegúrate de que 'export' esté aquí!
+  private baseUrl = environment.apiBaseUrl;
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * Obtiene todos los pacientes del backend, ordenados alfabéticamente.
+   * @returns Una Promesa que resuelve con un array de pacientes.
+   */
   async getPatients(): Promise<Patient[]> {
     return new Promise((resolve, reject) => {
-      this.http.get<Patient[]>(`${this.baseUrl}/patients`) // Asegúrate de que este endpoint sea correcto
+      this.http.get<Patient[]>(`${this.baseUrl}/patients`)
         .pipe(
-          catchError(this.handleError<Patient[]>('getAllPatients', []))
+          catchError(this.handleError<Patient[]>('getPatients', []))
         )
         .subscribe({
           next: (patients: Patient[]) => {
-            // Ordena los pacientes por nombre y apellido
             const sortedPatients = patients.sort((a, b) => {
               const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
               const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();
@@ -39,21 +44,47 @@ import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
     });
   }
 
-  async updatePatient(patient: Patient): Promise<Patient | string> {
+  /**
+   * Obtiene los detalles de un paciente por su ID.
+   * @param id El ID del paciente.
+   * @returns Una Promesa que resuelve con el objeto Patient.
+   */
+  async getPatientById(id: number): Promise<Patient> {
+    return new Promise((resolve, reject) => {
+      this.http.get<Patient>(`${this.baseUrl}/patient/${id}`) // Asume endpoint /api/patient/{id}
+        .pipe(
+          catchError(this.handleError<Patient>('getPatientById'))
+        )
+        .subscribe({
+          next: (patient: Patient) => {
+            console.log(`Paciente con ID ${id} cargado:`, patient);
+            resolve(patient);
+          },
+          error: (err) => {
+            console.error(`Error al obtener paciente con ID ${id}:`, err);
+            reject(err);
+          }
+        });
+    });
+  }
+
+  /**
+   * Actualiza los datos de un paciente existente.
+   * @param patient El objeto Patient con los datos actualizados (debe incluir el ID).
+   * @returns Una Promesa que resuelve con el objeto Patient actualizado o un mensaje de éxito.
+   */
+  async updatePatient(patient: Patient): Promise<Patient> {
     if (patient.id === undefined || patient.id === null) {
       return Promise.reject(new Error('No se puede actualizar un paciente sin ID.'));
     }
     return new Promise((resolve, reject) => {
-      // Asume que tu backend tiene un endpoint PUT/PATCH para pacientes por ID
-      // y que devuelve el objeto Patient actualizado o un mensaje de texto.
-      this.http.put<Patient>(`${this.baseUrl}/patients/${patient.id}`, patient)
+      this.http.patch<Patient>(`${this.baseUrl}/patch-patient/${patient.id}`, patient)
         .pipe(
           catchError(this.handleError<Patient>('updatePatient'))
         )
         .subscribe({
           next: (response: Patient) => {
             console.log('Paciente actualizado exitosamente:', response);
-            // Puedes devolver el objeto paciente actualizado o un mensaje de éxito.
             resolve(response);
           },
           error: (err) => {
@@ -64,18 +95,19 @@ import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
     });
   }
 
+  /**
+   * Crea un nuevo paciente en el backend.
+   * @param patient El objeto Patient a crear.
+   * @returns Un Observable que emite el paciente creado.
+   */
   createPatient(patient: Patient): Observable<Patient> {
     return this.http.post<Patient>(`${this.baseUrl}/patient`, patient).pipe(
       catchError((error: HttpErrorResponse) => {
         console.error('Error completo:', error);
-        
-        // Mensaje más detallado según el tipo de error
         let errorMessage = 'Error desconocido';
         if (error.error instanceof ErrorEvent) {
-          // Error del lado del cliente
           errorMessage = `Error: ${error.error.message}`;
         } else {
-          // Error del backend
           if (error.status === 400) {
             errorMessage = 'Datos inválidos: ' + (error.error.message || JSON.stringify(error.error));
           } else if (error.status === 500) {
@@ -84,69 +116,77 @@ import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
             errorMessage = `Error ${error.status}: ${error.error.message || error.message}`;
           }
         }
-        
         return throwError(() => new Error(errorMessage));
       })
     );
   }
 
+  /**
+   * Manejador de errores HTTP genérico.
+   * @param operation Nombre de la operación que falló.
+   * @param result Valor opcional a devolver en caso de error.
+   * @returns Un Observable que emite un error.
+   */
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: HttpErrorResponse): Observable<T> => {
       let errorMessage = `Error en ${operation}: `;
       if (error.error instanceof ErrorEvent) {
         errorMessage += `Error del cliente o de red: ${error.error.message}`;
       } else {
-        errorMessage += `Código ${error.status}, Cuerpo: ${JSON.stringify(error.error)}`;
+        if (error.error && typeof error.error === 'object' && error.error.message) {
+          errorMessage = error.error.message;
+        } else if (typeof error.error === 'string' && error.error.length > 0) {
+          errorMessage = error.error;
+        } else {
+          errorMessage += `Código ${error.status}, Cuerpo: ${JSON.stringify(error.error)}`;
+        }
       }
       console.error(errorMessage);
-      // Re-lanza el error para que sea manejado por el componente que llamó al servicio
       return throwError(() => new Error(errorMessage));
     };
   }
 
 
+  /**
+   * Guarda una observación para un paciente.
+   * @param observation El objeto PatientObservation a guardar.
+   * @returns Un Observable que emite un mensaje de texto de éxito.
+   */
   savePatientObservation(observation: PatientObservation): Observable<string> {
-    // IMPORTANT: Specify responseType: 'text' because the backend returns a String.
     return this.http.post(`${this.baseUrl}/patient-observations`, observation, { responseType: 'text' }).pipe(
       catchError(error => {
         console.error('Error in savePatientObservation:', error);
-        // You might want to extract error.error if the backend sends structured error messages.
-        // For now, re-throw to propagate the error to the component.
-        throw error;
+        return throwError(() => new Error(error.error || 'Error al guardar la observación.'));
       })
     );
   }
 
+  /**
+   * Obtiene las observaciones de un paciente por su número de teléfono.
+   * @param phoneNumber El número de teléfono del paciente.
+   * @returns Un Observable que emite un array de PatientObservation.
+   */
   getPatientObservations(phoneNumber: string): Observable<PatientObservation[]> {
-    // 1. Explicitly set responseType to 'text'.
-    // 2. Do NOT put a generic type like <string> or <PatientObservation[]> directly after .get(),
-    //    as responseType handles the raw type. The 'map' operator will then handle the transformation.
     return this.http.get(`${this.baseUrl}/patient-observations/${phoneNumber}`, { responseType: 'text' }).pipe(
-      map(rawResponse => { // 'rawResponse' will now be correctly inferred as 'string' by TypeScript
-        // Add a runtime type check for extra safety, though TypeScript should prevent this error now.
+      map(rawResponse => {
         if (typeof rawResponse !== 'string') {
           console.error('ERROR: Expected string response but received:', rawResponse);
-          // If this happens, it means responseType: 'text' is not working as expected.
           return [];
         }
 
-        let observationText: string = rawResponse; // Explicitly cast for clarity, though not strictly needed now
+        let observationText: string = rawResponse;
 
-        
         if (observationText.startsWith('"') && observationText.endsWith('"') && observationText.length > 1) {
-          observationText = observationText.slice(1, -1); // Remove first and last character
-          console.log('DEBUG (Service Map): Stripped quotes. New observationText:', observationText);
-      }
+          observationText = observationText.slice(1, -1);
+        }
 
-        if (observationText.trim() !== '' && observationText !== 'null') { // .trim() is now safe
+        if (observationText.trim() !== '' && observationText !== 'null') {
           const obs: PatientObservation = {
             phoneNumber: phoneNumber,
             observations: observationText
           };
-          console.log('DEBUG (Service Map): Transformed to:', [obs]);
           return [obs];
         }
-        console.log('DEBUG (Service Map): No valid observation text received or it was null/empty. Returning empty array.');
         return [];
       }),
       catchError((error: HttpErrorResponse) => {
@@ -160,7 +200,11 @@ import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
     );
   }
 
-
+  /**
+   * Crea un nuevo turno.
+   * @param appointmentData Los datos del turno a crear.
+   * @returns Un Observable que emite el turno creado.
+   */
   createAppointment(appointmentData: AppointmentRequestDto): Observable<AppointmentResponseDto> {
     console.log('Service: Sending appointment data to backend:', appointmentData);
     return this.http.post<AppointmentResponseDto>(`${this.baseUrl}/appointment`, appointmentData).pipe(
@@ -169,30 +213,21 @@ import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
         let errorMessage = 'Error desconocido al crear el turno.';
 
         if (error.error instanceof ErrorEvent) {
-          // Client-side error (e.g., network error)
           errorMessage = `Error de red: ${error.error.message}`;
         } else if (typeof error.error === 'string' && error.status === 400) {
-          // Backend returned 400 with a plain string message (e.g., "Paciente no existe" or validation message)
           errorMessage = `Error al registrar turno: ${error.error}`;
         } else if (error.error && typeof error.error === 'object' && error.error.message) {
-            // Backend returned 400/500 with a JSON object that has a 'message' field
             errorMessage = `Error al registrar turno: ${error.error.message}`;
         }
         else if (error.status === 400) {
-          // General 400 Bad Request, could be a more complex object we're not handling specifically
           errorMessage = `Error al registrar turno: Datos de entrada inválidos.`;
         } else if (error.status === 500) {
-          // Backend returned 500 Internal Server Error
           errorMessage = `Error del servidor al registrar turno. Por favor, inténtelo de nuevo.`;
         } else {
-          // Any other HTTP error
           errorMessage = `Error ${error.status}: ${error.statusText || error.message}`;
         }
-        // Re-throw the error as a new Error object for the component to catch
         return throwError(() => new Error(errorMessage));
       })
     );
   }
-
-  
 }

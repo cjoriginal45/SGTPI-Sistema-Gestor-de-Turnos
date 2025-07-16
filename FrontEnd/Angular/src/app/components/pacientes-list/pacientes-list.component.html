@@ -6,7 +6,7 @@
     [class.active]="showModal()"
     (click)="closeModal()"
   >
-    <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-content register-patient-modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
         <h2>Registrar Nuevo Paciente</h2>
         <button class="close-btn" (click)="closeModal()">&times;</button>
@@ -60,7 +60,6 @@
 
   <div
     class="modal-overlay"
-    
     [class.active]="showAssignAppointmentModal()"
     (click)="closeAssignAppointmentModal()"
   >
@@ -127,16 +126,16 @@
     [class.active]="showAddNotesModal()"
     (click)="closeAddNotesModal()"
   >
-    <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-content notes-modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Agregar Notas</h2>
+        <h2>Notas del Paciente</h2>
         <button class="close-btn" (click)="closeAddNotesModal()">&times;</button>
       </div>
       <div class="modal-body">
         <form (submit)="saveNotes()">
           <div class="form-group">
             <label>Paciente:</label>
-            <span>{{ selectedPatientForNotes()?.firstName }} {{ selectedPatientForNotes()?.lastName }}</span>
+            <p class="modal-display-info">{{ selectedPatientForNotes()?.firstName }} {{ selectedPatientForNotes()?.lastName }}</p>
           </div>
 
           <div class="form-group">
@@ -197,10 +196,13 @@
           ¡Haz clic para registrar el primer paciente!
         </button>
       </div>
+      <!-- CAMBIO: routerLink ahora envuelve solo el nombre y el email -->
       <div class="patient-item" *ngFor="let patient of filteredPatients()">
-        <div class="patient-name">{{ patient.firstName +" "+patient.lastName}}</div>
-        <div class="patient-email">{{ patient.email }}</div>
-        <div class="patient-id">{{ patient.phoneNumber }}</div>
+        <a [routerLink]="['/patient-details', patient.id]" class="patient-info-link">
+          <div class="patient-name">{{ patient.firstName +" "+patient.lastName}}</div>
+          <div class="patient-email">{{ patient.email }}</div>
+          <div class="patient-id">{{ patient.phoneNumber }}</div>
+        </a>
         <div class="patient-actions">
           <button
             class="action-button assign-button"

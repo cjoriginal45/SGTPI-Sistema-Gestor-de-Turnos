@@ -14,7 +14,7 @@ public record AppointmentRequestDto(
         @JsonProperty("duration")
         int duration,
         @JsonProperty("fecha")
-        @JsonFormat(pattern = "yyyy/MM/dd")
+        @JsonFormat(pattern = "yyyy-MM-dd")
         @Future(message = "La fecha debe ser futura")        
         LocalDate  fecha,
         @JsonProperty("hora")

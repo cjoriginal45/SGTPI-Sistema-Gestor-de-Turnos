@@ -7,72 +7,34 @@ import { catchError } from 'rxjs/operators';
 import { isPlatformBrowser } from '@angular/common';
 import { environment } from '../environments/environment'; // Adjust path if necessary
 import { Patient } from '../interfaces/patient'; // Import Patient interface
+import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
+import { AppointmentRequestDto } from '../interfaces/AppointmentRequestDto';
 
-// --- DTO INTERFACES ---
-// These interfaces represent the structure of data sent to and received from the backend.
-// If you have them in separate files (e.g., src/app/interfaces/appointment-dtos.ts),
-// you can delete these definitions and keep only their imports.
 
-// --- DTO INTERFACES ---
-// ACTUALIZACIÓN CLAVE AQUÍ: Añadir firstName, lastName, email a AppointmentPatientDto
 export interface AppointmentPatientDto {
   id?: number; // Added id for existing patients
-  firstName: string; // <-- AÑADIDO
-  lastName: string;  // <-- AÑADIDO
+  firstName: string;
+  lastName: string;
   phoneNumber: string;
-  email: string;     // <-- AÑADIDO
+  email: string;
 }
-
-export interface AppointmentRequestDto {
-  duration: number; // Appointment duration (e.g., in minutes)
-  fecha: string;    // Format 'YYYY/MM/DD'
-  hora: string;     // Format 'HH:mm:ss'
-  patient: Patient; // Nested DTO for the patient
-  state: string;
-  sessionNotes?: string; // NEW FIELD: Session observations!
-}
-
-export interface AppointmentResponseDto {
-  id: number;
-  patientName: string;
-  patientLastName: string;
-  patientPhoneNumber: string;
-  patientEmail: string;
-  fecha: string; // Date in backend format (e.g., 'YYYY/MM/DD')
-  hora: string;  // Time in backend format (e.g., 'HH:mm:ss')
-  state: string;
-  duration: number; // Duration in minutes
-  notes?: string; // Optional field for additional notes (if backend returns it)
-  creationDate?: string; // Creation date from backend (for compatibility)
-  modificationDate?: string; // Modification date from backend (for compatibility)
-}
-// --- END DTO INTERFACES ---
-
 
 // --- UPDATED Turno INTERFACE ---
-// This interface represents the internal structure of an 'appointment' in your Angular application.
-// It combines data from generated time slots (DISPONIBLE) and backend (CONFIRMADO/BLOQUEADO).
 export interface Turno {
-  id: string; // Frontend-friendly ID: 'slot-...' or 'backend-{apiId}'
-  apiId?: number; // The actual numeric backend ID for confirmed/blocked appointments
-
-  hora: string; // HH:mm format for display (e.g., '09:00')
-  fecha: string; // YYYY-MM-DD format for Date object creation and comparison
-
+  id: string;
+  apiId?: number | null;
+  hora: string;
+  fecha: string;
   estado: 'DISPONIBLE' | 'CONFIRMADO' | 'BLOQUEADO' | 'CANCELADO' | 'REALIZADO' | 'EN_CURSO';
-
-  // Patient details (only for CONFIRMADO and CANCELADO)
-  paciente?: string; // Full name: patientName + patientLastName
-  telefono?: string;
-  email?: string; // New: from patientEmail
-  duracion: number; // Appointment duration
-
-  fechaCreacion?: Date; // Timestamp when this appointment was created/loaded in frontend
-  fechaModificacion?: Date; // Timestamp of last modification in backend
-  observaciones?: string; // Corresponds to sessionNotes in the backend Request DTO
+  paciente?: string | null;
+  telefono?: string | null;
+  email?: string | null;
+  duracion: number;
+  fechaCreacion?: Date | null;
+  fechaModificacion?: Date | null;
+  observaciones?: string | null;
 }
 // --- END UPDATED Turno INTERFACE ---
-
 
 @Injectable({
   providedIn: 'root',
@@ -90,6 +52,9 @@ export class TurnosService {
   public fechaSeleccionadaSignal = signal<Date>(new Date());
 
   public notificaciones = new Subject<{ tipo: 'success' | 'error' | 'info'; mensaje: string }>();
+
+  private pollingInterval: any;
+
 
   public turnosPorPeriodo = computed(() => {
     const turnosDelDia = this.turnosSignal();
@@ -111,6 +76,7 @@ export class TurnosService {
 
   constructor() {
     this.cargarTurnos(this.fechaSeleccionadaSignal());
+    // this.startPollingForInProgressAppointments(); // <-- COMENTAR O ELIMINAR ESTA LÍNEA
   }
 
   // --- Auxiliary Methods ---
@@ -140,13 +106,13 @@ export class TurnosService {
   public async refreshCurrentDayAppointments(): Promise<void> {
     const currentSelectedDate = this.fechaSeleccionadaSignal();
     const dateIsoFormat = this.formatearFecha(currentSelectedDate);
-    console.log(`[TurnosService] Refreshing appointments for current date: ${dateIsoFormat}`);
+    console.log(`[TurnosService] Refrescando turnos para la fecha actual: ${dateIsoFormat}`);
     await this.getTurnosPorFecha(dateIsoFormat);
   }
 
   seleccionarFecha(fecha: Date) {
     const normalizedDate = new Date(fecha);
-    normalizedDate.setHours(0, 0, 0, 0); // Normalize date to midnight to avoid timezone issues
+    normalizedDate.setHours(0, 0, 0, 0);
     this.fechaSeleccionadaSignal.set(normalizedDate);
     this.cargarTurnos(normalizedDate);
   }
@@ -166,9 +132,8 @@ export class TurnosService {
           next: (backendResponses: AppointmentResponseDto[]) => {
             console.log('[getTurnosPorFecha] Raw Backend Responses:', backendResponses);
 
-            // Ensure the target date is correct to generate the base schedule
-            const targetDate = new Date(dateIsoFormat + 'T12:00:00'); // Use T12:00:00 to avoid DST issues
-            console.log('[getTurnosPorFecha] Date object passed to generateTurnosParaFecha:', targetDate);
+            const targetDate = new Date(dateIsoFormat + 'T12:00:00');
+            console.log('[getTurnosPorFecha] Date object passed to generarTurnosParaFecha:', targetDate);
 
             const fullDaySchedule = this.generarTurnosParaFecha(targetDate);
             console.log('[getTurnosPorFecha] Frontend Base Schedule:', fullDaySchedule);
@@ -176,43 +141,37 @@ export class TurnosService {
             const mergedSchedule: Turno[] = fullDaySchedule.map(slot => {
               const foundResponse = backendResponses.find(
                 backendRes => {
-                  // Normalize formats for comparison
-                  const backendFechaFormatted = backendRes.fecha.replace(/\//g, '-'); // Ensure YYYY-MM-DD
-                  const backendHoraFormatted = backendRes.hora.substring(0, 5); // Ensure HH:mm
+                  const backendFechaFormatted = backendRes.fecha.replace(/\//g, '-');
+                  const backendHoraFormatted = backendRes.hora.substring(0, 5);
 
                   return backendFechaFormatted === slot.fecha && backendHoraFormatted === slot.hora;
                 }
               );
 
               if (foundResponse) {
-                console.log(`  [getTurnosPorFecha] MATCH FOUND for slot ${slot.hora}. Merging with backend ID: ${foundResponse.id}`);
+                console.log(`  [getTurnosPorFecha] COINCIDENCIA ENCONTRADA para el slot ${slot.hora}. Fusionando con ID de backend: ${foundResponse.id}`);
                 return {
                   ...slot,
-                  id: `backend-${foundResponse.id}`, // Frontend ID
-                  apiId: foundResponse.id, // Actual backend ID
+                  id: `backend-${foundResponse.id}`,
+                  apiId: foundResponse.id,
                   estado: foundResponse.state as Turno['estado'],
-                  // Combine first and last name for 'paciente' field
-                  paciente: `${foundResponse.patientName || ''} ${foundResponse.patientLastName || ''}`.trim(),
-                  telefono: foundResponse.patientPhoneNumber || undefined,
-                  email: foundResponse.patientEmail || undefined,
+                  paciente: `${foundResponse.patientName || ''} ${foundResponse.patientLastName || ''}`.trim() || null,
+                  telefono: foundResponse.patientPhoneNumber || null,
+                  email: foundResponse.patientEmail || null,
                   duracion: foundResponse.duration || slot.duracion,
-                  // Ensure creation/modification dates are Date objects
-                  fechaCreacion: foundResponse.creationDate ? new Date(foundResponse.creationDate) : undefined, // Can be string from backend
-                  fechaModificacion: foundResponse.modificationDate ? new Date(foundResponse.modificationDate) : undefined, // Can be string from backend
-                  observaciones: foundResponse.notes || undefined // Map notes to observaciones
+                  observaciones: foundResponse.notes || null
                 };
               }
-              return slot; // If no backend response, use the base slot (DISPONIBLE or BLOQUEADO by default)
+              return slot;
             });
 
-            console.log('[getTurnosPorFecha] Final Merged Schedule (to be set in signal):', mergedSchedule);
+            console.log('[getTurnosPorFecha] Final Merged Schedule (a ser establecido en la señal):', mergedSchedule);
             this.turnosSignal.set(mergedSchedule);
             this.loading.set(false);
             resolve(mergedSchedule);
           },
           error: (err) => {
-            // Error is already handled by the pipe(catchError(...))
-            console.error('[getTurnosPorFecha] Error in subscription (already handled by catchError):', err);
+            console.error('[getTurnosPorFecha] Error en la suscripción (already handled by catchError):', err);
             reject(err);
           }
         });
@@ -226,25 +185,25 @@ export class TurnosService {
 
   private generarTurnosParaFecha(fecha: Date): Turno[] {
     const fechaStr = this.formatearFecha(fecha);
-    const diaSemana = fecha.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-    const diaMes = fecha.getDate(); // Day of the month (not used for rules for now)
+    const diaSemana = fecha.getDay();
+    const diaMes = fecha.getDate();
 
     const turnosBase = this.generarTurnosBase(diaSemana, diaMes);
 
     return turnosBase.map((turno): Turno => {
       return {
-        id: `base-slot-${fechaStr}-${turno.hora}`, // Unique frontend ID
+        id: `base-slot-${fechaStr}-${turno.hora}`,
         fecha: fechaStr,
         hora: turno.hora,
         estado: turno.estado,
-        paciente: turno.paciente || undefined,
-        telefono: turno.telefono || undefined,
-        email: turno.email || undefined,
+        paciente: turno.paciente || null,
+        telefono: turno.telefono || null,
+        email: turno.email || null,
         duracion: turno.duracion || 50,
-        fechaCreacion: new Date(), // Assign current date upon generation
-        fechaModificacion: undefined,
-        observaciones: undefined,
-        apiId: undefined // Initially no backend ID
+        fechaCreacion: new Date(),
+        fechaModificacion: null,
+        observaciones: null,
+        apiId: null
       };
     });
   }
@@ -257,7 +216,6 @@ export class TurnosService {
     email?: string;
     duracion?: number;
   }> {
-    // Define the base list of available times for any day.
     const weekdayTurnos: Array<{ hora: string; estado: any; paciente?: string; telefono?: string; email?: string; duracion?: number; }> = [
       { hora: '08:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '09:00', estado: 'DISPONIBLE', duracion: 50 },
       { hora: '10:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '11:00', estado: 'DISPONIBLE', duracion: 50 },
@@ -269,15 +227,13 @@ export class TurnosService {
       { hora: '22:00', estado: 'DISPONIBLE', duracion: 50 }
     ];
 
-    // Logic to block weekends (Sunday = 0, Saturday = 6)
     if (diaSemana === 0 || diaSemana === 6) {
-      console.log(`[generarTurnosBase] Blocking all appointments for the weekend (Day: ${diaSemana}).`);
+      console.log(`[generarTurnosBase] Bloqueando todos los turnos para el fin de semana (Día: ${diaSemana}).`);
       return weekdayTurnos.map(t => ({ ...t, estado: 'BLOQUEADO' }));
     }
 
-    // Logic to block specific times on Wednesdays (diaSemana === 3)
     if (diaSemana === 3) {
-      console.log(`[generarTurnosBase] Blocking appointments from 15:00 to 18:00 for Wednesday.`);
+      console.log(`[generarTurnosBase] Bloqueando turnos de 15:00 a 18:00 para el miércoles.`);
       return weekdayTurnos.map(t => {
         if (['15:00', '16:00', '17:00', '18:00'].includes(t.hora)) {
           return { ...t, estado: 'BLOQUEADO' };
@@ -286,18 +242,12 @@ export class TurnosService {
       });
     }
 
-    // If not weekend or Wednesday, return appointments as is (DISPONIBLE).
     console.log(`[generarTurnosBase] Available appointments for a normal day.`);
     return weekdayTurnos;
   }
 
   // --- CRUD Operations (Create, Read, Update, Delete) ---
 
-  /**
-   * Creates a new appointment in the backend.
-   * @param requestDto The AppointmentRequestDto with the data to create.
-   * @returns A Promise with the created AppointmentResponseDto.
-   */
   async createAppointment(requestDto: AppointmentRequestDto): Promise<AppointmentResponseDto> {
     this.loading.set(true);
     this.error.set(null);
@@ -311,7 +261,7 @@ export class TurnosService {
             console.log('[createAppointment] Appointment created successfully:', response);
             this.notificaciones.next({ tipo: 'success', mensaje: `Turno asignado exitosamente (ID: ${response.id}).` });
             this.loading.set(false);
-            await this.refreshCurrentDayAppointments(); // Refresh to reflect changes
+            await this.refreshCurrentDayAppointments();
             resolve(response);
           },
           error: (err: HttpErrorResponse) => {
@@ -323,35 +273,28 @@ export class TurnosService {
     });
   }
 
-  /**
-   * Saves or updates an appointment in the backend.
-   * @param turno The Turno object with data to save/update.
-   * @param patientData The complete Patient object selected from the list.
-   * @returns A Promise with a success message.
-   */
   async saveOrUpdateAppointment(turno: Turno, patientData: Patient): Promise<string> {
     this.loading.set(true);
     this.error.set(null);
 
-    // Use Patient object data directly
-    const patientDto: AppointmentPatientDto  = {
-      id: patientData.id, // Ensure ID is sent for existing patients
+    const patientDto: AppointmentPatientDto = {
+      id: patientData.id,
       firstName: patientData.firstName,
       lastName: patientData.lastName,
       phoneNumber: patientData.phoneNumber,
-      email: patientData.email || '' // Ensure email is always a string
+      email: patientData.email || ''
     };
 
-    const formattedFechaForRequest = turno.fecha.replace(/-/g, '/'); // Format YYYY/MM/DD for backend
-    const formattedHoraForRequest = `${turno.hora}:00`; // Format HH:mm:ss
+    const formattedFechaForRequest = turno.fecha.replace(/-/g, '/');
+    const formattedHoraForRequest = `${turno.hora}:00`;
 
     const requestDto: AppointmentRequestDto = {
       duration: turno.duracion || 50,
       fecha: formattedFechaForRequest,
       hora: formattedHoraForRequest,
-      patient: patientDto, // Pass the patient DTO
+      patient: patientDto,
       state: turno.estado,
-      sessionNotes: turno.observaciones || '' // Map observations to sessionNotes
+      sessionNotes: turno.observaciones || ''
     };
 
     console.log('[saveOrUpdateAppointment] --- REQUEST START ---');
@@ -361,17 +304,14 @@ export class TurnosService {
 
 
     return new Promise((resolve, reject) => {
-      // Determine if it's an update (PATCH) or a creation (POST)
       let apiCall: Observable<string | AppointmentResponseDto>;
       let requestUrl: string;
 
       if (turno.apiId !== undefined && turno.apiId !== null) {
-        // For PATCH, the Observable will emit a string
         requestUrl = `${this.API_BASE_URL}/patch-appointment/${turno.apiId}`;
         apiCall = this.http.patch(requestUrl, requestDto, { responseType: 'text' });
         console.log(`[saveOrUpdateAppointment] Performing PATCH to: ${requestUrl}`);
       } else {
-        // For POST, the Observable will emit an AppointmentResponseDto
         requestUrl = `${this.API_BASE_URL}/appointment`;
         apiCall = this.http.post<AppointmentResponseDto>(requestUrl, requestDto);
         console.log(`[saveOrUpdateAppointment] Performing POST to: ${requestUrl}`);
@@ -383,7 +323,6 @@ export class TurnosService {
           let successMessage: string;
 
           if (typeof response === 'string') {
-            // PATCH case (patch-appointment), where we expect text
             try {
               const parsedResponse = JSON.parse(response);
               successMessage = parsedResponse.text || 'Turno modificado exitosamente.';
@@ -392,13 +331,12 @@ export class TurnosService {
               successMessage = response;
             }
           } else {
-            // POST case (appointment), where we expect an AppointmentResponseDto object
             successMessage = `Turno asignado exitosamente (ID: ${response.id}).`;
           }
 
           this.notificaciones.next({ tipo: 'success', mensaje: successMessage });
           this.loading.set(false);
-          await this.refreshCurrentDayAppointments(); // Refresh to reflect changes
+          await this.refreshCurrentDayAppointments();
           resolve(successMessage);
           console.log('[saveOrUpdateAppointment] --- REQUEST SUCCESSFUL END ---');
         },
@@ -412,11 +350,6 @@ export class TurnosService {
     });
   }
 
-  /**
-   * Cancels an existing appointment.
-   * @param id The backend ID of the appointment.
-   * @returns A Promise with a success message.
-   */
   async cancelAppointment(id: number): Promise<string> {
     this.loading.set(true);
     this.error.set(null);
@@ -438,24 +371,18 @@ export class TurnosService {
             this.notificaciones.next({ tipo: 'success', mensaje: successMessage });
             this.loading.set(false);
 
-            // *** OPTIMISTIC UI UPDATE FOR CANCELLATION ***
             this.turnosSignal.update(currentTurnos => {
               return currentTurnos.map(turno => {
-                if (turno.apiId === id) { // Match by apiId (backend ID)
-                  // Update status to 'CANCELADO' and keep patient data for display
+                if (turno.apiId === id) {
                   return {
                     ...turno,
                     estado: 'CANCELADO',
-                    // Important: Do not delete patient data here (name, phone, email, observations)
-                    // so they continue to show in the interface as "Canceled (Patient Name)".
-                    // Deletion of this data will occur with refresh if the backend does not send them for canceled ones.
                   };
                 }
                 return turno;
               });
             });
 
-            // Full refresh to synchronize with backend data and confirm changes
             await this.refreshCurrentDayAppointments();
             console.log(`[cancelAppointment] Refresh completed after successful cancellation.`);
             resolve(successMessage);
@@ -469,12 +396,6 @@ export class TurnosService {
     });
   }
 
-  /**
-   * Blocks or unblocks a time slot.
-   * @param slotTime The exact date and time of the slot.
-   * @param block Boolean: true to block, false to unblock.
-   * @returns A Promise with a success message.
-   */
   async toggleBlock(slotTime: Date, block: boolean): Promise<string> {
     this.loading.set(true);
     this.error.set(null);
@@ -485,13 +406,11 @@ export class TurnosService {
     const hours = slotTime.getHours().toString().padStart(2, '0');
     const minutes = slotTime.getMinutes().toString().padStart(2, '0');
     const seconds = slotTime.getSeconds().toString().padStart(2, '0');
-    // Format required by the backend for the URL
     const formattedSlotTime = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 
     console.log(`[toggleBlock] Attempting to ${block ? 'block' : 'unblock'} time slot for: ${formattedSlotTime}`);
 
     return new Promise((resolve, reject) => {
-      // PUT request to the block/unblock endpoint. We expect a text response.
       this.http.put(`${this.API_BASE_URL}/appointments/${formattedSlotTime}/${block}`, {}, { responseType: 'text' })
         .subscribe({
           next: async (rawResponseText: string) => {
@@ -499,16 +418,13 @@ export class TurnosService {
 
             let successMessage: string;
             try {
-              // Try to parse the response as JSON (backend might send { "text": "Message" })
               const parsedResponse = JSON.parse(rawResponseText);
               if (parsedResponse && typeof parsedResponse === 'object' && 'text' in parsedResponse) {
                 successMessage = parsedResponse.text;
               } else {
-                // Fallback if parsed but no 'text' property
                 successMessage = block ? 'Horario bloqueado exitosamente.' : 'Horario desbloqueado exitosamente.';
               }
             } catch (e) {
-              // If JSON.parse fails (e.g., backend sent plain text)
               console.warn(`[toggleBlock] Failed to parse JSON response. Treating as plain text. Error:`, e);
               successMessage = rawResponseText || (block ? 'Horario bloqueado exitosamente.' : 'Horario desbloqueado exitosamente.');
             }
@@ -516,7 +432,6 @@ export class TurnosService {
             this.notificaciones.next({ tipo: 'success', mensaje: successMessage });
             this.loading.set(false);
 
-            // *** OPTIMISTIC UI UPDATE FOR BLOCK/UNBLOCK ***
             const targetDateStr = this.formatearFecha(slotTime);
             const targetTimeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 
@@ -524,18 +439,31 @@ export class TurnosService {
               return currentTurnos.map(turno => {
                 if (turno.fecha === targetDateStr && turno.hora === targetTimeStr) {
                   if (block) {
-                    // If blocked, clear patient data and apiId
-                    return { ...turno, estado: 'BLOQUEADO', paciente: undefined, telefono: undefined, email: undefined, observaciones: undefined, apiId: undefined };
+                    return {
+                      ...turno,
+                      estado: 'BLOQUEADO',
+                      paciente: null,
+                      telefono: null,
+                      email: null,
+                      observaciones: null,
+                      apiId: null
+                    };
                   } else {
-                    // If unblocked, set to DISPONIBLE and clear apiId if it was explicitly blocked
-                    return { ...turno, estado: 'DISPONIBLE', paciente: undefined, telefono: undefined, email: undefined, observaciones: undefined, apiId: undefined };
+                    return {
+                      ...turno,
+                      estado: 'DISPONIBLE',
+                      paciente: null,
+                      telefono: null,
+                      email: null,
+                      observaciones: null,
+                      apiId: null
+                    };
                   }
                 }
                 return turno;
               });
             });
 
-            // Full refresh to synchronize with backend data
             await this.refreshCurrentDayAppointments();
             console.log(`[toggleBlock] Refresh completed after successful operation.`);
             resolve(successMessage);
@@ -543,13 +471,12 @@ export class TurnosService {
           error: (err: HttpErrorResponse) => {
             console.error(`[toggleBlock] ERROR - error block! HttpErrorResponse:`, err);
 
-            // Handle specific errors, such as trying to unblock something that doesn't exist
             if (err.status === 400 && err.error && typeof err.error === 'object' && 'text' in err.error) {
               const serverMessage = err.error.text;
-              this.handleError(err, 'toggleBlock', serverMessage); // Use server message
-              reject(new Error(serverMessage)); // Reject with specific server message
+              this.handleError(err, 'toggleBlock', serverMessage);
+              reject(new Error(serverMessage));
             } else {
-              this.handleError(err, 'toggleBlock'); // General error handling
+              this.handleError(err, 'toggleBlock');
               reject(err);
             }
           }
@@ -557,7 +484,6 @@ export class TurnosService {
     });
   }
 
-  // --- Generalized HTTP Error Handler ---
   /**
    * Handles HTTP errors and notifies the user.
    * @param error The HttpErrorResponse object.
@@ -567,43 +493,197 @@ export class TurnosService {
    */
   private handleError<T>(error: HttpErrorResponse, operation = 'operation', customMessage?: string): Observable<T> {
     let errorMessage = `Error en ${operation}: `;
-    let userDisplayMessage: string;
+    let userDisplayMessage: string = 'Ocurrió un error inesperado. Por favor, intente de nuevo.';
 
     if (isPlatformBrowser(this.platformId)) {
       if (error.error instanceof ErrorEvent) {
-        // Client-side or network error
         errorMessage += `Error del cliente o de red: ${error.error.message}`;
         userDisplayMessage = 'Hubo un problema de conexión. Intente de nuevo.';
       } else {
-        // Backend error (non-2xx status codes)
-        const backendErrorBody = typeof error.error === 'string' ? error.error : JSON.stringify(error.error);
+        let backendErrorBody: string;
+        if (typeof error.error === 'string') {
+          backendErrorBody = error.error;
+        } else if (error.error === null || error.error === undefined) {
+          backendErrorBody = 'No se proporcionaron detalles de error desde el backend.';
+        } else if (typeof error.error === 'object') {
+          try {
+            backendErrorBody = JSON.stringify(error.error);
+          } catch (e) {
+            backendErrorBody = `Error de backend (objeto no serializable): ${String(error.error)}`;
+          }
+        } else {
+          backendErrorBody = `Tipo de error de backend inesperado: ${String(error.error)}`;
+        }
         errorMessage += `Código ${error.status}, Cuerpo: ${backendErrorBody}`;
 
-        // --- Lógica añadida para manejar el conflicto de horario ---
         if (error.status === 409 && typeof error.error === 'string' && error.error.includes('La fecha y hora seleccionadas ya están ocupadas')) {
           userDisplayMessage = '¡Conflicto de horario! La fecha y hora seleccionadas ya están ocupadas por otro turno.';
-        } else if (customMessage) { // Prioritize custom message if provided
+        } else if (customMessage) {
           userDisplayMessage = customMessage;
-        } else if (error.error && typeof error.error === 'object' && 'message' in error.error) { // Check for 'message' property
-          userDisplayMessage = (error.error as any).message; // Cast to any to access message
+        } else if (error.error && typeof error.error === 'object' && 'message' in error.error) {
+          userDisplayMessage = String((error.error as any).message || 'Error del servidor sin mensaje específico.');
         } else if (typeof error.error === 'string' && error.error.length > 0) {
           userDisplayMessage = error.error;
-        } else {
-          userDisplayMessage = `Error ${error.status}: Ocurrió un problema en el servidor.`;
         }
       }
     } else {
-      // Server-side (SSR) or non-browser environment
-      errorMessage += `Código ${error.status}, Cuerpo: ${JSON.stringify(error.error)}`;
+      let backendErrorBody: string;
+      if (typeof error.error === 'string') {
+        backendErrorBody = error.error;
+      } else if (error.error === null || error.error === undefined) {
+        backendErrorBody = 'No se proporcionaron detalles de error desde el backend (SSR).';
+      } else if (typeof error.error === 'object') {
+        try {
+          backendErrorBody = JSON.stringify(error.error);
+        } catch (e) {
+          backendErrorBody = `Error de backend (objeto no serializable SSR): ${String(error.error)}`;
+        }
+      } else {
+        backendErrorBody = `Tipo de error de backend inesperado (SSR): ${String(error.error)}`;
+      }
+      errorMessage += `Código ${error.status}, Cuerpo: ${backendErrorBody}`;
       userDisplayMessage = `Error ${error.status}: Ocurrió un problema en el servidor.`;
     }
 
-    console.error(errorMessage);
-    this.error.set(userDisplayMessage);
-    this.notificaciones.next({ tipo: 'error', mensaje: userDisplayMessage });
+    if (userDisplayMessage.trim() === '') {
+        userDisplayMessage = 'Ocurrió un error inesperado. Por favor, intente de nuevo.';
+    }
 
-    // Throw the error so subscribers can handle it
+    // console.error(errorMessage); // Comentar esta línea para ver si el error desaparece
+    // this.error.set(userDisplayMessage); // Comentar esta línea también
+    // this.notificaciones.next({ tipo: 'error', mensaje: userDisplayMessage }); // Comentar esta línea también
+
     return throwError(() => new Error(userDisplayMessage));
   }
 
+  // --- NEW POLLING METHODS ---
+  public startPollingForInProgressAppointments(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval); // Clear any existing interval
+    }
+    // Poll every 30 seconds (adjust as needed)
+    this.pollingInterval = setInterval(async () => {
+      console.log('[TurnosService] Polling for in-progress appointments...');
+      if (isPlatformBrowser(this.platformId)) {
+        await this.refreshCurrentDayAppointments();
+      }
+    }, 30000); // 30 seconds
+  }
+
+  public stopPollingForInProgressAppointments(): void {
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+      console.log('[TurnosService] Stopped polling for in-progress appointments.');
+    }
+  }
+
+  /**
+   * Obtiene el historial de turnos para un paciente específico.
+   * @param patientId El ID del paciente.
+   * @returns Una Promesa que resuelve con un array de AppointmentResponseDto.
+   */
+  async getAppointmentsByPatientId(patientId: number): Promise<AppointmentResponseDto[]> {
+    this.loading.set(true);
+    this.error.set(null);
+    console.log(`[TurnosService] Solicitando historial de turnos para paciente ID: ${patientId}`);
+
+    return new Promise((resolve, reject) => {
+      this.http.get<AppointmentResponseDto[]>(`${this.API_BASE_URL}/appointments/patient/${patientId}`)
+        .pipe(
+          catchError(error => this.handleError<AppointmentResponseDto[]>(error, 'getAppointmentsByPatientId'))
+        )
+        .subscribe({
+          next: (appointments: AppointmentResponseDto[]) => {
+            console.log(`Historial de turnos para paciente ID ${patientId}:`, appointments);
+            this.loading.set(false);
+            resolve(appointments);
+          },
+          error: (err) => {
+            console.error(`Error al obtener historial de turnos para paciente ID ${patientId}:`, err);
+            this.loading.set(false);
+            reject(err);
+          }
+        });
+    });
+  }
+
+/**
+   * Actualiza las notas de sesión de un turno específico.
+   * Utiliza la nueva API: PATCH /session-notes/{id}
+   * @param appointmentId El ID del turno.
+   * @param notes Las nuevas notas de sesión.
+   * @returns Una Promesa que resuelve cuando las notas se han guardado.
+   */
+async updateAppointmentNotes(appointmentId: number, notes: string): Promise<void> {
+  this.loading.set(true);
+  this.error.set(null);
+  console.log(`[TurnosService] Actualizando notas para turno ID ${appointmentId} con API: /session-notes/{id}`);
+
+  return new Promise((resolve, reject) => {
+    // El backend espera el cuerpo como un String directamente, no un objeto JSON con una propiedad.
+    // Por lo tanto, enviamos la cadena de 'notes' directamente como cuerpo de la solicitud.
+    this.http.patch(`${this.API_BASE_URL}/session-notes/${appointmentId}`, notes, { responseType: 'text' })
+      .pipe(
+        catchError(error => this.handleError<string>(error, 'updateAppointmentNotes'))
+      )
+      .subscribe({
+        next: (response) => {
+          console.log(`Notas del turno ID ${appointmentId} actualizadas:`, response);
+          this.notificaciones.next({ tipo: 'success', mensaje: 'Notas actualizadas exitosamente.' });
+          this.loading.set(false);
+          resolve();
+        },
+        error: (err) => {
+          console.error(`Error al actualizar notas para turno ID ${appointmentId}:`, err);
+          this.loading.set(false);
+          reject(err);
+        }
+      });
+  });
+}
+
+/**
+ * Obtiene las notas de sesión de un turno específico por su ID.
+ * Utiliza la nueva API: GET /get-notes/{id}
+ * @param appointmentId El ID del turno.
+ * @returns Una Promesa que resuelve con la cadena de observaciones o `null` si no se encuentran.
+ */
+async getAppointmentNotes(appointmentId: number): Promise<string | null> {
+  this.loading.set(true);
+  this.error.set(null);
+  console.log(`[TurnosService] Solicitando notas para el turno ID: ${appointmentId} con API: /get-notes/{id}`);
+
+  return new Promise((resolve, reject) => {
+    this.http.get<string>(`${this.API_BASE_URL}/get-notes/${appointmentId}`, { responseType: 'text' as 'json' })
+      .pipe(
+        catchError(error => {
+          // Si el backend devuelve 404 (Not Found), eso significa que no hay notas para ese ID.
+          // Queremos que esto resuelva a null, no que lance un error fatal.
+          if (error.status === 404) {
+            console.log(`[getAppointmentNotes] No se encontraron notas para el turno ID ${appointmentId} (404 Not Found).`);
+            this.loading.set(false);
+            return new Observable<string | null>(subscriber => {
+              subscriber.next(null);
+              subscriber.complete();
+            });
+          }
+          // Para otros errores, usa el manejador de errores estándar
+          return this.handleError<string | null>(error, 'getAppointmentNotes');
+        })
+      )
+      .subscribe({
+        next: (notes: string | null) => {
+          console.log(`[getAppointmentNotes] Notas recibidas para turno ID ${appointmentId}:`, notes);
+          this.loading.set(false);
+          resolve(notes);
+        },
+        error: (err) => {
+          console.error(`[getAppointmentNotes] Error en la suscripción para turno ID ${appointmentId}:`, err);
+          this.loading.set(false);
+          reject(err);
+        }
+      });
+  });
+}
 }
