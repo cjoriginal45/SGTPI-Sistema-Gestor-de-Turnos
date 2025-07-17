@@ -1,14 +1,17 @@
 // src/app/components/principal/principal.component.ts
 
-import { Component, ViewChild, signal, OnInit, OnDestroy, inject, computed, PLATFORM_ID } from '@angular/core';
+import { Component, ViewChild, signal, OnInit, OnDestroy, inject, computed } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common'; // Import isPlatformBrowser
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { CalendarComponent } from '../calendar/calendar.component';
 import { HeaderComponent } from "../header/header.component";
-import { TurnosService, Turno } from '../../services/turnos.service';
+import { AppointmentPatientDto, TurnosService } from '../../services/turnos.service'; // Import Turno and AppointmentPatientDto from turnos.service
 import { PatientService } from '../../services/patient.service';
 import { Patient } from '../../interfaces/patient'; // Asegúrate de que esta ruta sea correcta
+import { AppointmentResponseDto } from '../../interfaces/AppointmentResponseDto';
+import { Turno } from '../../interfaces/Turno';
+// Asegúrate de importar AppointmentResponseDto
 
 @Component({
   selector: 'app-principal',
@@ -38,7 +41,7 @@ export class PrincipalComponent implements OnInit, OnDestroy {
   protected pacienteNombre = signal<string>(''); // Kept for compatibility/internal validation
   protected telefonoPaciente = signal<string>('');
   protected emailPaciente = signal<string>('');
-  protected duracionTurno = signal<number>(50);
+  protected duracionTurno = signal<number>(50); // Default duration in minutes
   protected observaciones = signal<string>('');
 
   // --- NEW SIGNALS FOR DATE/TIME IN THE MODIFY MODAL ---
@@ -47,6 +50,17 @@ export class PrincipalComponent implements OnInit, OnDestroy {
 
   // --- Signals for Notifications ---
   protected notificacion = signal<{ tipo: 'success' | 'error' | 'info'; mensaje: string } | null>(null);
+
+  // --- Signals para el modal de confirmación personalizado ---
+  protected showCustomConfirmModal = signal(false);
+  protected customConfirmMessage = signal('');
+  private customConfirmResolve: ((confirmed: boolean) => void) | null = null; // Para resolver la promesa del custom confirm
+
+
+  // --- Signals para el Modal de Notas de Sesión ---
+  protected showNotesModal = signal(false);
+  protected selectedAppointmentForNotes = signal<AppointmentResponseDto | null>(null);
+  protected currentNotes = signal<string>(''); // Para el contenido del textarea de notas
 
   // Computed properties that observe service signals and update automatically
   protected turnos = computed(() => this.turnosService.turnosSignal());
@@ -84,6 +98,8 @@ export class PrincipalComponent implements OnInit, OnDestroy {
       });
 
     this.loadPatients();
+    // Load initial turnos for the currently selected date in the service
+    this.turnosService.seleccionarFecha(this.fechaSeleccionada());
   }
 
   ngOnDestroy() {
@@ -147,7 +163,9 @@ export class PrincipalComponent implements OnInit, OnDestroy {
 
   // --- Methods for Main Calendar Interaction ---
   toggleCalendar() {
-    this.calendar.onToggleClick();
+    if (this.calendar) {
+      this.calendar.onToggleClick();
+    }
   }
 
   onDateSelected(date: Date) {
@@ -204,7 +222,7 @@ export class PrincipalComponent implements OnInit, OnDestroy {
     this.pacienteNombre.set('');
     this.telefonoPaciente.set('');
     this.emailPaciente.set('');
-    this.duracionTurno.set(50);
+    this.duracionTurno.set(50); // Default duration for new assignment
     this.observaciones.set('');
 
     const initialModalDate = new Date(`${turno.fecha}T${turno.hora}`);
@@ -220,11 +238,13 @@ export class PrincipalComponent implements OnInit, OnDestroy {
     console.log('[abrirModificarModal] Abriendo modal para modificar turno:', turno);
     this.modalTurno.set(turno);
 
-    this.selectedPatient.set(null);
-    this.pacienteNombre.set('');
-    this.telefonoPaciente.set('');
-    this.emailPaciente.set('');
-    this.duracionTurno.set(turno.duracion || 50);
+    // Pre-fill modal fields based on the existing turno data
+    this.selectedPatient.set(null); // Will be set by preloadPatientForModal
+    this.pacienteNombre.set(''); // Will be set by preloadPatientForModal
+    this.telefonoPaciente.set(''); // Will be set by preloadPatientForModal
+    this.emailPaciente.set(''); // Will be set by preloadPatientForModal
+
+    this.duracionTurno.set(turno.duracion ?? 50); // Use nullish coalescing for safety
     this.observaciones.set(turno.observaciones || '');
 
     const initialModalDate = turno.fecha && turno.hora ? new Date(`${turno.fecha}T${turno.hora}`) : this.turnosService.fechaSeleccionadaSignal();
@@ -249,10 +269,11 @@ export class PrincipalComponent implements OnInit, OnDestroy {
         console.warn('[preloadPatientForModal] patientsList is empty. Preloading may fail. Ensure patients are loaded before opening the modal for modification.');
     }
 
-    const patientFullName = turno.paciente?.trim();
+    // Adjust to handle AppointmentPatientDto
+    const patientFullName = turno.paciente ? `${turno.paciente}`.trim() : '';
 
     const foundPatient = this.patientsList().find(p =>
-        p.phoneNumber === turno.telefono &&
+        p.phoneNumber === turno.telefono && // Use turno.paciente.phoneNumber
         `${p.firstName} ${p.lastName}`.trim() === patientFullName
     );
 
@@ -266,8 +287,9 @@ export class PrincipalComponent implements OnInit, OnDestroy {
         console.warn('[preloadPatientForModal] Appointment patient NOT found in the loaded patient list.');
         console.log('   Appointment data:', { paciente: turno.paciente, telefono: turno.telefono, email: turno.email });
         console.log('   Available patients:', this.patientsList());
-        this.pacienteNombre.set(turno.paciente || '');
-        this.telefonoPaciente.set(turno.telefono || '');
+        // Fallback to display what's in the turno object if patient not found in list
+        this.pacienteNombre.set(patientFullName);
+        this.telefonoPaciente.set(turno.telefono || turno.telefono || '');
         this.emailPaciente.set(turno.email || '');
     }
   }
@@ -288,16 +310,42 @@ export class PrincipalComponent implements OnInit, OnDestroy {
     console.log('[cerrarModal] Modals closed. Fields reset.');
   }
 
+  /**
+   * Muestra un modal de confirmación personalizado.
+   * @param message El mensaje a mostrar en el modal.
+   * @returns Una Promesa que se resuelve a `true` si el usuario confirma, `false` si cancela.
+   */
+  protected showCustomConfirm(message: string): Promise<boolean> {
+    this.customConfirmMessage.set(message);
+    this.showCustomConfirmModal.set(true);
+
+    return new Promise<boolean>(resolve => {
+      this.customConfirmResolve = resolve;
+    });
+  }
+
+  /**
+   * Maneja la respuesta del modal de confirmación personalizado.
+   * @param confirmed `true` si el usuario aceptó, `false` si canceló.
+   */
+  protected handleCustomConfirm(confirmed: boolean) {
+    this.showCustomConfirmModal.set(false);
+    if (this.customConfirmResolve) {
+      this.customConfirmResolve(confirmed);
+      this.customConfirmResolve = null; // Limpiar la función de resolución
+    }
+  }
+
   // --- Modal Confirmation Logic ---
   protected async confirmarModal() {
     const currentTurno = this.modalTurno();
-    const patientToAssign = this.selectedPatient();
+    const patientFromDropdown = this.selectedPatient(); // Patient object from patientsList
     let newDate: Date | null = null;
     let newTime: string = '';
 
     console.log('[confirmarModal] --- INICIO DE CONFIRMAR MODAL ---');
     console.log('[confirmarModal] currentTurno:', currentTurno);
-    console.log('[confirmarModal] patientToAssign (selectedPatient signal):', patientToAssign);
+    console.log('[confirmarModal] patientFromDropdown (selectedPatient signal):', patientFromDropdown);
 
     // Determine the date and time based on the active modal
     if (this.showModifyModal()) { // If it's the modify modal
@@ -318,10 +366,10 @@ export class PrincipalComponent implements OnInit, OnDestroy {
     }
 
     // --- Validation before proceeding ---
-    if (!currentTurno || !patientToAssign || !newDate || !newTime) {
+    if (!currentTurno || !patientFromDropdown || !newDate || !newTime) {
       console.warn('[confirmarModal] Validation failed: Missing essential data.');
       console.log('   currentTurno:', currentTurno);
-      console.log('   patientToAssign:', patientToAssign);
+      console.log('   patientFromDropdown:', patientFromDropdown);
       console.log('   newDate:', newDate);
       console.log('   newTime:', newTime);
       this.notificacion.set({ tipo: 'error', mensaje: 'Debe seleccionar un paciente, una fecha y una hora válidos.' });
@@ -329,52 +377,49 @@ export class PrincipalComponent implements OnInit, OnDestroy {
     }
 
     // --- STEP 1: Prepare and Update Patient Data (if changed) ---
-    let patientUpdated = false;
-    let updatedPatientData: Patient = { ...patientToAssign };
+    // Use patientFromDropdown as the base, and update if necessary from signals
+    let patientDataToUse: AppointmentPatientDto = {
+        id: patientFromDropdown.id, // Ensure ID is part of AppointmentPatientDto
+        firstName: patientFromDropdown.firstName,
+        lastName: patientFromDropdown.lastName,
+        phoneNumber: this.telefonoPaciente(), // Use value from signal
+        email: this.emailPaciente() // Use value from signal
+    };
 
-    console.log('[confirmarModal] Current telefonoPaciente signal:', this.telefonoPaciente());
-    console.log('[confirmarModal] Original patientToAssign.phoneNumber:', patientToAssign.phoneNumber);
-    console.log('[confirmarModal] Current emailPaciente signal:', this.emailPaciente());
-    console.log('[confirmarModal] Original patientToAssign.email:', patientToAssign.email);
-
-    if (this.telefonoPaciente() !== updatedPatientData.phoneNumber ||
-        this.emailPaciente() !== (updatedPatientData.email || '')) {
-
-        updatedPatientData.phoneNumber = this.telefonoPaciente();
-        updatedPatientData.email = this.emailPaciente();
-        patientUpdated = true;
-        console.log('[confirmarModal] Patient data detected as modified. updatedPatientData:', updatedPatientData);
+    // If the patient was not found in the list (manual input scenario, though current dropdown forces selection)
+    // This block might be redundant if dropdown always selects from existing patients.
+    // If you allow manual patient creation/input in the modal, this logic needs to be more robust.
+    if (!patientDataToUse.id && this.pacienteNombre().trim()) {
+      // This path is for a *new* patient entered directly in the modal, not selected from list.
+      // Current UI doesn't support this easily, but keeping for robustness.
+      const nameParts = this.pacienteNombre().trim().split(' ');
+      patientDataToUse = {
+        firstName: nameParts[0] || '',
+        lastName: nameParts.slice(1).join(' ') || '',
+        phoneNumber: this.telefonoPaciente(),
+        email: this.emailPaciente()
+      };
+      // For a truly new patient, you'd call patientService.createPatient here first
+      // and get an ID before proceeding. For now, we assume selection from existing.
     }
 
-    if (patientUpdated) {
-        try {
-            console.log('[confirmarModal] Attempting to update patient data via service...');
-            await this.patientService.updatePatient(updatedPatientData);
-            this.notificacion.set({ tipo: 'success', mensaje: 'Datos del paciente actualizados.' });
-            console.log('[confirmarModal] Patient data updated successfully. Reloading patients list...');
-            await this.loadPatients();
-        } catch (error) {
-            console.error('[confirmarModal] Error al actualizar los datos del paciente:', error);
-            this.notificacion.set({ tipo: 'error', mensaje: 'Error al actualizar los datos del paciente.' });
-            return;
-        }
-    } else {
-        console.log('[confirmarModal] No patient data modification detected. Skipping patient update.');
-    }
 
     // --- STEP 2: Prepare and Save/Update Appointment ---
     const turnoToSave: Turno = {
       ...currentTurno,
-      paciente: `${updatedPatientData.firstName} ${updatedPatientData.lastName}`.trim(),
-      telefono: updatedPatientData.phoneNumber,
-      email: updatedPatientData.email || '',
-      duracion: this.duracionTurno(),
+      // Ensure paciente is an AppointmentPatientDto object
+      paciente: patientDataToUse.firstName + " "+ patientDataToUse.lastName,
+      // These fields are redundant if paciente is an object, but kept for compatibility with old Turno interface structure
+      telefono: patientDataToUse.phoneNumber,
+      email: patientDataToUse.email || '',
+      duracion: this.duracionTurno(), // This should now correctly reflect the selected duration
       observaciones: this.observaciones().trim(),
       estado: 'CONFIRMADO',
       fecha: this.turnosService.formatearFecha(newDate),
       hora: newTime
     };
 
+    // If the original turno had an API ID, carry it over for update
     if (currentTurno.apiId) {
       turnoToSave.apiId = currentTurno.apiId;
     }
@@ -383,7 +428,8 @@ export class PrincipalComponent implements OnInit, OnDestroy {
 
     try {
       console.log('[confirmarModal] Attempting to save/modify appointment via service...');
-      await this.turnosService.saveOrUpdateAppointment(turnoToSave, updatedPatientData);
+      // Pass the patientDataToUse (AppointmentPatientDto) to saveOrUpdateAppointment
+      await this.turnosService.saveOrUpdateAppointment(turnoToSave, patientDataToUse);
       this.cerrarModal();
       console.log('[confirmarModal] Appointment saved/modified successfully. Modals closed.');
     } catch (error: any) { // Capturamos el error para manejarlo
@@ -391,12 +437,24 @@ export class PrincipalComponent implements OnInit, OnDestroy {
 
       let errorMessage = 'Error desconocido al guardar/modificar el turno.';
       // Intentamos analizar el error para ver si es un conflicto
-      if (error && error.error && typeof error.error === 'string' && error.error.includes('La fecha y hora seleccionadas ya están ocupadas')) {
+      if (error && error.message && typeof error.message === 'string' && error.message.includes('ocupadas')) {
           errorMessage = '¡Conflicto de horario! La fecha y hora seleccionadas ya están ocupadas por otro turno.';
       } else if (error && error.message) {
           errorMessage = error.message;
       }
-      this.notificacion.set({ tipo: 'error', mensaje: errorMessage });
+      
+      // Usar el modal de confirmación personalizado para errores de conflicto
+      if (errorMessage.includes('¡Conflicto de horario!')) {
+          const userConfirmed = await this.showCustomConfirm(errorMessage + ' ¿Desea cerrar este mensaje y revisar la agenda?');
+          if (userConfirmed) {
+              // Si el usuario acepta, cierra el modal de asignación/modificación
+              this.cerrarModal();
+          }
+          // Si el usuario cancela, el modal de asignación/modificación permanece abierto
+      } else {
+          // Para otros errores, solo muestra la notificación normal
+          this.notificacion.set({ tipo: 'error', mensaje: errorMessage });
+      }
     }
     console.log('[confirmarModal] --- FIN DE CONFIRMAR MODAL ---');
   }
@@ -440,7 +498,9 @@ export class PrincipalComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (confirm('¿Está seguro de que desea cancelar este turno? Esta acción no se puede deshacer.')) {
+    // Usar el modal de confirmación personalizado
+    const userConfirmed = await this.showCustomConfirm('¿Está seguro de que desea cancelar este turno? Esta acción no se puede deshacer.');
+    if (userConfirmed) {
       try {
         console.log('[cancelarTurno] Cancellation confirmation. Calling service for ID:', turno.apiId);
         await this.turnosService.cancelAppointment(turno.apiId);
@@ -465,7 +525,9 @@ export class PrincipalComponent implements OnInit, OnDestroy {
     const [hours, minutes] = turno.hora.split(':').map(Number);
     const slotDateTime = new Date(fechaSeleccionada.getFullYear(), fechaSeleccionada.getMonth(), fechaSeleccionada.getDate(), hours, minutes, 0);
 
-    if (confirm('¿Está seguro de que desea bloquear esta hora? Se volverá no disponible.')) {
+    // Usar el modal de confirmación personalizado
+    const userConfirmed = await this.showCustomConfirm('¿Está seguro de que desea bloquear esta hora? Se volverá no disponible.');
+    if (userConfirmed) {
       try {
         console.log('[bloquearHora] Block confirmation. Calling service for:', slotDateTime);
         await this.turnosService.toggleBlock(slotDateTime, true);
@@ -490,7 +552,9 @@ export class PrincipalComponent implements OnInit, OnDestroy {
     const [hours, minutes] = turno.hora.split(':').map(Number);
     const slotDateTime = new Date(fechaSeleccionada.getFullYear(), fechaSeleccionada.getMonth(), fechaSeleccionada.getDate(), hours, minutes, 0);
 
-    if (confirm('¿Está seguro de que desea desbloquear esta hora? Se volverá disponible.')) {
+    // Usar el modal de confirmación personalizado
+    const userConfirmed = await this.showCustomConfirm('¿Está seguro de que desea desbloquear esta hora? Se volverá disponible.');
+    if (userConfirmed) {
       try {
         console.log('[desbloquearHora] Unblock confirmation. Calling service for:', slotDateTime);
         await this.turnosService.toggleBlock(slotDateTime, false);
@@ -500,6 +564,77 @@ export class PrincipalComponent implements OnInit, OnDestroy {
         const errorMessage = error.message || 'Error desconocido al desbloquear el horario.';
         this.notificacion.set({ tipo: 'error', mensaje: errorMessage });
       }
+    }
+  }
+
+  // --- Métodos para el Modal de Notas de Sesión ---
+  async openNotesModal(appointment: AppointmentResponseDto): Promise<void> {
+    console.log('DEBUG [openNotesModal]: Abriendo modal de notas para turno:', appointment);
+    this.selectedAppointmentForNotes.set(appointment);
+
+    // Inicializar las notas con las que ya tiene el turno (si existen)
+    // Asumiendo que 'notes' es la propiedad en AppointmentResponseDto para las observaciones
+    this.currentNotes.set(appointment.notes || '');
+
+    // Si el turno tiene un paciente asociado y un número de teléfono, intenta cargar observaciones históricas
+    if (appointment.patientName+" "+appointment.patientLastName && appointment.patientPhoneNumber) {
+      console.log(`DEBUG [openNotesModal]: Intentando cargar observaciones para el paciente con teléfono: ${appointment.patientPhoneNumber}`);
+      try {
+        // FIX: PatientService does not have getPatientObservations. TurnosService does.
+        const patientObservations = this.patientService.getPatientObservations(appointment.patientPhoneNumber);
+        if (patientObservations) {
+          // Si hay observaciones del paciente, las añadimos a las notas actuales.
+          // Puedes decidir si las sobrescribes, las añades al inicio, al final, etc.
+          // Aquí las añadimos al final, con un separador.
+          const existingNotes = this.currentNotes();
+          if (existingNotes) {
+            this.currentNotes.set(`${existingNotes}\n\n--- Observaciones del Paciente ---\n${patientObservations}`);
+          } else {
+            this.currentNotes.set(`--- Observaciones del Paciente ---\n${patientObservations}`);
+          }
+          console.log('DEBUG [openNotesModal]: Observaciones del paciente cargadas y añadidas.');
+        } else {
+          console.log('DEBUG [openNotesModal]: No se encontraron observaciones históricas para este paciente.');
+        }
+      } catch (error) {
+        console.error('ERROR [openNotesModal]: Error al cargar observaciones del paciente:', error);
+        this.notificacion.set({ tipo: 'error', mensaje: 'Error al cargar observaciones históricas del paciente.' });
+      }
+    } else {
+      console.log('DEBUG [openNotesModal]: El turno no tiene paciente o número de teléfono para buscar observaciones históricas.');
+    }
+
+    this.showNotesModal.set(true);
+    console.log('DEBUG [openNotesModal]: Notas finales cargadas en el modal:', this.currentNotes());
+  }
+
+  closeNotesModal(): void {
+    this.showNotesModal.set(false);
+    this.selectedAppointmentForNotes.set(null);
+    this.currentNotes.set(''); // Limpiar notas al cerrar
+    console.log('DEBUG [closeNotesModal]: Modal de notas cerrado y campos reseteados.');
+  }
+
+  async saveNotes(): Promise<void> {
+    const appointment = this.selectedAppointmentForNotes();
+    if (!appointment || appointment.id === undefined || appointment.id === null) {
+      this.notificacion.set({ tipo: 'error', mensaje: 'No se ha seleccionado un turno para guardar las notas.' });
+      return;
+    }
+
+    const notesToSave = this.currentNotes();
+    console.log(`DEBUG [saveNotes]: Guardando notas para turno ID ${appointment.id}:`, notesToSave);
+
+    try {
+      // Asumiendo que 'id' en AppointmentResponseDto es el apiId que necesita el backend
+      await this.turnosService.updateAppointmentNotes(appointment.id, notesToSave);
+      this.closeNotesModal();
+      this.notificacion.set({ tipo: 'success', mensaje: 'Notas guardadas exitosamente.' });
+      // Opcional: Refrescar la agenda para que las notas se muestren si es necesario
+      await this.turnosService.refreshCurrentDayAppointments();
+    } catch (error) {
+      console.error('ERROR [saveNotes]: Error al guardar las notas:', error);
+      this.notificacion.set({ tipo: 'error', mensaje: 'Error al guardar las notas.' });
     }
   }
 }

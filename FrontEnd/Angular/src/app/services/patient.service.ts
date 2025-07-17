@@ -166,36 +166,25 @@ export class PatientService { // <-- ¡Asegúrate de que 'export' esté aquí!
    * @param phoneNumber El número de teléfono del paciente.
    * @returns Un Observable que emite un array de PatientObservation.
    */
-  getPatientObservations(phoneNumber: string): Observable<PatientObservation[]> {
+  getPatientObservations(phoneNumber: string): Observable<string | null> {
     return this.http.get(`${this.baseUrl}/patient-observations/${phoneNumber}`, { responseType: 'text' }).pipe(
       map(rawResponse => {
-        if (typeof rawResponse !== 'string') {
-          console.error('ERROR: Expected string response but received:', rawResponse);
-          return [];
-        }
-
         let observationText: string = rawResponse;
-
         if (observationText.startsWith('"') && observationText.endsWith('"') && observationText.length > 1) {
           observationText = observationText.slice(1, -1);
         }
-
-        if (observationText.trim() !== '' && observationText !== 'null') {
-          const obs: PatientObservation = {
-            phoneNumber: phoneNumber,
-            observations: observationText
-          };
-          return [obs];
+        if (observationText.trim() === '' || observationText.toLowerCase() === 'null') {
+          return null;
         }
-        return [];
+        return observationText;
       }),
       catchError((error: HttpErrorResponse) => {
-        console.error('ERROR (Service catchError): Failed to get observations:', error);
+        console.error('ERROR (PatientService - getPatientObservations): Falló al obtener observaciones:', error);
         if (error.status === 404) {
-          console.log(`No observations found for patient ${phoneNumber} (404 Not Found).`);
-          return of([]);
+          console.log(`No se encontraron observaciones para el paciente ${phoneNumber} (404 Not Found).`);
+          return of(null);
         }
-        return throwError(() => new Error(`Error loading observations for ${phoneNumber}: ${error.message}`));
+        return throwError(() => new Error(`Error al cargar observaciones para ${phoneNumber}: ${error.message || error.statusText}`));
       })
     );
   }

@@ -1,7 +1,7 @@
 // src/app/services/turnos.service.ts
 
 import { Injectable, signal, computed, inject, PLATFORM_ID } from '@angular/core';
-import { Observable, throwError, Subject } from 'rxjs';
+import { Observable, throwError, Subject, lastValueFrom } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { isPlatformBrowser } from '@angular/common';
@@ -9,6 +9,7 @@ import { environment } from '../environments/environment'; // Adjust path if nec
 import { Patient } from '../interfaces/patient'; // Import Patient interface
 import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
 import { AppointmentRequestDto } from '../interfaces/AppointmentRequestDto';
+import { Turno } from '../interfaces/Turno';
 
 
 export interface AppointmentPatientDto {
@@ -17,22 +18,7 @@ export interface AppointmentPatientDto {
   lastName: string;
   phoneNumber: string;
   email: string;
-}
-
-// --- UPDATED Turno INTERFACE ---
-export interface Turno {
-  id: string;
-  apiId?: number | null;
-  hora: string;
-  fecha: string;
-  estado: 'DISPONIBLE' | 'CONFIRMADO' | 'BLOQUEADO' | 'CANCELADO' | 'REALIZADO' | 'EN_CURSO';
-  paciente?: string | null;
-  telefono?: string | null;
-  email?: string | null;
-  duracion: number;
-  fechaCreacion?: Date | null;
-  fechaModificacion?: Date | null;
-  observaciones?: string | null;
+  state?: 'DISPONIBLE' | 'CONFIRMADO' | 'BLOQUEADO' | 'CANCELADO' | 'REALIZADO' | 'EN_CURSO';
 }
 // --- END UPDATED Turno INTERFACE ---
 
@@ -44,7 +30,7 @@ export class TurnosService {
   private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
 
-  private API_BASE_URL = environment.apiBaseUrl;
+  private API_BASE_URL = environment.apiBaseUrl; // Usando la variable de entorno
 
   public turnosSignal = signal<Turno[]>([]);
   public loading = signal(false);
@@ -117,135 +103,147 @@ export class TurnosService {
     this.cargarTurnos(normalizedDate);
   }
 
+  // Nuevo método para obtener turnos SOLO del backend
+  async getTurnosFromBackend(dateIsoFormat: string): Promise<AppointmentResponseDto[]> {
+    this.loading.set(true);
+    this.error.set(null);
+    console.log(`[getTurnosFromBackend] Requesting appointments for date: ${dateIsoFormat}`);
+
+    try {
+      const backendResponses: AppointmentResponseDto[] = await lastValueFrom(
+        this.http.get<AppointmentResponseDto[]>(`${this.API_BASE_URL}/appointments/${dateIsoFormat}`)
+          .pipe(
+            catchError(error => this.handleError<AppointmentResponseDto[]>(error, 'getTurnosFromBackend'))
+          )
+      );
+      this.loading.set(false);
+      return backendResponses;
+    } catch (err: any) {
+      console.error('[getTurnosFromBackend] Error en la promesa:', err);
+      this.loading.set(false);
+      throw err; // Re-lanzar el error para que el componente lo maneje
+    }
+  }
+
+  // Método principal para obtener turnos, que ahora fusiona la base con el backend
   async getTurnosPorFecha(dateIsoFormat: string): Promise<Turno[]> {
     this.loading.set(true);
     this.error.set(null);
 
-    console.log(`[getTurnosPorFecha] Requesting appointments for date: ${dateIsoFormat}`);
+    try {
+      const backendResponses = await this.getTurnosFromBackend(dateIsoFormat);
+      const targetDate = new Date(dateIsoFormat + 'T12:00:00');
+      const fullDaySchedule = this.generarTurnosParaFecha(targetDate); // Slots base con bloqueos virtuales
 
-    return new Promise((resolve, reject) => {
-      this.http.get<AppointmentResponseDto[]>(`${this.API_BASE_URL}/appointments/${dateIsoFormat}`)
-        .pipe(
-          catchError(error => this.handleError<AppointmentResponseDto[]>(error, 'getTurnosPorFecha'))
-        )
-        .subscribe({
-          next: (backendResponses: AppointmentResponseDto[]) => {
-            console.log('[getTurnosPorFecha] Raw Backend Responses:', backendResponses);
-
-            const targetDate = new Date(dateIsoFormat + 'T12:00:00');
-            console.log('[getTurnosPorFecha] Date object passed to generarTurnosParaFecha:', targetDate);
-
-            const fullDaySchedule = this.generarTurnosParaFecha(targetDate);
-            console.log('[getTurnosPorFecha] Frontend Base Schedule:', fullDaySchedule);
-
-            const mergedSchedule: Turno[] = fullDaySchedule.map(slot => {
-              const foundResponse = backendResponses.find(
-                backendRes => {
-                  const backendFechaFormatted = backendRes.fecha.replace(/\//g, '-');
-                  const backendHoraFormatted = backendRes.hora.substring(0, 5);
-
-                  return backendFechaFormatted === slot.fecha && backendHoraFormatted === slot.hora;
-                }
-              );
-
-              if (foundResponse) {
-                console.log(`  [getTurnosPorFecha] COINCIDENCIA ENCONTRADA para el slot ${slot.hora}. Fusionando con ID de backend: ${foundResponse.id}`);
-                return {
-                  ...slot,
-                  id: `backend-${foundResponse.id}`,
-                  apiId: foundResponse.id,
-                  estado: foundResponse.state as Turno['estado'],
-                  paciente: `${foundResponse.patientName || ''} ${foundResponse.patientLastName || ''}`.trim() || null,
-                  telefono: foundResponse.patientPhoneNumber || null,
-                  email: foundResponse.patientEmail || null,
-                  duracion: foundResponse.duration || slot.duracion,
-                  observaciones: foundResponse.notes || null
-                };
-              }
-              return slot;
-            });
-
-            console.log('[getTurnosPorFecha] Final Merged Schedule (a ser establecido en la señal):', mergedSchedule);
-            this.turnosSignal.set(mergedSchedule);
-            this.loading.set(false);
-            resolve(mergedSchedule);
-          },
-          error: (err) => {
-            console.error('[getTurnosPorFecha] Error en la suscripción (already handled by catchError):', err);
-            reject(err);
-          }
-        });
-    });
+      const mergedSchedule = this.mergeTurnos(fullDaySchedule, backendResponses);
+      
+      this.turnosSignal.set(mergedSchedule); // Actualizar la señal principal de turnos
+      this.loading.set(false);
+      return mergedSchedule;
+    } catch (err: any) {
+      console.error('[getTurnosPorFecha] Error al obtener y fusionar turnos:', err);
+      this.loading.set(false);
+      throw err;
+    }
   }
 
-  private cargarTurnos(fecha: Date) {
-    const isoDate = this.formatearFecha(fecha);
-    this.getTurnosPorFecha(isoDate);
-  }
+ // Lógica de fusión separada para reutilizar
+ private mergeTurnos(baseSchedule: Turno[], backendResponses: AppointmentResponseDto[]): Turno[] {
+  return baseSchedule.map(slot => {
+    const foundResponse = backendResponses?.find(
+      backendRes => {
+        const backendFechaFormatted = backendRes.fecha.replace(/\//g, '-');
+        const backendHoraFormatted = backendRes.hora.substring(0, 5);
+        return backendFechaFormatted === slot.fecha && backendHoraFormatted === slot.hora;
+      }
+    );
 
-  private generarTurnosParaFecha(fecha: Date): Turno[] {
-    const fechaStr = this.formatearFecha(fecha);
-    const diaSemana = fecha.getDay();
-    const diaMes = fecha.getDate();
-
-    const turnosBase = this.generarTurnosBase(diaSemana, diaMes);
-
-    return turnosBase.map((turno): Turno => {
+    if (foundResponse) {
+      // Si el backend tiene un turno, ese prevalece
       return {
-        id: `base-slot-${fechaStr}-${turno.hora}`,
-        fecha: fechaStr,
-        hora: turno.hora,
-        estado: turno.estado,
-        paciente: turno.paciente || null,
-        telefono: turno.telefono || null,
-        email: turno.email || null,
-        duracion: turno.duracion || 50,
-        fechaCreacion: new Date(),
-        fechaModificacion: null,
-        observaciones: null,
-        apiId: null
+        ...slot, // Mantener ID del frontend y fechaCreacion si no se sobrescriben
+        apiId: foundResponse.id,
+        estado: foundResponse.state as Turno['estado'], // Usar estado del backend
+        paciente: `${foundResponse.patientName || ''} ${foundResponse.patientLastName || ''}`.trim() || null,
+        telefono: foundResponse.patientPhoneNumber || null,
+        email: foundResponse.patientEmail || null,
+        duracion: foundResponse.duration || slot.duracion,
+        observaciones: foundResponse.notes || null
       };
+    }
+    // Si no hay respuesta del backend, se mantiene el slot original del frontend (con su estado DISPONIBLE o BLOQUEADO virtual)
+    return slot;
+  });
+}
+
+
+private cargarTurnos(fecha: Date) {
+  const isoDate = this.formatearFecha(fecha);
+  this.getTurnosPorFecha(isoDate); // Carga y fusiona para la señal principal
+}
+
+// Hacer este método público para que PatientsListComponent pueda usarlo
+public generarTurnosParaFecha(fecha: Date): Turno[] {
+  const fechaStr = this.formatearFecha(fecha);
+  const diaSemana = fecha.getDay();
+
+  const turnosBase = this.generarTurnosBase(diaSemana);
+
+  return turnosBase.map((turno): Turno => {
+    return {
+      id: `base-slot-${fechaStr}-${turno.hora}`,
+      fecha: fechaStr,
+      hora: turno.hora,
+      estado: turno.estado,
+      paciente: turno.paciente || null,
+      telefono: turno.telefono || null,
+      email: turno.email || null,
+      duracion: turno.duracion || 50,
+      observaciones: null,
+      apiId: null
+    };
+  });
+}
+
+// Modificado: ahora solo recibe diaSemana
+private generarTurnosBase(diaSemana: number): Array<{
+  hora: string;
+  estado: 'DISPONIBLE' | 'CONFIRMADO' | 'BLOQUEADO' | 'CANCELADO' | 'REALIZADO' | 'EN_CURSO';
+  paciente?: string;
+  telefono?: string;
+  email?: string;
+  duracion?: number;
+}> {
+  const weekdayTurnos: Array<{ hora: string; estado: any; paciente?: string; telefono?: string; email?: string; duracion?: number; }> = [
+    { hora: '08:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '09:00', estado: 'DISPONIBLE', duracion: 50 },
+    { hora: '10:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '11:00', estado: 'DISPONIBLE', duracion: 50 },
+    { hora: '12:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '13:00', estado: 'DISPONIBLE', duracion: 50 },
+    { hora: '14:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '15:00', estado: 'DISPONIBLE', duracion: 50 },
+    { hora: '16:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '17:00', estado: 'DISPONIBLE', duracion: 50 },
+    { hora: '18:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '19:00', estado: 'DISPONIBLE', duracion: 50 },
+    { hora: '20:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '21:00', estado: 'DISPONIBLE', duracion: 50 },
+    { hora: '22:00', estado: 'DISPONIBLE', duracion: 50 }
+  ];
+
+  // Lógica de bloqueo "virtual" en el frontend
+  if (diaSemana === 0 || diaSemana === 6) { // Domingo (0) o Sábado (6)
+    console.log(`[generarTurnosBase] Bloqueando todos los turnos para el fin de semana (Día: ${diaSemana}).`);
+    return weekdayTurnos.map(t => ({ ...t, estado: 'BLOQUEADO' }));
+  }
+
+  if (diaSemana === 3) { // Miércoles (3)
+    console.log(`[generarTurnosBase] Bloqueando turnos de 15:00 a 18:00 para el miércoles.`);
+    return weekdayTurnos.map(t => {
+      if (['15:00', '16:00', '17:00', '18:00'].includes(t.hora)) {
+        return { ...t, estado: 'BLOQUEADO' };
+      }
+      return t;
     });
   }
 
-  private generarTurnosBase(diaSemana: number, diaMes: number): Array<{
-    hora: string;
-    estado: 'DISPONIBLE' | 'CONFIRMADO' | 'BLOQUEADO' | 'CANCELADO' | 'REALIZADO' | 'EN_CURSO';
-    paciente?: string;
-    telefono?: string;
-    email?: string;
-    duracion?: number;
-  }> {
-    const weekdayTurnos: Array<{ hora: string; estado: any; paciente?: string; telefono?: string; email?: string; duracion?: number; }> = [
-      { hora: '08:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '09:00', estado: 'DISPONIBLE', duracion: 50 },
-      { hora: '10:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '11:00', estado: 'DISPONIBLE', duracion: 50 },
-      { hora: '12:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '13:00', estado: 'DISPONIBLE', duracion: 50 },
-      { hora: '14:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '15:00', estado: 'DISPONIBLE', duracion: 50 },
-      { hora: '16:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '17:00', estado: 'DISPONIBLE', duracion: 50 },
-      { hora: '18:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '19:00', estado: 'DISPONIBLE', duracion: 50 },
-      { hora: '20:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '21:00', estado: 'DISPONIBLE', duracion: 50 },
-      { hora: '22:00', estado: 'DISPONIBLE', duracion: 50 }
-    ];
-
-    if (diaSemana === 0 || diaSemana === 6) {
-      console.log(`[generarTurnosBase] Bloqueando todos los turnos para el fin de semana (Día: ${diaSemana}).`);
-      return weekdayTurnos.map(t => ({ ...t, estado: 'BLOQUEADO' }));
-    }
-
-    if (diaSemana === 3) {
-      console.log(`[generarTurnosBase] Bloqueando turnos de 15:00 a 18:00 para el miércoles.`);
-      return weekdayTurnos.map(t => {
-        if (['15:00', '16:00', '17:00', '18:00'].includes(t.hora)) {
-          return { ...t, estado: 'BLOQUEADO' };
-        }
-        return t;
-      });
-    }
-
-    console.log(`[generarTurnosBase] Available appointments for a normal day.`);
-    return weekdayTurnos;
-  }
-
+  console.log(`[generarTurnosBase] Available appointments for a normal day.`);
+  return weekdayTurnos;
+}
   // --- CRUD Operations (Create, Read, Update, Delete) ---
 
   async createAppointment(requestDto: AppointmentRequestDto): Promise<AppointmentResponseDto> {
@@ -261,7 +259,7 @@ export class TurnosService {
             console.log('[createAppointment] Appointment created successfully:', response);
             this.notificaciones.next({ tipo: 'success', mensaje: `Turno asignado exitosamente (ID: ${response.id}).` });
             this.loading.set(false);
-            await this.refreshCurrentDayAppointments();
+            await this.refreshCurrentDayAppointments(); // Refrescar los turnos para el día actual
             resolve(response);
           },
           error: (err: HttpErrorResponse) => {
@@ -273,7 +271,7 @@ export class TurnosService {
     });
   }
 
-  async saveOrUpdateAppointment(turno: Turno, patientData: Patient): Promise<string> {
+  async saveOrUpdateAppointment(turno: Turno, patientData: AppointmentPatientDto): Promise<string> {
     this.loading.set(true);
     this.error.set(null);
 
@@ -282,14 +280,16 @@ export class TurnosService {
       firstName: patientData.firstName,
       lastName: patientData.lastName,
       phoneNumber: patientData.phoneNumber,
-      email: patientData.email || ''
+      email: patientData.email || '',
+      state: turno.estado // Usar el estado del turno para el paciente
     };
 
-    const formattedFechaForRequest = turno.fecha.replace(/-/g, '/');
-    const formattedHoraForRequest = `${turno.hora}:00`;
+    // Asegurarse de que la fecha se formatee correctamente para el backend (YYYY-MM-DD)
+    const formattedFechaForRequest = turno.fecha; // Ya está en YYYY-MM-DD
+    const formattedHoraForRequest = `${turno.hora}:00`; // Asegurarse de que tenga segundos
 
     const requestDto: AppointmentRequestDto = {
-      duration: turno.duracion || 50,
+      duration: turno.duracion, // FIX: Removed || 50. Now uses the exact duration from the turno object.
       fecha: formattedFechaForRequest,
       hora: formattedHoraForRequest,
       patient: patientDto,
@@ -336,7 +336,7 @@ export class TurnosService {
 
           this.notificaciones.next({ tipo: 'success', mensaje: successMessage });
           this.loading.set(false);
-          await this.refreshCurrentDayAppointments();
+          await this.refreshCurrentDayAppointments(); // Refrescar los turnos para el día actual
           resolve(successMessage);
           console.log('[saveOrUpdateAppointment] --- REQUEST SUCCESSFUL END ---');
         },
@@ -551,7 +551,7 @@ export class TurnosService {
 
     // console.error(errorMessage); // Comentar esta línea para ver si el error desaparece
     // this.error.set(userDisplayMessage); // Comentar esta línea también
-    // this.notificaciones.next({ tipo: 'error', mensaje: userDisplayMessage }); // Comentar esta línea también
+    this.notificaciones.next({ tipo: 'error', mensaje: userDisplayMessage }); // Se mantiene la notificación
 
     return throwError(() => new Error(userDisplayMessage));
   }

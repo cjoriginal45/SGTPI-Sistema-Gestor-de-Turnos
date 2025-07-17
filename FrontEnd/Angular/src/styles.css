@@ -141,12 +141,10 @@ body, html {
   cursor: pointer;
   padding: 0.5rem;
   color: white; /* Color del icono */
-  transition: color 0.3s ease, transform 0.2s ease;
 }
 
 .config-btn:hover {
   color: var(--light-celeste); /* Color en hover */
-  transform: rotate(30deg); /* Pequeña rotación en hover */
 }
 
 .config-icon {

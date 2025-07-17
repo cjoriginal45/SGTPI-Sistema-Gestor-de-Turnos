@@ -7,7 +7,7 @@
     <div class="logo-container">
       <a routerLink="/">
         <!-- Usar un placeholder si 'logoPag.png' no es accesible o no existe -->
-        <img src="https://placehold.co/45x45/237ab5/ffffff?text=LOGO" alt="Logo" class="logo" onerror="this.onerror=null;this.src='https://placehold.co/45x45/237ab5/ffffff?text=LOGO';">
+        <img src="logoPag.png" alt="Logo" class="logo" onerror="this.onerror=null;">
       </a>
     </div>
 
@@ -29,7 +29,7 @@
     <!-- Menú de configuración -->
     <div class="config-container" [class.config-active]="isConfigActive()">
       <button class="config-btn" (click)="toggleConfig($event)" aria-label="Configuración">
-        <span class="material-symbols-outlined config-icon">settings</span>
+        <span class="material-symbols-outlined config-icon">menu</span>
       </button>
       <div class="config-dropdown">
         <a routerLink="/cuenta" class="dropdown-item" (click)="closeAllMenus()">Mi cuenta</a>
