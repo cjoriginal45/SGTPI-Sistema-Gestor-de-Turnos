@@ -10,16 +10,10 @@ import { Patient } from '../interfaces/patient'; // Import Patient interface
 import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
 import { AppointmentRequestDto } from '../interfaces/AppointmentRequestDto';
 import { Turno } from '../interfaces/Turno';
+import { AppointmentPatientDto } from '../interfaces/AppointmentPatientDto';
 
 
-export interface AppointmentPatientDto {
-  id?: number; // Added id for existing patients
-  firstName: string;
-  lastName: string;
-  phoneNumber: string;
-  email: string;
-  state?: 'DISPONIBLE' | 'CONFIRMADO' | 'BLOQUEADO' | 'CANCELADO' | 'REALIZADO' | 'EN_CURSO';
-}
+
 // --- END UPDATED Turno INTERFACE ---
 
 @Injectable({
@@ -33,6 +27,7 @@ export class TurnosService {
   private API_BASE_URL = environment.apiBaseUrl; // Usando la variable de entorno
 
   public turnosSignal = signal<Turno[]>([]);
+  public turnosSignalPrincipal = signal<Turno[]>([]);
   public loading = signal(false);
   public error = signal<string | null>(null);
   public fechaSeleccionadaSignal = signal<Date>(new Date());
@@ -41,7 +36,7 @@ export class TurnosService {
 
   private pollingInterval: any;
 
-
+  
   public turnosPorPeriodo = computed(() => {
     const turnosDelDia = this.turnosSignal();
     const manana: Turno[] = [];
@@ -59,6 +54,7 @@ export class TurnosService {
     });
     return { manana, tarde, noche };
   });
+
 
   constructor() {
     this.cargarTurnos(this.fechaSeleccionadaSignal());
@@ -147,6 +143,8 @@ export class TurnosService {
     }
   }
 
+
+
  // Lógica de fusión separada para reutilizar
  private mergeTurnos(baseSchedule: Turno[], backendResponses: AppointmentResponseDto[]): Turno[] {
   return baseSchedule.map(slot => {
@@ -164,17 +162,25 @@ export class TurnosService {
         ...slot, // Mantener ID del frontend y fechaCreacion si no se sobrescriben
         apiId: foundResponse.id,
         estado: foundResponse.state as Turno['estado'], // Usar estado del backend
-        paciente: `${foundResponse.patientName || ''} ${foundResponse.patientLastName || ''}`.trim() || null,
-        telefono: foundResponse.patientPhoneNumber || null,
-        email: foundResponse.patientEmail || null,
-        duracion: foundResponse.duration || slot.duracion,
-        observaciones: foundResponse.notes || null
+        // CORREGIDO: Asignar un objeto AppointmentPatientDto a 'paciente'
+        paciente: {
+          id: foundResponse.patientId || null,
+          firstName: foundResponse.patientName || '',
+          lastName: foundResponse.patientLastName || '',
+          phoneNumber: foundResponse.patientPhoneNumber || '',
+          email: foundResponse.patientEmail || ''
+        },
+        telefono: foundResponse.patientPhoneNumber || null, // Se mantiene por compatibilidad
+        email: foundResponse.patientEmail || null, // Se mantiene por compatibilidad
+        duracion: foundResponse.duration ?? slot.duracion, // Usar nullish coalescing operator (??)
+        observaciones: foundResponse.notes || null // Mapear 'notes' del backend a 'observaciones' del frontend
       };
     }
-    // Si no hay respuesta del backend, se mantiene el slot original del frontend (con su estado DISPONIBLE o BLOQUEADO virtual)
+    // Si no hay respuesta del backend, se mantiene el slot original del frontend
     return slot;
   });
 }
+
 
 
 private cargarTurnos(fecha: Date) {
@@ -209,39 +215,46 @@ public generarTurnosParaFecha(fecha: Date): Turno[] {
 private generarTurnosBase(diaSemana: number): Array<{
   hora: string;
   estado: 'DISPONIBLE' | 'CONFIRMADO' | 'BLOQUEADO' | 'CANCELADO' | 'REALIZADO' | 'EN_CURSO';
-  paciente?: string;
+  paciente: AppointmentPatientDto | null; // CORRECTO: Esto debe ser AppointmentPatientDto | null
   telefono?: string;
   email?: string;
   duracion?: number;
 }> {
-  const weekdayTurnos: Array<{ hora: string; estado: any; paciente?: string; telefono?: string; email?: string; duracion?: number; }> = [
-    { hora: '08:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '09:00', estado: 'DISPONIBLE', duracion: 50 },
-    { hora: '10:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '11:00', estado: 'DISPONIBLE', duracion: 50 },
-    { hora: '12:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '13:00', estado: 'DISPONIBLE', duracion: 50 },
-    { hora: '14:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '15:00', estado: 'DISPONIBLE', duracion: 50 },
-    { hora: '16:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '17:00', estado: 'DISPONIBLE', duracion: 50 },
-    { hora: '18:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '19:00', estado: 'DISPONIBLE', duracion: 50 },
-    { hora: '20:00', estado: 'DISPONIBLE', duracion: 50 }, { hora: '21:00', estado: 'DISPONIBLE', duracion: 50 },
-    { hora: '22:00', estado: 'DISPONIBLE', duracion: 50 }
+  const weekdayTurnos: Array<{ hora: string; estado: any; paciente: AppointmentPatientDto | null; telefono?: string; email?: string; duracion?: number; }> = [
+    { hora: '08:00', estado: 'DISPONIBLE', duracion: 50, paciente: null }, // Explicitamente null
+    { hora: '09:00', estado: 'DISPONIBLE', duracion: 50, paciente: null },
+    { hora: '10:00', estado: 'DISPONIBLE', duracion: 50, paciente: null },
+    { hora: '11:00', estado: 'DISPONIBLE', duracion: 50, paciente: null },
+    { hora: '12:00', estado: 'DISPONIBLE', duracion: 50, paciente: null },
+    { hora: '13:00', estado: 'DISPONIBLE', duracion: 50, paciente: null },
+    { hora: '14:00', estado: 'DISPONIBLE', duracion: 50, paciente: null },
+    { hora: '15:00', estado: 'DISPONIBLE', duracion: 50, paciente: null },
+    { hora: '16:00', estado: 'DISPONIBLE', duracion: 50, paciente: null },
+    { hora: '17:00', estado: 'DISPONIBLE', duracion: 50, paciente: null },
+    { hora: '18:00', estado: 'DISPONIBLE', duracion: 50, paciente: null },
+    { hora: '19:00', estado: 'DISPONIBLE', duracion: 50, paciente: null },
+    { hora: '20:00', estado: 'DISPONIBLE', duracion: 50, paciente: null },
+    { hora: '21:00', estado: 'DISPONIBLE', duracion: 50, paciente: null },
+    { hora: '22:00', estado: 'DISPONIBLE', duracion: 50, paciente: null }
   ];
 
   // Lógica de bloqueo "virtual" en el frontend
   if (diaSemana === 0 || diaSemana === 6) { // Domingo (0) o Sábado (6)
     console.log(`[generarTurnosBase] Bloqueando todos los turnos para el fin de semana (Día: ${diaSemana}).`);
-    return weekdayTurnos.map(t => ({ ...t, estado: 'BLOQUEADO' }));
+    return weekdayTurnos.map(t => ({ ...t, estado: 'BLOQUEADO', paciente: null })); // Asegurar que paciente es null al bloquear
   }
 
   if (diaSemana === 3) { // Miércoles (3)
     console.log(`[generarTurnosBase] Bloqueando turnos de 15:00 a 18:00 para el miércoles.`);
     return weekdayTurnos.map(t => {
       if (['15:00', '16:00', '17:00', '18:00'].includes(t.hora)) {
-        return { ...t, estado: 'BLOQUEADO' };
+        return { ...t, estado: 'BLOQUEADO', paciente: null }; // Asegurar que paciente es null al bloquear
       }
       return t;
     });
   }
 
-  console.log(`[generarTurnosBase] Available appointments for a normal day.`);
+  console.log(`[generarTurnosBase] Turnos disponibles para un día normal.`);
   return weekdayTurnos;
 }
   // --- CRUD Operations (Create, Read, Update, Delete) ---
@@ -414,7 +427,7 @@ private generarTurnosBase(diaSemana: number): Array<{
       this.http.put(`${this.API_BASE_URL}/appointments/${formattedSlotTime}/${block}`, {}, { responseType: 'text' })
         .subscribe({
           next: async (rawResponseText: string) => {
-            console.log(`[toggleBlock] Success - next block! Raw Response (text):`, rawResponseText);
+            console.log('Respuesta cruda del backend:', rawResponseText);
 
             let successMessage: string;
             try {
@@ -687,3 +700,5 @@ async getAppointmentNotes(appointmentId: number): Promise<string | null> {
   });
 }
 }
+
+

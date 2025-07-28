@@ -130,19 +130,17 @@
 
       <!-- Section: Appointment History -->
       <div class="appointment-history-section">
-        <h3 class="section-header">
+        <h2 class="section-header">
           <span class="material-symbols-outlined header-icon">history</span>
           Historial de Turnos
-        </h3>
+        </h2>
 
-        <!-- Empty State for Appointments -->
         <div *ngIf="displayedAppointments().length === 0" class="empty-state">
           <span class="material-symbols-outlined empty-state-icon">event_busy</span>
           <p class="empty-state-title">No hay turnos registrados para este paciente.</p>
           <p class="empty-state-message">Puedes asignar un nuevo turno desde la lista de pacientes.</p>
         </div>
 
-        <!-- List of Appointments -->
         <div *ngIf="displayedAppointments().length > 0" class="appointment-list">
           <div *ngFor="let appointment of displayedAppointments()" class="appointment-item">
             <div class="appointment-details">
@@ -157,13 +155,14 @@
               </div>
               <div class="appointment-status">
                 Estado:
+                <!-- MODIFICADO: Usar getAppointmentDisplayStatus para el texto y la clase -->
                 <span [ngClass]="{
-                  'status-confirmed': appointment.state === 'CONFIRMADO',
-                  'status-in-progress': appointment.state === 'EN_CURSO',
-                  'status-cancelled': appointment.state === 'CANCELADO',
-                  'status-blocked': appointment.state === 'BLOQUEADO',
-                  'status-realizado': appointment.state === 'REALIZADO'
-                }">{{ appointment.state }}</span>
+                  'status-confirmed': getAppointmentDisplayStatus(appointment) === 'Confirmado',
+                  'status-in-progress': getAppointmentDisplayStatus(appointment) === 'En curso',
+                  'status-cancelled': getAppointmentDisplayStatus(appointment) === 'Cancelado',
+                  'status-blocked': getAppointmentDisplayStatus(appointment) === 'Bloqueado',
+                  'status-realizado': getAppointmentDisplayStatus(appointment) === 'Realizado'
+                }">{{ getAppointmentDisplayStatus(appointment) }}</span>
               </div>
             </div>
             <div class="button-group">

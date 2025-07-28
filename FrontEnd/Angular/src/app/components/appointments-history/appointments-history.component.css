@@ -1,0 +1,492 @@
+/* src/app/components/turnos-history/turnos-history.component.css */
+
+/* Reutiliza .app-container de styles.css para el layout principal */
+.app-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--background-light), #e0e7ff); /* Subtle gradient */
+    padding: 1rem; /* Default padding */
+    font-family: 'Inter', sans-serif; /* Ensure Inter font is loaded globally */
+    color: var(--text-dark);
+  }
+  
+  /* Responsive padding */
+  @media (min-width: 640px) {
+    .app-container {
+      padding: 1.5rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .app-container {
+      padding: 2rem;
+    }
+  }
+  
+  
+  .history-container {
+    max-width: 72rem; /* Equivalent to max-w-6xl for wider content */
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background-color: var(--card-background);
+    border-radius: 1rem;
+    box-shadow: 0 20px 25px -5px var(--shadow-color), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+  
+  @media (min-width: 640px) {
+    .history-container {
+      padding: 2rem;
+    }
+  }
+  
+  /* --- Section Headers --- */
+  .section-header {
+    font-size: 1.575rem;
+    margin-bottom: 1rem;
+    color: var(--color-header);
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem; /* space-x-2 */
+  }
+  
+  .section-header .header-icon {
+    font-size: 2.25rem;
+    color: var(--color-header);
+  }
+  
+  /* --- Search Bar --- */
+  .search-bar {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  
+  .search-input {
+    flex-grow: 1;
+    min-width: 200px;
+    padding: 0.625rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    font-size: 1rem;
+    transition: all 0.15s ease-in-out;
+    color: var(--text-dark);
+  }
+  .search-input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(35, 122, 181, 0.25);
+  }
+  
+  .search-button {
+    flex-shrink: 0;
+    /* Reusing .btn and .btn-primary styles from global styles */
+  }
+  
+  
+  /* --- Empty State for Appointments --- */
+  .empty-state {
+    text-align: center;
+    color: var(--text-light);
+    padding: 2.5rem;
+    border: 2px dashed var(--border-color);
+    border-radius: 0.5rem;
+    background-color: #F9FAFB;
+    margin-top: 1.5rem;
+  }
+  .empty-state-icon {
+    font-size: 4rem;
+    color: #CBD5E0;
+    margin-bottom: 1rem;
+  }
+  .empty-state-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  .empty-state-message {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+  }
+  
+  /* --- Appointment List --- */
+  .appointment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+  
+  .appointment-item {
+    background-color: var(--card-background);
+    padding: 1.25rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    border: 1px solid #F3F4F6;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start; /* Default for mobile */
+    transition: all 0.2s ease-in-out;
+  }
+  .appointment-item:hover {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+    border-color: #BFDBFE;
+  }
+  
+  @media (min-width: 768px) {
+    .appointment-item {
+      flex-direction: row;
+      align-items: center; /* Vertically center items in the row */
+      gap: 2rem; /* Increased gap between details and buttons for more space */
+      padding: 1.5rem 1.25rem; /* Slightly more vertical padding for bigger containers */
+    }
+  }
+  
+  .appointment-details {
+    flex-grow: 1;
+    margin-bottom: 0.75rem; /* Space below details on mobile */
+    display: flex; /* Default for mobile */
+    flex-direction: column; /* Default for mobile */
+    gap: 0.75rem; /* Space between detail lines on mobile */
+    padding: 0.5rem 0; /* Add some internal padding */
+  }
+  
+  @media (min-width: 768px) {
+    .appointment-details {
+      margin-bottom: 0;
+      display: grid; /* Use grid for desktop layout */
+      grid-template-columns: repeat(2, minmax(0, 1fr)); /* Two columns, equal width */
+      grid-auto-rows: minmax(min-content, max-content); /* Rows auto-adjust to content */
+      gap: 1.5rem 2rem; /* Row gap, Column gap */
+      align-items: center; /* Vertically align items in grid cells */
+    }
+  }
+  
+  /* Individual detail items within appointment-details */
+  .appointment-patient-info,
+  .appointment-date-time,
+  .appointment-duration,
+  .appointment-status {
+    display: flex;
+    align-items: center;
+    font-size: 1rem;
+    color: var(--text-dark);
+    white-space: normal; /* Allow text to wrap within grid cell */
+    padding: 0.25rem 0.5rem; /* Add some padding to each detail item */
+  }
+  
+  .appointment-date-time span:last-child{
+    margin-left: 0.5rem; /* Space between date and time */
+  }
+
+  .appointment-patient-info {
+    font-weight: 600; /* Make patient name stand out */
+  }
+  
+  .patient-info-link {
+    color: var(--primary-blue);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s ease;
+    margin-left: 0.25rem;
+  }
+  .patient-info-link:hover {
+    color: var(--dark-blue);
+    text-decoration: underline;
+  }
+  
+  
+  .appointment-date-time {
+    font-weight: 600;
+    font-size: 1.125rem;
+    /* Resetting flex properties that might interfere with grid layout */
+    display: flex;
+    align-items: center;
+  }
+  .appointment-icon {
+    color: var(--primary-blue);
+    font-size: 1.25rem;
+    vertical-align: middle;
+    margin-right: 0.5rem;
+  }
+  .appointment-date-time .material-icons:nth-of-type(2) {
+    margin-left: 1rem;
+  }
+  
+  .appointment-duration span,
+  .appointment-status span {
+    font-weight: 500;
+  }
+  
+  /* --- Appointment Status Colors --- */
+  .appointment-status .status-confirmed {
+    color: var(--success-green);
+    font-weight: 700;
+  }
+  .appointment-status .status-in-progress {
+    color: var(--warning-yellow);
+    font-weight: 700;
+  }
+  .appointment-status .status-cancelled {
+    color: var(--error-red);
+    font-weight: 700;
+  }
+  .appointment-status .status-blocked {
+    color: var(--secondary-gray);
+    font-weight: 700;
+  }
+  .appointment-status .status-completed {
+    color: var(--primary-blue);
+    font-weight: 700;
+  }
+  .appointment-status .status-realizado {
+    color: #2aa446;
+    font-weight: 700;
+  }
+  
+  /* --- Buttons (general styles, specific overrides might be in component) --- */
+  .button-group {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+  
+  @media (min-width: 768px) {
+    .button-group {
+      margin-top: 0;
+      justify-content: flex-end;
+    }
+  }
+  
+  .btn {
+    padding: 0.625rem 1.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease-in-out;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: none;
+  }
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+  .btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 6px var(--primary-blue);
+  }
+  .btn-icon {
+    margin-right: 0.5rem;
+    font-size: 1.25rem;
+  }
+  
+  .btn-primary {
+    background: var(--dark-blue);
+    color: white;
+  }
+  .btn-primary:hover {
+    background: var(--primary-blue);
+  }
+  .btn-primary:focus {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 6px var(--primary-blue);
+  }
+  
+  .btn-success {
+    background: linear-gradient(to right, var(--success-green), var(--light-success-green));
+    color: white;
+  }
+  .btn-success:hover {
+    background: linear-gradient(to right, var(--light-success-green), var(--success-green));
+  }
+  .btn-success:focus {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 6px var(--success-green);
+  }
+  
+  .btn-secondary {
+    background-color: var(--error-red);
+    color: white;
+  }
+  .btn-secondary:hover {
+    background-color: var(--light-error-red);
+  }
+  .btn-secondary:focus {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 6px var(--secondary-gray);
+  }
+  
+  .btn-purple {
+    background: var(--light-purple);
+    color: white;
+  }
+  .btn-purple:hover {
+    background: var(--purple);
+  }
+  .btn-purple:focus {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 6px var(--purple);
+  }
+  
+  
+  /* --- Notes Modal --- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    z-index: 50;
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+  
+  .modal-content {
+    background-color: var(--card-background);
+    border-radius: 1rem;
+    box-shadow: 0 20px 25px -5px var(--shadow-color), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    padding: 2rem;
+    width: 100%;
+    max-width: 28rem;
+    transform: scale(0.95);
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+  
+  .modal-header {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+  }
+  
+  .modal-appointment-info {
+    color: var(--text-medium);
+    margin-bottom: 1.5rem;
+  }
+  .modal-appointment-info span {
+    font-weight: 600;
+  }
+  
+  .modal-textarea {
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    color: var(--text-dark);
+    resize: vertical;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.15s ease-in-out;
+  }
+  .modal-textarea:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(35, 122, 181, 0.25);
+  }
+  
+  .modal-button-group {
+    margin-top: 2rem;
+  }
+  
+  /* --- Notifications --- */
+  .notification-area {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 50;
+  }
+  
+  .notification-card {
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transform: translateX(100%);
+    animation: slideInRight 0.3s ease-out forwards;
+  }
+  
+  .notification-icon {
+    font-size: 1.5rem;
+  }
+  
+  .notification-message {
+    font-weight: 600;
+  }
+  
+  .notification-close-btn {
+    margin-left: auto;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease-in-out;
+  }
+  .notification-close-btn:hover {
+    opacity: 1;
+  }
+  
+  /* Notification Type Colors */
+  .notification-success {
+    background-color: var(--success-green);
+  }
+  .notification-error {
+    background-color: var(--error-red);
+  }
+  .notification-info {
+    background-color: var(--primary-blue);
+  }
+  
+  /* --- Animations --- */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes scaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  
+  @keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  /* --- Loading Spinner --- */
+  .loading-indicator {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-medium);
+  }
+  
+  .spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top: 4px solid var(--primary-blue);
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem auto;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .loading-text {
+    font-size: 1.125rem;
+    font-weight: 500;
+  }
+  

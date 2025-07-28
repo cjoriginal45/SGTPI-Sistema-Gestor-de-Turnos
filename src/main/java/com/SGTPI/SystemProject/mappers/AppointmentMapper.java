@@ -19,28 +19,15 @@ import org.springframework.stereotype.Service;
 @Service
 public class AppointmentMapper {
 
-    private final PatientMapper patientMapper;
+
     private final PatientRepository patientRepository;
     private final ProfessionalRepository professionalRepository;
 
-    public AppointmentMapper(PatientMapper patientMapper, PatientRepository patientRepository, ProfessionalRepository professionalRepository) {
-        this.patientMapper = patientMapper;
+    public AppointmentMapper(PatientRepository patientRepository, ProfessionalRepository professionalRepository) {
         this.patientRepository = patientRepository;
         this.professionalRepository = professionalRepository;
     }
 
-    //dtoRequest a dto Response
-    /*public AppointmentResponseDto requestToResponse(AppointmentRequestDto dto) {
-        return new AppointmentResponseDto(
-                dto.patient().firstName(),
-                dto.patient().lastName(),
-                dto.patient().phoneNumber(),
-                dto.patient().email(),
-                dto.fecha().getDayOfMonth() + "/" + dto.fecha().getMonthValue(),
-                dto.hora().format(DateTimeFormatter.ofPattern("HH:mm:ss")), // Corregí el formato de hora
-                "CONFIRMADO" // Estado por defecto
-        );
-    }*/
     //dtoRequest a Entity
     public Appointment requestToAppointment(AppointmentRequestDto dto) {
         Optional<Patient> patient = patientRepository.findByPhoneNumber(dto.patient().phoneNumber());
@@ -70,9 +57,11 @@ public class AppointmentMapper {
         String patientLastName = null;
         String patientPhoneNumber = null;
         String patientEmail = null;
+        Integer patientId = null;
 
         // Si el objeto Patient no es null, entonces extraemos sus datos
         if (patient != null) {
+            patientId = patient.getId();
             patientFirstName = patient.getFirstName();
             patientLastName = patient.getLastName();
             patientPhoneNumber = patient.getPhoneNumber();
@@ -81,14 +70,16 @@ public class AppointmentMapper {
 
         return new AppointmentResponseDto(
                 appointment.getId(),
-                // Usamos los valores que pueden ser null, que es lo esperado para un turno bloqueado
+                patientId,
                 patientFirstName,
                 patientLastName,
                 patientPhoneNumber,
                 patientEmail,
                 appointment.getDate().toLocalDate().toString(), // Fecha en formato YYYY-MM-DD
                 appointment.getDate().toLocalTime().toString(), // Hora en formato HH:mm:ss
-                appointment.getStatus().toString() // Estado del turno
+                appointment.getStatus().toString(), // Estado del turno
+                appointment.getDuration(),
+                appointment.getSessionNotes()
         );
     }
 

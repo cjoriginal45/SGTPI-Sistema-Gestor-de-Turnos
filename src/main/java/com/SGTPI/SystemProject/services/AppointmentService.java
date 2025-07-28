@@ -173,7 +173,7 @@ public class AppointmentService {
                 case "fecha":
                     if (value instanceof String) {
                         try {
-                            tempLocalDateRef.set(LocalDate.parse((String) value, DateTimeFormatter.ofPattern("yyyy/MM/dd")));
+                            tempLocalDateRef.set(LocalDate.parse((String) value, DateTimeFormatter.ofPattern("yyyy-MM-dd")));
                         } catch (Exception e) {
                             System.err.println("Error parseando 'fecha': " + value + " - " + e.getMessage());
                         }

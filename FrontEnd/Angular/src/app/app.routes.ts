@@ -3,6 +3,7 @@ import { PrincipalComponent } from './components/principal/principal.component';
 import { PatientsListComponent } from './components/pacientes-list/pacientes-list.component';
 import { NgModule } from '@angular/core';
 import { PatientDetailsComponent } from './components/patient-details/patient-details.component';
+import { AppointmentsHistoryComponent } from './components/appointments-history/appointments-history.component';
 
 export const routes: Routes = [
     { 
@@ -17,6 +18,10 @@ export const routes: Routes = [
     {
       path: 'patient-details/:id', 
       component: PatientDetailsComponent
+    },
+    {
+      path: 'historial',
+      component: AppointmentsHistoryComponent
     }
   ];
 

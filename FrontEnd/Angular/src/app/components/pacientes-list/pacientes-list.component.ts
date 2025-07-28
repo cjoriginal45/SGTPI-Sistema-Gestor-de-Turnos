@@ -9,10 +9,11 @@ import { CalendarComponent } from '../calendar/calendar.component';
 import { PatientObservation } from '../../interfaces/PatientObservation'; // Asegúrate de que esta ruta sea correcta
 import { AppointmentRequestDto } from '../../interfaces/AppointmentRequestDto'; // Asegúrate de que esta ruta sea correcta
 import { AppointmentResponseDto } from '../../interfaces/AppointmentResponseDto'; // Asegúrate de que esta ruta sea correcta
-import {AppointmentPatientDto, TurnosService } from '../../services/turnos.service'; // Asegúrate de que esta ruta sea correcta y que Turno se exporte desde turnos.service.ts o su propia interfaz
+import {TurnosService } from '../../services/turnos.service'; // Asegúrate de que esta ruta sea correcta y que Turno se exporte desde turnos.service.ts o su propia interfaz
 import { Subject, takeUntil } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Turno } from '../../interfaces/Turno';
+import { AppointmentPatientDto } from '../../interfaces/AppointmentPatientDto';
 
 
 
@@ -42,14 +43,14 @@ export class PatientsListComponent implements OnInit, OnDestroy {
   showModal = signal(false);
 
   // List of patients
-  patients = signal<Patient[]>([]);
+  patients = signal<AppointmentPatientDto[]>([]);
 
   // Signal for search term
   searchTerm = signal('');
 
   // --- Signals for Assign Appointment Modal ---
   showAssignAppointmentModal = signal(false);
-  selectedPatientForAppointment = signal<Patient | null>(null);
+  selectedPatientForAppointment = signal<AppointmentPatientDto | null>(null);
   selectedAppointmentDate = signal<Date | null>(null);
   selectedAppointmentTime = signal<string | null>(null);
   selectedDuration = signal<number | null>(null); // Inicializar a null para forzar selección
@@ -59,10 +60,10 @@ export class PatientsListComponent implements OnInit, OnDestroy {
   protected notificacion = signal<{ tipo: 'success' | 'error' | 'info'; mensaje: string } | null>(null);
   private destroy$ = new Subject<void>(); // Para gestionar las suscripciones
 
-  filteredPatients = signal<Patient[]>([]);
+  filteredPatients = signal<AppointmentPatientDto[]>([]);
   // --- Signals for Add Notes Modal ---
   showAddNotesModal = signal(false);
-  selectedPatientForNotes = signal<Patient | null>(null);
+  selectedPatientForNotes = signal<AppointmentPatientDto | null>(null);
   patientNotes = signal('');
   // REMOVIDO: patientObservations ya no se usa para una única nota de texto.
 
@@ -286,7 +287,7 @@ export class PatientsListComponent implements OnInit, OnDestroy {
     }
 
     const patientDtoForAppointment: AppointmentPatientDto  = {
-      id: patient.id,
+      id: patient.id || null,
       firstName: patient.firstName || '',
       lastName: patient.lastName || '',
       phoneNumber: patient.phoneNumber || '',
@@ -302,7 +303,7 @@ export class PatientsListComponent implements OnInit, OnDestroy {
         const turnoToUpdate: Turno = {
             ...selectedTimeSlotInMergedSchedule, // Keep existing ID, fecha, hora, etc.
             estado: 'CONFIRMADO', // Set to CONFIRMADO
-            paciente: patient.firstName + " "+ patient.lastName, // Assign the new patient
+            paciente: patient, // Assign the new patient
             duracion: duration, // Use the converted duration
             observaciones: '' // Clear or update notes as needed
         };

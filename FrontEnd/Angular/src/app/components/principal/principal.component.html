@@ -13,18 +13,17 @@
         <div class="form-group">
           <label for="pacienteSelectAssign">Paciente:</label>
           <select
-            id="pacienteSelectAssign"
-            [value]="selectedPatient()?.id ?? ''"
-            (change)="onPatientSelected($event)"
+            id="pacienteSelectModify"
+            [ngModel]="selectedPatient()?.id ?? ''"
+            (ngModelChange)="onPatientSelected($event)" 
             class="form-control"
           >
-            <option value="" disabled>Seleccionar Paciente</option>
+            <option [ngValue]="null" disabled>Seleccionar Paciente</option>
             <option *ngFor="let patient of patientsList()" [value]="patient.id">
               {{ patient.firstName }} {{ patient.lastName }}
             </option>
           </select>
         </div>
-
         <!-- Campos de input de Teléfono y Email (visibles y readonly) -->
         <div class="form-group">
           <label for="telefonoPacienteAssign">Teléfono:</label>
@@ -111,7 +110,7 @@
           <select
             id="pacienteSelectModify"
             [ngModel]="selectedPatient()?.id ?? ''"
-            (ngModelChange)="onPatientSelected($event)"
+            (ngModelChange)="onPatientSelected($event)" 
             class="form-control"
           >
             <option [ngValue]="null" disabled>Seleccionar Paciente</option>
@@ -121,6 +120,18 @@
           </select>
         </div>
 
+        <!-- Botón "ver" para el modal de modificar turno -->
+        <a
+          class="btn-verPaciente"
+          *ngIf="selectedPatient()?.id"
+          [routerLink]="['/patient-details', selectedPatient()?.id]"
+          [queryParams]="{ fecha: modalSelectedDate() | date: 'yyyy-MM-dd', hora: modalSelectedTime() }"
+          [queryParamsHandling]="'merge'"
+          target="_blank"
+          (click)="$event.stopPropagation()"
+        >
+          ver
+        </a>
 
         <!-- Campos de input de Teléfono y Email (visibles y readonly) -->
         <div class="form-group">
@@ -157,16 +168,15 @@
               [showToggle]="false"
             ></app-calendar>
 
-            <!-- Selector de hora -->
+            <!-- Selector de hora - AHORA FILTRADO POR HORAS DISPONIBLES -->
             <select
               id="modalTimeSelectModify"
               [value]="modalSelectedTime()"
               (change)="modalSelectedTime.set($any($event.target).value)"
               class="form-control time-select"
             >
-              <option *ngFor="let hour of [8,9,10,11,12,13,14,15,16,17,18,19,20,21,22]"
-                      [value]="(hour < 10 ? '0' : '') + hour + ':00'">
-                {{ (hour < 10 ? '0' : '') + hour }}:00
+              <option *ngFor="let hour of availableModalHours()" [value]="hour">
+                {{ hour }}
               </option>
             </select>
           </div>
@@ -212,6 +222,30 @@
     </div>
   </div>
 
+  <!-- NUEVO: MODAL DE CONFIRMACIÓN PERSONALIZADO -->
+  <div class="modal-overlay" *ngIf="showCustomConfirmModal()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Confirmar Acción</h2>
+        <button (click)="handleCustomConfirm(false)" class="close-btn">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>{{ customConfirmMessage() }}</p>
+      </div>
+      <div class="modal-footer modal-button-group">
+        <button type="button" class="btn btn-cancelar" (click)="handleCustomConfirm(false)">
+          <span class="material-symbols-outlined btn-icon">cancel</span>Cancelar
+        </button>
+        <button type="button" class="btn btn-asignar" (click)="handleCustomConfirm(true)">
+          <span class="material-symbols-outlined btn-icon">check_circle</span>Confirmar
+        </button>
+      </div>
+    </div>
+  </div>
+  <!-- FIN NUEVO MODAL DE CONFIRMACIÓN PERSONALIZADO -->
+
   <app-header></app-header>
 
   <main class="main">
@@ -249,18 +283,24 @@
                 </span>
               </div>
               <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO' || turno.estado === 'CANCELADO'">
-                <span class="turno-info"
-                  ><p class="turno-title">Paciente:</p> {{ turno.paciente || "-" }}</span
-                >
-                <span class="turno-info"
-                  ><p class="turno-title">Teléfono:</p> {{ turno.telefono || "-" }}</span
-                >
-                <span class="turno-info"
-                  ><p class="turno-title">Email:</p> {{ turno.email || "No tiene" }}</span
-                >
-                <span class="turno-info"
-                  ><p class="turno-title">Duración:</p> {{ turno.duracion}}</span
-                >
+                <span class="turno-info">
+                  <p class="turno-title">Paciente:</p>
+                  <!-- Corrected: Use turno.paciente?.id for routerLink and its condition -->
+                  <a *ngIf="turno.paciente?.id" [routerLink]="['/patient-details', turno.paciente?.id]" class="patient-info-link">
+                    {{ turno.paciente?.firstName }} {{ turno.paciente?.lastName }}
+                  </a>
+                  <!-- Fallback if patient.id is not available but patient object exists -->
+                  <ng-container *ngIf="!turno.paciente?.id && turno.paciente">
+                    {{ turno.paciente?.firstName }} {{ turno.paciente?.lastName }}
+                  </ng-container>
+                  <!-- Fallback if no patient data at all -->
+                  <ng-container *ngIf="!turno.paciente">
+                    -
+                  </ng-container>
+                </span>
+                <span class="turno-info">
+                  <p class="turno-title">Duración:</p> {{ turno.duracion }} minutos 
+                </span>
               </div>
             </div>
 
@@ -317,18 +357,24 @@
                 </span>
               </div>
               <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO' || turno.estado === 'CANCELADO'">
-                <span class="turno-info"
-                  ><p class="turno-title">Paciente:</p> {{ turno.paciente || "-" }}</span
-                >
-                <span class="turno-info"
-                  ><p class="turno-title">Teléfono:</p> {{ turno.telefono || "-" }}</span
-                >
-                <span class="turno-info"
-                  ><p class="turno-title">Email:</p> {{ turno.email || "No tiene" }}</span
-                >
-                <span class="turno-info"
-                  ><p class="turno-title">Duración:</p> {{ turno.duracion }}</span
-                >
+                <span class="turno-info">
+                  <p class="turno-title">Paciente:</p>
+                  <!-- Corrected: Use turno.paciente?.id for routerLink and its condition -->
+                  <a *ngIf="turno.paciente?.id" [routerLink]="['/patient-details', turno.paciente?.id]" class="patient-info-link">
+                    {{ turno.paciente?.firstName }} {{ turno.paciente?.lastName }}
+                  </a>
+                  <!-- Fallback if patient.id is not available but patient object exists -->
+                  <ng-container *ngIf="!turno.paciente?.id && turno.paciente">
+                    {{ turno.paciente?.firstName }} {{ turno.paciente?.lastName }}
+                  </ng-container>
+                  <!-- Fallback if no patient data at all -->
+                  <ng-container *ngIf="!turno.paciente">
+                    -
+                  </ng-container>
+                </span>
+                <span class="turno-info">
+                  <p class="turno-title">Duración:</p> {{ turno.duracion }} minutos 
+                </span>
               </div>
             </div>
 
@@ -363,7 +409,7 @@
               </ng-container>
               <!-- NEW: Show only patient name for CANCELADO state, no buttons -->
               <ng-container *ngIf="turno.estado === 'CANCELADO'">
-                <span class="turno-info">{{ turno.paciente || 'Paciente desconocido' }}</span>
+                  <span class="turno-info">{{ turno.paciente || 'Paciente desconocido' }}</span>
               </ng-container>
             </div>
           </div>
@@ -385,18 +431,24 @@
                 </span>
               </div>
               <div class="turno-centro" *ngIf="turno.estado === 'CONFIRMADO' || turno.estado === 'CANCELADO'">
-                <span class="turno-info"
-                  ><p class="turno-title">Paciente:</p> {{ turno.paciente || "-" }}</span
-                >
-                <span class="turno-info"
-                  ><p class="turno-title">Teléfono:</p> {{ turno.telefono }}</span
-                >
-                <span class="turno-info"
-                  ><p class="turno-title">Email:</p> {{ turno.email || "No tiene" }}</span
-                >
-                <span class="turno-info"
-                  ><p class="turno-title">Duración:</p> {{ turno.duracion }}</span
-                >
+                <span class="turno-info">
+                  <p class="turno-title">Paciente:</p>
+                  <!-- Corrected: Use turno.paciente?.id for routerLink and its condition -->
+                  <a *ngIf="turno.paciente?.id" [routerLink]="['/patient-details', turno.paciente?.id]" class="patient-info-link">
+                    {{ turno.paciente?.firstName }} {{ turno.paciente?.lastName }}
+                  </a>
+                  <!-- Fallback if patient.id is not available but patient object exists -->
+                  <ng-container *ngIf="!turno.paciente?.id && turno.paciente">
+                    {{ turno.paciente?.firstName }} {{ turno.paciente?.lastName }}
+                  </ng-container>
+                  <!-- Fallback if no patient data at all -->
+                  <ng-container *ngIf="!turno.paciente">
+                    -
+                  </ng-container>
+                </span>
+                <span class="turno-info">
+                  <p class="turno-title">Duración:</p> {{ turno.duracion }} minutos 
+                </span>
               </div>
             </div>
 
@@ -431,7 +483,7 @@
               </ng-container>
               <!-- NEW: Show only patient name for CANCELADO state, no buttons -->
               <ng-container *ngIf="turno.estado === 'CANCELADO'">
-                <span class="turno-info">{{ turno.paciente || 'Paciente desconocido' }}</span>
+                  <span class="turno-info">{{ turno.paciente || 'Paciente desconocido' }}</span>
               </ng-container>
             </div>
           </div>

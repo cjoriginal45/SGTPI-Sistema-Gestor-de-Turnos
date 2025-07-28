@@ -7,6 +7,7 @@ import { PatientObservation } from '../interfaces/PatientObservation';
 import { AppointmentRequestDto } from '../interfaces/AppointmentRequestDto';
 import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
 import { environment } from '../environments/environment';
+import { AppointmentPatientDto } from '../interfaces/AppointmentPatientDto';
 
 
 @Injectable({
@@ -21,14 +22,14 @@ export class PatientService { // <-- ¡Asegúrate de que 'export' esté aquí!
    * Obtiene todos los pacientes del backend, ordenados alfabéticamente.
    * @returns Una Promesa que resuelve con un array de pacientes.
    */
-  async getPatients(): Promise<Patient[]> {
+  async getPatients(): Promise<AppointmentPatientDto[]> {
     return new Promise((resolve, reject) => {
-      this.http.get<Patient[]>(`${this.baseUrl}/patients`)
+      this.http.get<AppointmentPatientDto[]>(`${this.baseUrl}/patients`)
         .pipe(
-          catchError(this.handleError<Patient[]>('getPatients', []))
+          catchError(this.handleError<AppointmentPatientDto[]>('getPatients', []))
         )
         .subscribe({
-          next: (patients: Patient[]) => {
+          next: (patients: AppointmentPatientDto[]) => {
             const sortedPatients = patients.sort((a, b) => {
               const nameA = `${a.firstName} ${a.lastName}`.toLowerCase();
               const nameB = `${b.firstName} ${b.lastName}`.toLowerCase();

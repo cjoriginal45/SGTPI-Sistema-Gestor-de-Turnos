@@ -1,12 +1,13 @@
 export interface AppointmentResponseDto {
-  id: number;
-  patientName: string;
-  patientLastName: string;
-  patientPhoneNumber: string;
-  patientEmail: string;
-  fecha: string; // This will likely be 'YYYY/MM/DD' from backend
-  hora:string;
-  state: string;
-  duration: number; // Duration in minutes
-  notes?: string; // Optional field for additional notes
+  id: number; // ID del turno en el backend
+  patientId?: number | null; // ID del paciente (puede ser de nivel superior)
+  patientName?: string;
+  patientLastName?: string;
+  patientPhoneNumber?: string;
+  patientEmail?: string;
+  fecha: string; // Formato YYYY/MM/DD
+  hora: string; // Formato HH:MM:SS
+  state: string; // Estado del turno (e.g., "CONFIRMADO", "CANCELADO")
+  duration: number; // Duración en minutos
+  notes?: string; // Notas de la sesión
   }

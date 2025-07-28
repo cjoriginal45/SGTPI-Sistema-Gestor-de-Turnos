@@ -286,4 +286,61 @@ export class PatientDetailsComponent implements OnInit {
   clearNotification(): void {
     this.notification.set(null);
   }
+
+   // --- NEW: Helper to get display text for appointment status ---
+   protected getTextoEstado(estado: string): string {
+    switch (estado) {
+      case 'DISPONIBLE':
+        return 'Disponible';
+      case 'CONFIRMADO':
+        return 'Confirmado';
+      case 'BLOQUEADO':
+        return 'Bloqueado';
+      case 'CANCELADO':
+        return 'Cancelado';
+      case 'EN_CURSO':
+        return 'En curso';
+      case 'REALIZADO': // This is the new frontend status
+        return 'Realizado';
+      default:
+        return 'Estado desconocido';
+    }
+  }
+
+  // --- NEW: Function to determine the display status of an appointment ---
+  protected getAppointmentDisplayStatus(appointment: AppointmentResponseDto): string {
+    // If the appointment is explicitly cancelled, always show 'Cancelado'
+    if (appointment.state === 'CANCELADO') {
+      return this.getTextoEstado('CANCELADO');
+    }
+
+    // If the appointment is confirmed, check if it's in the past
+    if (appointment.state === 'CONFIRMADO') {
+      // Ensure fecha is in YYYY-MM-DD for reliable Date parsing
+      let formattedFecha = appointment.fecha;
+      if (formattedFecha && formattedFecha.includes('/')) {
+        const parts = formattedFecha.split('/');
+        if (parts.length === 3) {
+          formattedFecha = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+      }
+
+      const appointmentDateTime = new Date(`${formattedFecha}T${appointment.hora}`);
+      const now = new Date();
+
+      // For comparison, normalize both to ignore seconds and milliseconds
+      appointmentDateTime.setSeconds(0);
+      appointmentDateTime.setMilliseconds(0);
+      now.setSeconds(0);
+      now.setMilliseconds(0);
+
+      if (appointmentDateTime < now) {
+        return this.getTextoEstado('REALIZADO');
+      }
+    }
+
+    // For any other state (CONFIRMADO futuro, DISPONIBLE, BLOQUEADO, EN_CURSO),
+    // or if the above conditions aren't met, return the original state's text.
+    return this.getTextoEstado(appointment.state);
+  }
 }

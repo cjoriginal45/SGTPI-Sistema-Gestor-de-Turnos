@@ -1,10 +1,10 @@
 import { AppointmentPatientDto } from './AppointmentPatientDto';
 
 export interface AppointmentRequestDto {
-  duration: number; // The duration of the appointment (e.g., in minutes)
-  fecha: string; // Formatted as 'YYYY/MM/DD'
-  hora: string; // Formatted as 'HH:mm:ss'
-  patient: AppointmentPatientDto; // Nested patient DTO
+  fecha: string; // Formato YYYY/MM/DD
+  hora: string; // Formato HH:MM:SS
+  duration: number;
+  patient: AppointmentPatientDto; // El paciente debe ser un objeto AppointmentPatientDto
   state: string;
-  sessionNotes?:string;
+  sessionNotes?: string;
 }

@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Email;
 public record AppointmentResponseDto(
         @JsonProperty("id")
         int id,
+        @JsonProperty("patientId")
+        Integer patientId,
         @JsonProperty("patientName")
         String patientName,
         @JsonProperty("patientLastName")
@@ -22,6 +24,10 @@ public record AppointmentResponseDto(
         @JsonProperty("hora")
         String hora,
         @JsonProperty("state")
-        String state
+        String state,
+        @JsonProperty("duration")
+        Integer duration,
+        @JsonProperty("notes")
+        String notes
         ) {
 }
