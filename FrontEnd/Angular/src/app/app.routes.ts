@@ -4,6 +4,7 @@ import { PatientsListComponent } from './components/pacientes-list/pacientes-lis
 import { NgModule } from '@angular/core';
 import { PatientDetailsComponent } from './components/patient-details/patient-details.component';
 import { AppointmentsHistoryComponent } from './components/appointments-history/appointments-history.component';
+import { ReportsComponent } from './components/reports/reports.component';
 
 export const routes: Routes = [
     { 
@@ -22,6 +23,10 @@ export const routes: Routes = [
     {
       path: 'historial',
       component: AppointmentsHistoryComponent
+    },
+    {
+      path: 'reportes',
+      component: ReportsComponent
     }
   ];
 

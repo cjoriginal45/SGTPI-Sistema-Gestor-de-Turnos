@@ -54,7 +54,7 @@ public class PatientController {
     @GetMapping("/patients")
     public ResponseEntity<?> getAllPatients() {
         List<PatientDto> patients = patientService.getPatients();
-        return ResponseEntity.ok(patients);        // 200 con los datos
+        return ResponseEntity.ok(patients);
     }
 
     //modificar paciente
@@ -79,7 +79,5 @@ public class PatientController {
         }
         return ResponseEntity.notFound().build();
     }
-    //set y get observations
-    //set horario preferido
   
 }

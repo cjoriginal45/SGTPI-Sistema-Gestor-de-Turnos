@@ -11,12 +11,14 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
-import lombok.Builder;
-import lombok.Data;
+
+import lombok.*;
 
 @Data
 @Builder
 @Entity
+@AllArgsConstructor
+@RequiredArgsConstructor
 @Table(name = "report_tbl")
 public class Report {
     
@@ -25,6 +27,7 @@ public class Report {
     private Integer id;
     
     @Enumerated(EnumType.STRING)
+    @Column(length = 30)
     private ReportType type;
     
     private LocalDateTime date;

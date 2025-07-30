@@ -48,4 +48,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
 
     Optional<Appointment> findByDateAndIdIsNotAndStatusIn(LocalDateTime date, int id, List<AppointmentStatus> statuses);
 
+    @Query("SELECT a FROM Appointment a WHERE a.status = CANCELADO")
+    List<Appointment> findByStatusCanceled();
+
 }

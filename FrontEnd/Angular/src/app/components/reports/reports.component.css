@@ -1,0 +1,352 @@
+/* src/app/components/reports/reports.component.css */
+
+/* Reutiliza .app-container de styles.css para el layout principal */
+.app-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--background-light), #e0e7ff);
+    padding: 1rem;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-dark);
+  }
+  
+  @media (min-width: 640px) {
+    .app-container {
+      padding: 1.5rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .app-container {
+      padding: 2rem;
+    }
+  }
+  
+  .reports-container {
+    max-width: 90rem; /* Wider container for reports */
+    margin: 2rem auto;
+    padding: 1.5rem;
+    background-color: var(--card-background);
+    border-radius: 1rem;
+    box-shadow: 0 20px 25px -5px var(--shadow-color), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+  
+  @media (min-width: 640px) {
+    .reports-container {
+      padding: 2rem;
+    }
+  }
+  
+  .main-header {
+    font-size: 1.575rem;
+    margin-bottom: 1rem;
+    color: var(--color-header);
+    font-weight: 600;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-self: center;
+    gap: 0.5rem; /* space-x-2 */
+  }
+  
+  .main-header .header-icon {
+    font-size: 2.25rem;
+    color: var(--color-header);
+  }
+  
+  .reports-grid {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  @media (min-width: 768px) {
+    .reports-grid {
+      flex-direction: column;
+      flex-wrap: wrap;
+      gap: 1.5rem; /* Space between report cards */
+    }
+  }
+  
+  /* NEW: Styles for collapsible report categories */
+  .report-category-card {
+    background-color: #F8FAFC; /* Light background for each section */
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border: 1px solid #E5E7EB; /* Light border */
+    overflow: hidden; /* Hide overflowing content when collapsed */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .category-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem; /* py-5 px-6 */
+    background-color: var(--primary-blue); /* Blue background for header */
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .category-header:hover {
+    background-color: var(--dark-blue); /* Darker blue on hover */
+  }
+  
+  .category-header .header-icon {
+    font-size: 1.8rem;
+    color: white; /* White icon */
+    margin-right: 0.75rem;
+  }
+  
+  .category-header h3 {
+    margin: 0; /* Remove default margin from h3 */
+    flex-grow: 1; /* Allow h3 to take available space */
+  }
+  
+  .toggle-icon {
+    font-size: 2rem; /* Larger toggle icon */
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  /* .category-content {
+    // This content is shown/hidden by *ngIf, no specific transition needed here for height
+  } */
+  
+  /* NEW: Styles for individual report items within a category */
+  .report-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.5rem; /* py-3 px-6 */
+    border-bottom: 1px solid #E5E7EB; /* Separator between items */
+    background-color: white;
+  }
+  
+  .report-item:last-child {
+    border-bottom: none; /* No border for the last item */
+  }
+  
+  .report-name {
+    font-size: 1rem;
+    color: var(--text-dark);
+    font-weight: 500;
+    flex-grow: 1; /* Allow name to take space */
+    margin-right: 1rem; /* Space before buttons */
+  }
+  
+  .report-actions {
+    display: flex;
+    gap: 0.5rem; /* Space between PDF and Excel buttons */
+    flex-shrink: 0; /* Prevent buttons from shrinking */
+  }
+  
+  /* NEW: Specific styles for PDF and Excel buttons */
+  .btn-pdf, .btn-excel {
+    padding: 0.5rem 0.75rem; /* Smaller padding for these buttons */
+    border-radius: 0.375rem; /* rounded-md */
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* Subtle shadow */
+    border: none;
+    font-size: 0.875rem; /* Smaller font size */
+  }
+  
+  .btn-pdf {
+    background-color: #DC2626; /* Red for PDF */
+    color: white;
+  }
+  .btn-pdf:hover {
+    background-color: #B91C1C; /* Darker red on hover */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .btn-excel {
+    background-color: #10B981; /* Green for Excel */
+    color: white;
+  }
+  .btn-excel:hover {
+    background-color: #059669; /* Darker green on hover */
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  .btn-pdf .btn-icon, .btn-excel .btn-icon {
+    font-size: 1.1rem; /* Icon size for PDF/Excel buttons */
+    margin-right: 0.25rem; /* Small margin */
+  }
+  
+  
+  /* --- Loading Indicator --- */
+  .loading-indicator {
+    text-align: center;
+    padding: 4rem;
+    color: var(--text-medium);
+  }
+  
+  .spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top: 4px solid var(--primary-blue);
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem auto;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .loading-text {
+    font-size: 1.125rem;
+    font-weight: 500;
+  }
+  
+  /* --- Notifications (reused from global styles) --- */
+  .notification-area {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 50;
+  }
+  
+  .notification-card {
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transform: translateX(100%);
+    animation: slideInRight 0.3s ease-out forwards;
+  }
+  
+  .notification-icon {
+    font-size: 1.5rem;
+  }
+  
+  .notification-message {
+    font-weight: 600;
+  }
+  
+  .notification-close-btn {
+    margin-left: auto;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s ease-in-out;
+  }
+  .notification-close-btn:hover {
+    opacity: 1;
+  }
+  
+  /* Notification Type Colors */
+  .notification-success {
+    background-color: var(--success-green);
+  }
+  .notification-error {
+    background-color: var(--error-red);
+  }
+  .notification-info {
+    background-color: var(--primary-blue);
+  }
+  
+  /* --- Animations (reused from global styles) --- */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  
+  @keyframes scaleIn {
+    from { transform: scale(0.95); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+  }
+  
+  @keyframes slideInRight {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  
+  /* --- Report Parameters Modal Styles --- */
+  /* Reusing .modal-overlay, .modal-content, .modal-header, .modal-body, .modal-button-group from global styles */
+
+  .modal-button-group{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1rem; /* Space between buttons */
+  }
+  
+  .btn-secondary{
+    background-color: var(--error-red);
+  }
+
+  .btn-secondary:hover{
+    background-color: rgb(202, 47, 47);
+  }
+
+  .btn-secondary:focus {
+    box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.5), 0 0 0 6px rgb(202, 47, 47);
+  }
+
+  .modal-report-info {
+    font-size: 1.1rem;
+    color: var(--text-dark);
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .modal-report-info strong {
+    color: var(--dark-blue);
+  }
+  
+  .params-form-grid {
+    display: grid;
+    grid-template-columns: 1fr; /* Single column on small screens */
+    gap: 1rem; /* Space between form groups */
+  }
+  
+  @media (min-width: 600px) {
+    .params-form-grid {
+      grid-template-columns: repeat(2, 1fr); /* Two columns for month/year on larger screens */
+    }
+  }
+  
+  .params-form-grid .form-group.full-width {
+    grid-column: 1 / -1; /* Make calendar inputs span full width */
+  }
+  
+  .selected-date-display {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-medium);
+    font-style: italic;
+    text-align: center;
+  }
+  
+  app-calendar {
+    width: 100%;
+    max-width: 300px;
+    margin: 0.5rem auto;
+    display: block;
+  }
+  
+  @media (min-width: 600px) {
+    .modal-overlay .modal-content {
+      max-width: 35rem;
+    }
+  }
+  

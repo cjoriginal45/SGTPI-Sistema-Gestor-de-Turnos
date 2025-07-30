@@ -50,6 +50,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem; /* space-x-2 */
+    justify-self: center;
   }
   
   .section-header .header-icon {
