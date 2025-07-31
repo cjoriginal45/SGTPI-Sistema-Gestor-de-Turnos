@@ -1,0 +1,36 @@
+<nav class="pagination-container">
+    <button
+      class="pagination-btn"
+      [disabled]="currentPage() === 1"
+      (click)="prevPage()"
+    >
+      <span class="material-symbols-outlined">chevron_left</span>
+      Anterior
+    </button>
+    
+    <div class="page-numbers-group">
+      <ng-container *ngFor="let page of pageNumbers()">
+        <button
+          *ngIf="page !== '...'; else dots"
+          class="page-number-btn"
+          [class.active]="currentPage() === page"
+          (click)="goToPage(page)"
+        >
+          {{ page }}
+        </button>
+        <ng-template #dots>
+          <span class="dots">...</span>
+        </ng-template>
+      </ng-container>
+    </div>
+    
+    <button
+      class="pagination-btn"
+      [disabled]="currentPage() === totalPages()"
+      (click)="nextPage()"
+    >
+      Siguiente
+      <span class="material-symbols-outlined">chevron_right</span>
+    </button>
+  </nav>
+  

@@ -19,9 +19,9 @@ import { CommonModule } from '@angular/common';
 export class CalendarComponent {
   @Output() dateSelected = new EventEmitter<Date>();
 
-  // --- NUEVOS INPUTS ---
-  @Input() initialDate: Date | undefined; // ¡Aquí está el Input que faltaba!
-  @Input() showToggle: boolean = true; // Para controlar la visibilidad del botón en el modal
+  @Input() initialDate: Date | undefined;
+  @Input() showToggle: boolean = true;
+  @Input() allowAnyDate: boolean = false; // Este es el flag que controla la restricción.
 
   // Signals para estado reactivo
   currentDate = signal(new Date());
@@ -46,12 +46,13 @@ export class CalendarComponent {
   ];
   weekDays = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
-  // --- PROPIEDADES COMPUTADAS ---
+  // Propiedades computadas
   currentMonthName = computed(
     () => this.monthNames[this.currentDate().getMonth()]
   );
   currentYear = computed(() => this.currentDate().getFullYear());
 
+  // Esta propiedad ahora se usa solo cuando `allowAnyDate` es false
   maxSelectableDate = computed(() => {
     const date = new Date();
     date.setDate(date.getDate() + 31);
@@ -69,44 +70,29 @@ export class CalendarComponent {
   });
 
   constructor() {
-    // 1. Efecto para reaccionar a cambios en `initialDate`
-    // Este `effect` se ejecutará cuando el componente se inicialice y cuando `initialDate` cambie.
     effect(() => {
       if (this.initialDate) {
         const newDate = new Date(this.initialDate);
-        newDate.setHours(0, 0, 0, 0); // Normalizar a medianoche
+        newDate.setHours(0, 0, 0, 0);
 
-        // Solo actualiza si la fecha recibida es diferente a la ya seleccionada
         if (!this.selectedDate() || this.selectedDate()!.getTime() !== newDate.getTime()) {
-          this.selectedDate.set(newDate); // Establece la fecha seleccionada
-          // Establece el `currentDate` del calendario al primer día del mes de la nueva fecha
+          this.selectedDate.set(newDate);
           this.currentDate.set(new Date(newDate.getFullYear(), newDate.getMonth(), 1));
-          this.renderCalendar(); // Vuelve a renderizar el calendario con la nueva fecha
-          this.dateSelected.emit(newDate); // Emite la fecha si fue actualizada por el input
+          this.renderCalendar();
+          this.dateSelected.emit(newDate);
           console.log('[CalendarComponent] initialDate input changed/set, updated to:', newDate);
         }
-      } else {
-        // Si `initialDate` es undefined o null (ej. al abrir el calendario por primera vez sin una fecha específica)
-        // Puedes decidir si quieres resetear a "hoy" o dejar la selección como está.
-        // Aquí lo dejaremos sin hacer nada específico si `initialDate` se quita,
-        // asumiendo que siempre se le pasará algo cuando sea relevante.
       }
-    }, { allowSignalWrites: true }); // `allowSignalWrites: true` es necesario para modificar signals dentro de un effect
+    }, { allowSignalWrites: true });
 
-    // 2. Renderiza el calendario inicialmente
     this.renderCalendar();
-
-    // 3. Establece "Hoy" como valor inicial de forma segura si no hay `initialDate` proporcionado
-    // Este método solo actúa si `selectedDate` aún no ha sido establecido por el `effect`
     this.initializeSelection();
   }
 
   // --- API PÚBLICA / MANEJO DE EVENTOS ---
 
   onToggleClick() {
-    // Si el calendario se está abriendo, asegúrate de que la fecha actual sea la que se muestre
     if (!this.isOpen()) {
-      // Si ya hay una fecha seleccionada, ir a esa fecha. Si no, ir a hoy.
       const dateToShow = this.selectedDate() || new Date();
       this.currentDate.set(new Date(dateToShow.getFullYear(), dateToShow.getMonth(), 1));
       this.renderCalendar();
@@ -128,8 +114,8 @@ export class CalendarComponent {
     const selectedDate = new Date(date.getFullYear(), date.getMonth(), day.dayNumber);
 
     this.selectedDate.set(selectedDate);
-    this.dateSelected.emit(selectedDate); // Asegúrate que esto se está ejecutando
-    this.isOpen.set(false); // Cierra el calendario al seleccionar un día
+    this.dateSelected.emit(selectedDate);
+    this.isOpen.set(false);
 
     this.highlightSelectedDay(day.dayNumber);
   }
@@ -140,7 +126,7 @@ export class CalendarComponent {
         const isSelected =
           d.dayNumber === dayNumber &&
           d.selectable &&
-          this.isCurrentMonth(this.createDateFromDay(d.dayNumber)); // Asegúrate de que es del mes visible
+          this.isCurrentMonth(this.createDateFromDay(d.dayNumber));
 
         return {
           ...d,
@@ -155,7 +141,6 @@ export class CalendarComponent {
   // --- LÓGICA INTERNA ---
 
   private initializeSelection() {
-    // Solo inicializa la selección si `selectedDate` aún no ha sido establecido por el `effect`
     if (this.selectedDate() === null) {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -174,30 +159,26 @@ export class CalendarComponent {
 
         if (todayObject) {
           this.selectedDate.set(new Date(today.getFullYear(), today.getMonth(), today.getDate()));
-          // No emitir aquí para evitar doble emisión si el padre ya estableció initialDate
         }
       }
     }
   }
-
 
   private renderCalendar() {
     const date = this.currentDate();
     const year = date.getFullYear();
     const month = date.getMonth();
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalizar 'today' para evitar problemas con la hora
+    today.setHours(0, 0, 0, 0);
 
     const firstDay = new Date(year, month, 1);
-    // getDay() devuelve 0 para domingo, 1 para lunes...
-    // Queremos que lunes sea el primer día (índice 0 en weekDays), por eso (day === 0 ? 6 : day - 1)
-    const firstDayIndex = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1; // Convertir 0 (Domingo) a 6
+    const firstDayIndex = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
 
     const lastDay = new Date(year, month + 1, 0);
     const prevLastDay = new Date(year, month, 0).getDate();
 
-    const lastDayIndex = lastDay.getDay() === 0 ? 6 : lastDay.getDay() - 1; // Convertir 0 (Domingo) a 6
-    const nextDays = (7 - lastDayIndex - 1 + 7) % 7; // Días para rellenar la última semana
+    const lastDayIndex = lastDay.getDay() === 0 ? 6 : lastDay.getDay() - 1;
+    const nextDays = (7 - lastDayIndex - 1 + 7) % 7;
 
     const daysArray = [];
 
@@ -209,9 +190,13 @@ export class CalendarComponent {
     // Días del mes actual
     for (let i = 1; i <= lastDay.getDate(); i++) {
       const dayDate = new Date(year, month, i);
-      dayDate.setHours(0, 0, 0, 0); // Normalizar
+      dayDate.setHours(0, 0, 0, 0);
+
+      // Lógica de restricción de fecha actualizada
+      // `isSelectable` es true si `allowAnyDate` es true O si la fecha está dentro del rango permitido
+      const isSelectable = this.allowAnyDate || (dayDate >= today && dayDate <= this.maxSelectableDate());
+      const isDisabled = !isSelectable;
       const isToday = dayDate.getTime() === today.getTime();
-      const isDisabled = dayDate < today || dayDate > this.maxSelectableDate();
       const isSelected = this.selectedDate() && dayDate.getTime() === this.selectedDate()!.getTime();
 
       let classes = isToday ? 'hoy' : '';
@@ -246,13 +231,11 @@ export class CalendarComponent {
     };
   }
 
-  // Helper para verificar si un día pertenece al mes que se está mostrando
   private isCurrentMonth(date: Date): boolean {
     return date.getMonth() === this.currentDate().getMonth() &&
            date.getFullYear() === this.currentDate().getFullYear();
   }
 
-  // Helper para crear un objeto Date a partir de un `dayNumber` y el `currentDate` del calendario
   private createDateFromDay(dayNumber: number): Date {
     const year = this.currentDate().getFullYear();
     const month = this.currentDate().getMonth();

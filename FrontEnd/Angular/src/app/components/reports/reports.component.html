@@ -1,301 +1,303 @@
 <!-- src/app/components/reports/reports.component.html -->
 
 <div class="app-container">
-    <app-header></app-header>
+    <app-header></app-header>
   
-    <!-- Notification Area -->
-    <div *ngIf="notification()" class="notification-area">
-      <div
-        [ngClass]="{
-          'notification-success': notification()?.tipo === 'success',
-          'notification-error': notification()?.tipo === 'error',
-          'notification-info': notification()?.tipo === 'info'
-        }"
-        class="notification-card"
-        role="alert"
-      >
-        <span class="material-symbols-outlined notification-icon">
-          {{ notification()?.tipo === 'success' ? 'check_circle' : (notification()?.tipo === 'error' ? 'error' : 'info') }}
-        </span>
-        <p class="notification-message">{{ notification()?.mensaje }}</p>
-        <button (click)="clearNotification()" class="notification-close-btn">
-          <span class="material-symbols-outlined">close</span>
-        </button>
-      </div>
-    </div>
+    <!-- Notification Area -->
+    <div *ngIf="notification()" class="notification-area">
+      <div
+        [ngClass]="{
+          'notification-success': notification()?.tipo === 'success',
+          'notification-error': notification()?.tipo === 'error',
+          'notification-info': notification()?.tipo === 'info'
+        }"
+        class="notification-card"
+        role="alert"
+      >
+        <span class="material-symbols-outlined notification-icon">
+          {{ notification()?.tipo === 'success' ? 'check_circle' : (notification()?.tipo === 'error' ? 'error' : 'info') }}
+        </span>
+        <p class="notification-message">{{ notification()?.mensaje }}</p>
+        <button (click)="clearNotification()" class="notification-close-btn">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      </div>
+    </div>
   
-    <div class="reports-container">
-      <h2 class="main-header">
-        <span class="material-symbols-outlined header-icon">assessment</span>
-        Generador de Reportes
-      </h2>
+    <div class="reports-container">
+      <h2 class="main-header">
+        <span class="material-symbols-outlined header-icon">assessment</span>
+        Generador de Reportes
+      </h2>
   
-      <!-- Loading Indicator -->
-      <div *ngIf="loading()" class="loading-indicator">
-        <div class="spinner"></div>
-        <p class="loading-text">Generando reporte...</p>
-      </div>
+      <!-- Loading Indicator -->
+      <div *ngIf="loading()" class="loading-indicator">
+        <div class="spinner"></div>
+        <p class="loading-text">Generando reporte...</p>
+      </div>
   
-      <div class="reports-grid">
-        <!-- Sección: Reportes de Pacientes -->
-        <div class="report-category-card">
-          <div class="category-header" (click)="toggleCategory('patients')">
-            <span class="material-symbols-outlined header-icon">group</span>
-            <h3>Reportes de Pacientes</h3>
-            <span class="material-symbols-outlined toggle-icon">{{ isPatientsExpanded() ? 'expand_less' : 'expand_more' }}</span>
-          </div>
-          <div class="category-content" *ngIf="isPatientsExpanded()">
-            <div class="report-item">
-              <span class="report-name">Total de Pacientes</span>
-              <div class="report-actions">
-                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.PACIENTES_TOTAL, ReportFormat.PDF)">
-                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
-                </button>
-                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.PACIENTES_TOTAL, ReportFormat.EXCEL)">
-                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
-                </button>
-              </div>
-            </div>
-            <div class="report-item">
-              <span class="report-name">Paciente con Más Turnos</span>
-              <div class="report-actions">
-                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.PACIENTE_MAS_TURNOS, ReportFormat.PDF)">
-                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
-                </button>
-                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.PACIENTE_MAS_TURNOS, ReportFormat.EXCEL)">
-                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
-                </button>
-              </div>
-            </div>
-            <div class="report-item">
-              <span class="report-name">Paciente con Más Cancelaciones</span>
-              <div class="report-actions">
-                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.PACIENTE_MAS_CANCELACIONES, ReportFormat.PDF)">
-                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
-                </button>
-                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.PACIENTE_MAS_CANCELACIONES, ReportFormat.EXCEL)">
-                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
-                </button>
-              </div>
-            </div>
-            <div class="report-item">
-              <span class="report-name">Nuevos Pacientes (Mes)</span>
-              <div class="report-actions">
-                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.NUEVOS_PACIENTES_MES, ReportFormat.PDF)">
-                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
-                </button>
-                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.NUEVOS_PACIENTES_MES, ReportFormat.EXCEL)">
-                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="reports-grid">
+        <!-- Sección: Reportes de Pacientes -->
+        <div class="report-category-card">
+          <div class="category-header" (click)="toggleCategory('patients')">
+            <span class="material-symbols-outlined header-icon">group</span>
+            <h3>Reportes de Pacientes</h3>
+            <span class="material-symbols-outlined toggle-icon">{{ isPatientsExpanded() ? 'expand_less' : 'expand_more' }}</span>
+          </div>
+          <div class="category-content" *ngIf="isPatientsExpanded()">
+            <!-- Reporte: Total de Pacientes -->
+            <div class="report-item">
+              <span class="report-name">Total de Pacientes</span>
+              <div class="report-actions">
+                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.PACIENTES_TOTAL, ReportFormat.PDF)">
+                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
+                </button>
+                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.PACIENTES_TOTAL, ReportFormat.EXCEL)">
+                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
+                </button>
+              </div>
+            </div>
+            <!-- Reporte: Paciente con Más Turnos -->
+            <div class="report-item">
+              <span class="report-name">Paciente con Más Turnos</span>
+              <div class="report-actions">
+                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.PACIENTE_MAS_TURNOS, ReportFormat.PDF)">
+                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
+                </button>
+                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.PACIENTE_MAS_TURNOS, ReportFormat.EXCEL)">
+                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
+                </button>
+              </div>
+            </div>
+            <!-- Reporte: Paciente con Más Cancelaciones -->
+            <div class="report-item">
+              <span class="report-name">Cantidad de turnos este mes</span>
+              <div class="report-actions">
+                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.CANT_TURNOS_MES, ReportFormat.PDF)">
+                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
+                </button>
+                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.CANT_TURNOS_MES, ReportFormat.EXCEL)">
+                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
+                </button>
+              </div>
+            </div>
+            <!-- Reporte: Paciente con Más Turnos (por mes) -->
+            <div class="report-item">
+              <span class="report-name">Paciente con Más Turnos (Mes)</span>
+              <div class="report-actions">
+                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.PACIENTE_MAS_TURNOS_MES, ReportFormat.PDF)">
+                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
+                </button>
+                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.PACIENTE_MAS_TURNOS_MES, ReportFormat.EXCEL)">
+                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
   
-        <!-- Sección: Reportes de Turnos -->
-        <div class="report-category-card">
-          <div class="category-header" (click)="toggleCategory('appointments')">
-            <span class="material-symbols-outlined header-icon">event_available</span>
-            <h3>Reportes de Turnos</h3>
-            <span class="material-symbols-outlined toggle-icon">{{ isAppointmentsExpanded() ? 'expand_less' : 'expand_more' }}</span>
-          </div>
-          <div class="category-content" *ngIf="isAppointmentsExpanded()">
-            <div class="report-item">
-              <span class="report-name">Cantidad de Turnos por Mes</span>
-              <div class="report-actions">
-                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.CANT_TURNOS_MES, ReportFormat.PDF)">
-                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
-                </button>
-                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.CANT_TURNOS_MES, ReportFormat.EXCEL)">
-                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
-                </button>
-              </div>
-            </div>
-            <div class="report-item">
-              <span class="report-name">Total de Turnos Cancelados</span>
-              <div class="report-actions">
-                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.TURNOS_CANCELADOS_TOTAL, ReportFormat.PDF)">
-                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
-                </button>
-                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.TURNOS_CANCELADOS_TOTAL, ReportFormat.EXCEL)">
-                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
-                </button>
-              </div>
-            </div>
-            <div class="report-item">
-              <span class="report-name">Total de Turnos Realizados</span>
-              <div class="report-actions">
-                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.TURNOS_REALIZADOS_TOTAL, ReportFormat.PDF)">
-                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
-                </button>
-                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.TURNOS_REALIZADOS_TOTAL, ReportFormat.EXCEL)">
-                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
-                </button>
-              </div>
-            </div>
-            <div class="report-item">
-              <span class="report-name">Duración Promedio de Turnos</span>
-              <div class="report-actions">
-                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.PROMEDIO_DURACION_TURNOS, ReportFormat.PDF)">
-                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
-                </button>
-                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.PROMEDIO_DURACION_TURNOS, ReportFormat.EXCEL)">
-                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
-                </button>
-              </div>
-            </div>
-            <div class="report-item">
-              <span class="report-name">Turnos para un Día Específico</span>
-              <div class="report-actions">
-                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.TURNOS_DIA_DADO, ReportFormat.PDF)">
-                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
-                </button>
-                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.TURNOS_DIA_DADO, ReportFormat.EXCEL)">
-                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- Sección: Reportes de Turnos -->
+        <div class="report-category-card">
+          <div class="category-header" (click)="toggleCategory('appointments')">
+            <span class="material-symbols-outlined header-icon">event_available</span>
+            <h3>Reportes de Turnos</h3>
+            <span class="material-symbols-outlined toggle-icon">{{ isAppointmentsExpanded() ? 'expand_less' : 'expand_more' }}</span>
+          </div>
+          <div class="category-content" *ngIf="isAppointmentsExpanded()">
+            <!-- Reporte: Día con Mayor Cant. de Turnos -->
+            <div class="report-item">
+              <span class="report-name">Día con Mayor Cant. de Turnos</span>
+              <div class="report-actions">
+                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.DIA_MAYOR_CANT_TURNOS, ReportFormat.PDF)">
+                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
+                </button>
+                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.DIA_MAYOR_CANT_TURNOS, ReportFormat.EXCEL)">
+                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
+                </button>
+              </div>
+            </div>
+            <!-- Reporte: Turnos para un Día Específico -->
+            <div class="report-item">
+              <span class="report-name">Turnos para un Día Específico</span>
+              <div class="report-actions">
+                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.TURNOS_DIA_DADO, ReportFormat.PDF)">
+                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
+                </button>
+                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.TURNOS_DIA_DADO, ReportFormat.EXCEL)">
+                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
+                </button>
+              </div>
+            </div>
+            <!-- Reporte: Turnos en un Rango de Fechas -->
+            <div class="report-item">
+              <span class="report-name">Turnos en un Rango de Fechas</span>
+              <div class="report-actions">
+                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.TURNOS_RANGO_FECHAS, ReportFormat.PDF)">
+                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
+                </button>
+                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.TURNOS_RANGO_FECHAS, ReportFormat.EXCEL)">
+                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
+                </button>
+              </div>
+            </div>
+            <!-- Reporte: Turnos Cancelados (Total) -->
+            <div class="report-item">
+              <span class="report-name">Total de Turnos Cancelados</span>
+              <div class="report-actions">
+                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.TURNOS_CANCELADOS_TOTAL, ReportFormat.PDF)">
+                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
+                </button>
+                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.TURNOS_CANCELADOS_TOTAL, ReportFormat.EXCEL)">
+                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
+                </button>
+              </div>
+            </div>
+            <!-- Reporte: Turnos Realizados (Total) -->
+            <div class="report-item">
+              <span class="report-name">Total de Turnos Realizados</span>
+              <div class="report-actions">
+                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.TURNOS_REALIZADOS_TOTAL, ReportFormat.PDF)">
+                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
+                </button>
+                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.TURNOS_REALIZADOS_TOTAL, ReportFormat.EXCEL)">
+                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
+                </button>
+              </div>
+            </div>
+            <!-- Reporte: Promedio de Duración de Turnos -->
+            <div class="report-item">
+              <span class="report-name">Promedio Duración de Turnos</span>
+              <div class="report-actions">
+                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.PROMEDIO_DURACION_TURNOS, ReportFormat.PDF)">
+                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
+                </button>
+                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.PROMEDIO_DURACION_TURNOS, ReportFormat.EXCEL)">
+                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
+                </button>
+              </div>
+            </div>
+            <!-- Reporte: Turnos Mes Actual -->
+            <div class="report-item">
+              <span class="report-name">Turnos del Mes Actual</span>
+              <div class="report-actions">
+                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.TURNOS_MES_ACTUAL, ReportFormat.PDF)">
+                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
+                </button>
+                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.TURNOS_MES_ACTUAL, ReportFormat.EXCEL)">
+                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   
-        <!-- Sección: Reportes de Fechas -->
-        <div class="report-category-card">
-          <div class="category-header" (click)="toggleCategory('dates')">
-            <span class="material-symbols-outlined header-icon">date_range</span>
-            <h3>Reportes de Fechas</h3>
-            <span class="material-symbols-outlined toggle-icon">{{ isDatesExpanded() ? 'expand_less' : 'expand_more' }}</span>
-          </div>
-          <div class="category-content" *ngIf="isDatesExpanded()">
-            <div class="report-item">
-              <span class="report-name">Turnos del Mes Actual</span>
-              <div class="report-actions">
-                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.TURNOS_MES_ACTUAL, ReportFormat.PDF)">
-                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
-                </button>
-                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.TURNOS_MES_ACTUAL, ReportFormat.EXCEL)">
-                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
-                </button>
-              </div>
-            </div>
-            <div class="report-item">
-              <span class="report-name">Turnos en un Rango de Fechas</span>
-              <div class="report-actions">
-                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.TURNOS_RANGO_FECHAS, ReportFormat.PDF)">
-                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
-                </button>
-                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.TURNOS_RANGO_FECHAS, ReportFormat.EXCEL)">
-                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
-                </button>
-              </div>
-            </div>
-            <div class="report-item">
-              <span class="report-name">Día con Mayor Cant. de Turnos</span>
-              <div class="report-actions">
-                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.DIA_MAYOR_CANT_TURNOS, ReportFormat.PDF)">
-                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
-                </button>
-                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.DIA_MAYOR_CANT_TURNOS, ReportFormat.EXCEL)">
-                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
-                </button>
-              </div>
-            </div>
-            <div class="report-item">
-              <span class="report-name">Turnos por Estado (Mes)</span>
-              <div class="report-actions">
-                <button class="btn btn-pdf" (click)="openReportParamsModal(ReportType.TURNOS_POR_ESTADO_MES, ReportFormat.PDF)">
-                  <span class="material-symbols-outlined btn-icon">picture_as_pdf</span>PDF
-                </button>
-                <button class="btn btn-excel" (click)="openReportParamsModal(ReportType.TURNOS_POR_ESTADO_MES, ReportFormat.EXCEL)">
-                  <span class="material-symbols-outlined btn-icon">table_chart</span>Excel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <!-- Modal de Parámetros del Reporte -->
+    <div class="modal-overlay" *ngIf="showReportParamsModal()">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Parámetros del Reporte</h2>
+          <button (click)="closeReportParamsModal()" class="close-btn">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-report-info">
+            Generando reporte: <strong>{{ currentReportType() | titlecase }}</strong> en formato <strong>{{ currentReportFormat() }}</strong>
+          </p>
   
-    <!-- Report Parameters Modal (remains largely the same) -->
-    <div class="modal-overlay" *ngIf="showReportParamsModal()">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Parámetros del Reporte</h2>
-          <button (click)="closeReportParamsModal()" class="close-btn">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p class="modal-report-info">
-            Generando reporte: <strong>{{ currentReportType() | titlecase }}</strong> en formato <strong>{{ currentReportFormat() }}</strong>
-          </p>
+          <!-- Entradas de Parámetros Dinámicos -->
+          <div class="params-form-grid">
+            <!-- Entrada de Fecha Única -->
+            <ng-container *ngIf="getRequiredParams().includes('singleDate')">
+              <div class="form-group full-width">
+                <label>Seleccionar Fecha:</label>
+                <app-calendar
+                  (dateSelected)="onModalDateSelected($event, 'startDate')"
+                  [initialDate]="modalParamStartDate() || undefined"
+                  [showToggle]="false"
+                  [allowAnyDate]="true"
+                ></app-calendar>
+                <p class="selected-date-display" *ngIf="modalParamStartDate()">
+                  Fecha seleccionada: {{ modalParamStartDate() | date:'fullDate' }}
+                </p>
+              </div>
+            </ng-container>
   
-          <!-- Dynamic Parameter Inputs -->
-          <div class="params-form-grid">
-            <!-- Month and Year Inputs -->
-            <ng-container *ngIf="getRequiredParams().includes('month') && getRequiredParams().includes('year')">
-              <div class="form-group">
-                <label for="reportMonth">Mes:</label>
-                <input type="number" id="reportMonth" class="form-input"
-                       [(ngModel)]="modalParamMonth" placeholder="Ej: 7" min="1" max="12" required>
-              </div>
-              <div class="form-group">
-                <label for="reportYear">Año:</label>
-                <input type="number" id="reportYear" class="form-input"
-                       [(ngModel)]="modalParamYear" placeholder="Ej: 2025" min="1900" max="2100" required>
-              </div>
-            </ng-container>
+            <!-- Entradas de Rango de Fechas -->
+            <ng-container *ngIf="getRequiredParams().includes('startDate') && getRequiredParams().includes('endDate')">
+              <div class="form-group full-width">
+                <label>Fecha de Inicio:</label>
+                <app-calendar
+                  (dateSelected)="onModalDateSelected($event, 'startDate')"
+                  [initialDate]="modalParamStartDate() || undefined"
+                  [showToggle]="false"
+                  [allowAnyDate]="true"
+                ></app-calendar>
+                <p class="selected-date-display" *ngIf="modalParamStartDate()">
+                  Inicio: {{ modalParamStartDate() | date:'dd/MM/yyyy' }}
+                </p>
+              </div>
+              <div class="form-group full-width">
+                <label>Fecha de Fin:</label>
+                <app-calendar
+                  (dateSelected)="onModalDateSelected($event, 'endDate')"
+                  [initialDate]="modalParamEndDate() || undefined"
+                  [showToggle]="false"
+                  [allowAnyDate]="true"
+                ></app-calendar>
+                <p class="selected-date-display" *ngIf="modalParamEndDate()">
+                  Fin: {{ modalParamEndDate() | date:'dd/MM/yyyy' }}
+                </p>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+        <div class="modal-footer modal-button-group">
+          <button (click)="closeReportParamsModal()" class="btn btn-secondary">
+            <span class="material-symbols-outlined btn-icon">cancel</span>Cancelar
+          </button>
+          <button (click)="confirmGenerateReport()" class="btn btn-success" [disabled]="!isFormValid()">
+            <span class="material-symbols-outlined btn-icon">download</span>Generar Reporte
+          </button>
+        </div>
+      </div>
+    </div>
   
-            <!-- Single Date Input (using CalendarComponent) -->
-            <ng-container *ngIf="getRequiredParams().includes('singleDate')">
-              <div class="form-group full-width">
-                <label>Seleccionar Fecha:</label>
-                <app-calendar
-                  (dateSelected)="onModalDateSelected($event, 'singleDate')"
-                  [initialDate]="modalParamStartDate() || undefined"
-                  [showToggle]="false"
-                ></app-calendar>
-                <p class="selected-date-display" *ngIf="modalParamStartDate()">
-                  Fecha seleccionada: {{ modalParamStartDate() | date:'fullDate' }}
-                </p>
-              </div>
-            </ng-container>
+    <!-- Sección de Reportes Generados -->
+    <div class="reports-generated-container">
+      <h3 class="generated-header">
+        <span class="material-symbols-outlined header-icon">file_download</span>
+        Reportes Generados
+      </h3>
+      <div *ngIf="paginatedReports().length === 0" class="no-reports-message">
+        <p>No se han generado reportes aún.</p>
+      </div>
+      <div class="reports-list" *ngIf="paginatedReports().length > 0">
+        <!-- Se cambió allReports() por paginatedReports() -->
+        <div class="report-generated-item" *ngFor="let report of paginatedReports()">
+          <div class="report-info">
+            <p class="generated-report-name">{{ report.professionalEmail }}</p>
+            <span class="generated-report-details">
+              Generado el {{ report.date | date:'longDate'}}
+              (<span [ngClass]="{'pdf-badge': report.format === 'PDF', 'excel-badge': report.format === 'EXCEL'}">{{ report.format }}</span>)
+            </span>
+          </div>
+          <button class="btn btn-success" (click)="downloadReport(report.id,StringToEnum(report.format))">
+            <span class="material-symbols-outlined btn-icon">cloud_download</span>Descargar
+          </button>
+        </div>
+      </div>
   
-            <!-- Date Range Inputs (using CalendarComponent for each) -->
-            <ng-container *ngIf="getRequiredParams().includes('startDate') && getRequiredParams().includes('endDate')">
-              <div class="form-group full-width">
-                <label>Fecha de Inicio:</label>
-                <app-calendar
-                  (dateSelected)="onModalDateSelected($event, 'startDate')"
-                  [initialDate]="modalParamStartDate() || undefined"
-                  [showToggle]="false"
-                ></app-calendar>
-                <p class="selected-date-display" *ngIf="modalParamStartDate()">
-                  Inicio: {{ modalParamStartDate() | date:'dd/MM/yyyy' }}
-                </p>
-              </div>
-              <div class="form-group full-width">
-                <label>Fecha de Fin:</label>
-                <app-calendar
-                  (dateSelected)="onModalDateSelected($event, 'endDate')"
-                  [initialDate]="modalParamEndDate() || undefined"
-                  [showToggle]="false"
-                ></app-calendar>
-                <p class="selected-date-display" *ngIf="modalParamEndDate()">
-                  Fin: {{ modalParamEndDate() | date:'dd/MM/yyyy' }}
-                </p>
-              </div>
-            </ng-container>
-          </div>
-        </div>
-        <div class="modal-footer modal-button-group">
-          <button (click)="closeReportParamsModal()" class="btn btn-secondary">
-            <span class="material-symbols-outlined btn-icon">cancel</span>Cancelar
-          </button>
-          <button (click)="confirmGenerateReport()" class="btn btn-success" [disabled]="!isFormValid()">
-            <span class="material-symbols-outlined btn-icon">download</span>Generar Reporte
-          </button>
-        </div>
-      </div>
-    </div>
+      <!-- Componente de paginación añadido aquí -->
+      <app-paginator
+        [currentPage]="currentPage"
+        [totalPages]="totalPages"
+        (pageChange)="onPageChange($event)">
+      </app-paginator>
+  
+    </div>
+  
   </div>
   

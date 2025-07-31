@@ -169,7 +169,8 @@ public class ReportService {
                         .filter(app -> {
                             LocalDate date = app.getDate().toLocalDate();
                             return !date.isBefore(start) && !date.isAfter(end)
-                                    && app.getStatus().equals(AppointmentStatus.CANCELADO)
+                                    && ((app.getStatus().equals(AppointmentStatus.CANCELADO))
+                                    || (app.getStatus().equals(AppointmentStatus.CONFIRMADO)))
                                     && app.getPatient() != null;
                         })
                         .collect(Collectors.groupingBy(Appointment::getPatient, Collectors.counting()));
@@ -181,9 +182,18 @@ public class ReportService {
                 Patient pat = maxEntry.map(Map.Entry::getKey).orElse(null);
                 long cont = maxEntry.map(Map.Entry::getValue).orElse(0L);
                 ArrayList lista = new ArrayList<>();
-                lista.set(0,pat);
-                lista.set(1,cont);
-                lista.set(2,start.getMonth().toString());
+
+                if (maxEntry.isPresent()) {
+                    Map.Entry<Patient, Long> entry = maxEntry.get();
+                    lista.add(entry.getKey());
+                    lista.add(entry.getValue());
+                } else {
+                    lista.add(null);
+                    lista.add(0L);
+                }
+
+                // El mes se añade siempre, ya que siempre existe
+                lista.add(start.getMonth().toString());
 
                 data.put("patientMonth", lista);
                 break;

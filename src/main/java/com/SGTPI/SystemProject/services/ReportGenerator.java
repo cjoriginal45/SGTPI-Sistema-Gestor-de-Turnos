@@ -178,9 +178,12 @@ public class ReportGenerator {
     }
 
     private void generateAppointmentsDayPdf(Document document, List<Appointment> appointmentsDay) {
-        document.add(new Paragraph("Cantidad de turnos para este el dia: "+ appointmentsDay.get(1).getDate()
-                +" : "+ appointmentsDay.size()+" dias"));
-        document.add(Chunk.NEWLINE);
+        if (!appointmentsDay.isEmpty()) {
+            document.add(new Paragraph("Cantidad de turnos para el dia: "+ appointmentsDay.get(0).getDate().toLocalDate()
+                    +" : "+ appointmentsDay.size()+" turnos"));
+        } else {
+            document.add(new Paragraph("No se encontraron turnos para el día especificado."));
+        }
 
         PdfPTable table = new PdfPTable(5);
         table.setWidthPercentage(100);
