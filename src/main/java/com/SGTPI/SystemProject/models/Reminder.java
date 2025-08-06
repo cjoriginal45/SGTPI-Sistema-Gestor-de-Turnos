@@ -1,21 +1,17 @@
 
 package com.SGTPI.SystemProject.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
-import lombok.Builder;
-import lombok.Data;
+
+import lombok.*;
 
 @Data
 @Builder
 @Entity
+@AllArgsConstructor
+@RequiredArgsConstructor
 @Table(name="reminder_tbl")
 public class Reminder {
     
@@ -27,8 +23,10 @@ public class Reminder {
     
     @Enumerated(EnumType.STRING)
     private sendMethod method;
-    
+
     private boolean isConfirmed;
+    @Column(name = "is_sent", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean isSent;
     
     @OneToOne
     @JoinColumn(name = "appointment_id")

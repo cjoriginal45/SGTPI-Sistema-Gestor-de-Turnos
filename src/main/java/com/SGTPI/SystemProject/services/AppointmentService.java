@@ -8,13 +8,12 @@ import com.SGTPI.SystemProject.exceptions.AppointmentCancellationException;
 import com.SGTPI.SystemProject.exceptions.AppointmentConflictException;
 import com.SGTPI.SystemProject.mappers.AppointmentMapper;
 import com.SGTPI.SystemProject.mappers.PatientMapper;
-import com.SGTPI.SystemProject.models.Appointment;
-import com.SGTPI.SystemProject.models.AppointmentStatus;
-import com.SGTPI.SystemProject.models.Patient;
-import com.SGTPI.SystemProject.models.Professional;
+import com.SGTPI.SystemProject.models.*;
 import com.SGTPI.SystemProject.repositories.AppointmentRepository;
 import com.SGTPI.SystemProject.repositories.PatientRepository;
 import com.SGTPI.SystemProject.repositories.ProfessionalRepository;
+import com.SGTPI.SystemProject.repositories.ReminderRepository;
+import com.SGTPI.SystemProject.utils.EmailEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.transaction.Transactional;
@@ -28,6 +27,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -45,15 +47,26 @@ public class AppointmentService {
 
     private final ProfessionalRepository professionalRepository;
 
+    private final ReminderRepository reminderRepository;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
+
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
 
     public AppointmentService(AppointmentMapper appMapper, PatientRepository patientRepository, AppointmentRepository appRepository,
-                              ObjectMapper objectMapper, PatientMapper patientMapper, ProfessionalRepository professionalRepository) {
+                              ObjectMapper objectMapper, PatientMapper patientMapper,
+                              ProfessionalRepository professionalRepository,ReminderRepository reminderRepository) {
         this.appMapper = appMapper;
         this.patientRepository = patientRepository;
         this.appRepository = appRepository;
         this.objectMapper = objectMapper;
         this.patientMapper = patientMapper;
         this.professionalRepository = professionalRepository;
+        this.reminderRepository = reminderRepository;
     }
 
     //crear turno
@@ -99,23 +112,57 @@ public class AppointmentService {
             throw new AppointmentBlockedException("Hay un turno cancelado en este horario y no se puede asignar un turno.");
         }
 
-        // --- Manejo del Paciente: Solo se permite asignar a pacientes existentes ---
         if (appointment.getPatient() == null || appointment.getPatient().getId() == null) {
             throw new IllegalArgumentException("Debe seleccionar un paciente existente para asignar el turno.");
         }
 
         Patient existingPatient = patientRepository.findById(appointment.getPatient().getId())
                 .orElseThrow(() -> new IllegalArgumentException("Paciente asociado no encontrado con ID: " + appointment.getPatient().getId()));
-        appointment.setPatient(existingPatient); // Asigna la instancia manejada del paciente existente
+        appointment.setPatient(existingPatient);
 
-        // --- CORRECCIÓN CLAVE AQUÍ: setear al profesional ---
-        // Obtener el profesional con ID 1 de la base de datos
-        // findById devuelve Optional, necesitas usar .orElseThrow() o .get() (con precaución)
+
         Professional defaultProfessional = professionalRepository.findById(1);
-        appointment.setProfessional(defaultProfessional); // Asigna el profesional existente y manejado
+        appointment.setProfessional(defaultProfessional);
 
         // Guardar la entidad
         Appointment savedAppointment = appRepository.save(appointment);
+
+        // --- LÓGICA DEL RECORDATORIO ---
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime reminderSendThreshold = savedAppointment.getDate().minusHours(48);
+        LocalDateTime reminderCreationThreshold = savedAppointment.getDate().minusHours(72);
+
+        if (now.isBefore(reminderSendThreshold)) {
+            // El turno está a más de 48 horas de distancia, podemos enviar un recordatorio.
+            LocalDateTime sendTime = now.isBefore(reminderCreationThreshold) ? reminderCreationThreshold : now;
+
+            Reminder newReminder = Reminder.builder()
+                    .appointment(savedAppointment)
+                    .sendTime(sendTime)
+                    .method(sendMethod.EMAIL)
+                    .isSent(false)
+                    .build();
+
+            reminderRepository.save(newReminder);
+        }
+
+
+
+        if (savedAppointment.getPatient() != null && savedAppointment.getPatient().getEmail() != null) {
+            // Lógica de generación del correo
+            String to = savedAppointment.getPatient().getEmail();
+            String subject = "Confirmación de Cita";
+            StringBuilder body = new StringBuilder();
+            body.append("<h1>¡Hola, ").append(appointment.getPatient().getFirstName()).append("!</h1>");
+            body.append("<p>Tu turno ha sido <strong>CONFIRMADO</strong></p>");
+            body.append("<ul>");
+            body.append("<li><strong>Fecha y Hora:</strong> ").append(appointment.getDate().format(FORMATTER)).append("</li>");
+            body.append("</ul>");
+            body.append("<p>Atentamente, Equipo Médico.</p>");
+
+            // En lugar de llamar directamente al servicio, publicamos un evento
+            eventPublisher.publishEvent(new EmailEvent(this, to, subject, body.toString()));
+        }
 
         // Convertir la entidad guardada a DTO de respuesta
         return appMapper.entityToResponse(savedAppointment);
@@ -265,6 +312,23 @@ public class AppointmentService {
 
 
         Appointment updated = appRepository.save(app);
+
+        if (updated.getPatient() != null && updated.getPatient().getEmail() != null) {
+            // Lógica de generación del correo
+            String to = updated.getPatient().getEmail();
+            String subject = "Cita modificada";
+            StringBuilder body = new StringBuilder();
+            body.append("<h1>¡Hola, ").append(updated.getPatient().getFirstName()).append("!</h1>");
+            body.append("<p>Tu turno ha sido <strong>MODIFICADO</strong></p>");
+            body.append("<ul>");
+            body.append("<li><strong>Fecha y Hora:</strong> ").append(updated.getDate().format(FORMATTER)).append("</li>");
+            body.append("</ul>");
+            body.append("<p>Atentamente, Equipo Médico.</p>");
+
+            // En lugar de llamar directamente al servicio, publicamos un evento
+            eventPublisher.publishEvent(new EmailEvent(this, to, subject, body.toString()));
+        }
+
         return appMapper.entityToResponse(updated);
     }
 
@@ -316,8 +380,54 @@ public class AppointmentService {
             System.out.println("Turno ID " + id + " cancelado con menos de 48h de antelación. Estado: CANCELADO.");
         }
 
-        appRepository.save(appointment); // Guarda los cambios
-        return message; // Devuelve el mensaje de éxito
+        Appointment appointmentToCancel = appRepository.save(appointment);
+
+        if (appointmentToCancel.getPatient() != null && appointmentToCancel.getPatient().getEmail() != null) {
+            // Lógica de generación del correo
+            String to = appointmentToCancel.getPatient().getEmail();
+            String subject = "Cancelacion de cita";
+            StringBuilder body = new StringBuilder();
+            body.append("<h1>¡Hola, ").append(appointmentToCancel.getPatient().getFirstName()).append("!</h1>");
+            body.append("<p>Tu turno ha sido <strong>CANCELADO</strong></p>");
+            body.append("<ul>");
+            body.append("<li><strong>Fecha y Hora:</strong> ").append(appointmentToCancel.getDate().format(FORMATTER)).append("</li>");
+            body.append("</ul>");
+            body.append("<p>Atentamente, Equipo Médico.</p>");
+
+            // En lugar de llamar directamente al servicio, publicamos un evento
+            eventPublisher.publishEvent(new EmailEvent(this, to, subject, body.toString()));
+        }
+
+        return message;
+    }
+
+
+    @Transactional
+    public String cancelAppointmentFromReminder(Integer reminderId) {
+        // Busca el recordatorio por ID
+        Reminder reminder = reminderRepository.findById(reminderId)
+                .orElseThrow(() -> new IllegalArgumentException("Recordatorio no encontrado"));
+
+        Appointment appointment = reminder.getAppointment();
+
+        // Validamos si la ventana de 24 horas de antelación aún está abierta
+        if (LocalDateTime.now().isBefore(appointment.getDate().minusHours(48))) {
+            // Si la ventana está abierta, cancelamos el turno
+            // Usamos la misma lógica que tu método de cancelación, pero sin la validación de tiempo
+            appointment.setStatus(AppointmentStatus.CANCELADO);
+            appRepository.save(appointment);
+
+            // Actualizamos el recordatorio para marcarlo como confirmado
+            reminder.setSent(true);
+            reminderRepository.save(reminder);
+
+            return "Turno cancelado exitosamente desde el recordatorio.";
+        } else {
+            // Si el tiempo de cancelación ya pasó, se considera confirmado
+            reminder.setSent(true);
+            reminderRepository.save(reminder);
+            return "El tiempo para cancelar el turno ha expirado. El turno se considera confirmado.";
+        }
     }
 
 

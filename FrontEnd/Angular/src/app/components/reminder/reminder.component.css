@@ -1,0 +1,111 @@
+/* Estilos generales del contenedor */
+.main-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 1rem;
+    background-color: #f3f4f6;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  /* Estilos de la tarjeta principal */
+  .card {
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    max-width: 24rem;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .card-title {
+    font-size: 1.875rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+  
+  .card-title.text-red {
+    color: #dc2626; /* rojo */
+  }
+  
+  .card-title.text-green {
+    color: #16a34a; /* verde */
+  }
+  
+  .card-message {
+    margin-bottom: 1.5rem;
+    color: #4b5563; /* gris oscuro */
+  }
+  
+  /* Estilos para los botones */
+  .button-confirm {
+    width: 100%;
+    background-color: #ef4444; /* rojo */
+    color: white;
+    font-weight: 700;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    transition-duration: 300ms;
+    margin-bottom: 0.5rem;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .button-confirm:hover {
+    background-color: #dc2626;
+  }
+  
+  .button-abort {
+    width: 100%;
+    color: #6b7280; /* gris */
+    font-weight: 700;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    transition-duration: 300ms;
+    border: none;
+    background: none;
+    cursor: pointer;
+  }
+  
+  .button-abort:hover {
+    color: #374151; /* gris oscuro */
+  }
+  
+  /* Estilos para enlaces */
+  .link-home {
+    display: inline-block;
+    margin-top: 1.5rem;
+    color: #6b7280;
+    text-decoration: none;
+    transition-duration: 300ms;
+  }
+  
+  .link-home:hover {
+    color: #374151;
+  }
+  
+  /* Iconos de estado */
+  .icon-success, .icon-error {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+  }
+  
+  /* Spinner de carga */
+  .spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: #3b82f6; /* azul */
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem auto;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  

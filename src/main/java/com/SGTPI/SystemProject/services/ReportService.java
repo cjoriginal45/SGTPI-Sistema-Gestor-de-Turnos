@@ -322,7 +322,17 @@ public class ReportService {
     private String generateUniqueFileName(ReportType type, ReportFormat format) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
         String typeName = type.name().toLowerCase().replace("_", "-");
-        String formatExtension = format.name().toLowerCase();
+        String formatExtension;
+
+        if (format == ReportFormat.EXCEL) {
+            // La extensión correcta para Excel es "xlsx"
+            formatExtension = "xlsx";
+        } else if (format == ReportFormat.PDF) {
+            formatExtension = "pdf";
+        } else {
+            throw new IllegalArgumentException("Unsupported report format");
+        }
+
         return String.format("%s_%s.%s", typeName, timestamp, formatExtension);
     }
 

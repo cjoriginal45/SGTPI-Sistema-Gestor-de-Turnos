@@ -5,6 +5,7 @@ import { NgModule } from '@angular/core';
 import { PatientDetailsComponent } from './components/patient-details/patient-details.component';
 import { AppointmentsHistoryComponent } from './components/appointments-history/appointments-history.component';
 import { ReportsComponent } from './components/reports/reports.component';
+import { ReminderComponent } from './components/reminder/reminder.component';
 
 export const routes: Routes = [
     { 
@@ -27,7 +28,10 @@ export const routes: Routes = [
     {
       path: 'reportes',
       component: ReportsComponent
-    }
+    },
+    { path: 'cancel/:reminderId',
+       component: ReminderComponent 
+    },
   ];
 
 @NgModule({

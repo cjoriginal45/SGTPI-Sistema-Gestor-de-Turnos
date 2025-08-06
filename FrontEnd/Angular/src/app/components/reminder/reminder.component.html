@@ -1,0 +1,47 @@
+<!-- Contenedor principal centrado -->
+<div class="main-container">
+    <!-- Tarjeta de confirmación/estado -->
+    <div class="card">
+  
+      <!-- Estado inicial: muestra el formulario de confirmación -->
+      <ng-container *ngIf="status === 'initial'">
+        <h1 class="card-title text-red">Cancelar Turno</h1>
+        <p class="card-message">
+          ¿Estás seguro de que deseas cancelar este turno? Esta acción no se puede deshacer.
+        </p>
+        <form (ngSubmit)="confirmCancellation()">
+          <button type="submit" class="button-confirm">
+            Sí, Cancelar
+          </button>
+        </form>
+        <button (click)="abortCancellation()" class="button-abort">
+          No, volver
+        </button>
+      </ng-container>
+  
+      <!-- Estado de carga: muestra un spinner -->
+      <ng-container *ngIf="status === 'loading'">
+        <div class="spinner"></div>
+        <h1 class="card-title">Procesando...</h1>
+        <p class="card-message">Por favor, espera un momento.</p>
+      </ng-container>
+  
+      <!-- Estado de éxito: muestra un mensaje de cancelación exitosa -->
+      <ng-container *ngIf="status === 'success'">
+        <div class="icon-success">✅</div>
+        <h1 class="card-title text-green">¡Turno Cancelado!</h1>
+        <p class="card-message">{{ message }}</p>
+        <a routerLink="/" class="link-home">Volver al inicio</a>
+      </ng-container>
+  
+      <!-- Estado de error: muestra un mensaje de error -->
+      <ng-container *ngIf="status === 'error'">
+        <div class="icon-error">❌</div>
+        <h1 class="card-title text-red">Error</h1>
+        <p class="card-message">{{ message }}</p>
+        <a routerLink="/" class="link-home">Volver al inicio</a>
+      </ng-container>
+  
+    </div>
+  </div>
+  
