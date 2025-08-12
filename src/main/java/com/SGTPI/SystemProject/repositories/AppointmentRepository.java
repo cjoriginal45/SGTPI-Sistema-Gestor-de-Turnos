@@ -36,7 +36,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Intege
     Optional<Appointment> findByDateAndIdIsNotAndStatus(
             @Param("date") LocalDateTime date,
             @Param("excludeId") int excludeId,
-            @Param("status") AppointmentStatus status // <--- ¡CAMBIO CLAVE AQUÍ!
+            @Param("status") AppointmentStatus status
     );
 
     @Query("SELECT a FROM Appointment a WHERE a.date = :date")
