@@ -1,138 +1,156 @@
 <!-- src/app/components/turnos-history/turnos-history.component.html -->
 
 <div class="app-container">
-    <app-header></app-header>
-  
-    <!-- Notification Area -->
-    <div *ngIf="notification()" class="notification-area">
+  <app-header></app-header>
+
+  <!-- Notification Area -->
+  <div *ngIf="notification()" class="notification-area">
       <div
-        [ngClass]="{
-          'notification-success': notification()?.tipo === 'success',
-          'notification-error': notification()?.tipo === 'error',
-          'notification-info': notification()?.tipo === 'info'
-        }"
-        class="notification-card"
-        role="alert"
+          [ngClass]="{
+        'notification-success': notification()?.tipo === 'success',
+        'notification-error': notification()?.tipo === 'error',
+        'notification-info': notification()?.tipo === 'info'
+      }"
+          class="notification-card"
+          role="alert"
       >
-        <span class="material-symbols-outlined notification-icon">
-          {{ notification()?.tipo === 'success' ? 'check_circle' : (notification()?.tipo === 'error' ? 'error' : 'info') }}
-        </span>
-        <p class="notification-message">{{ notification()?.mensaje }}</p>
-        <button (click)="clearNotification()" class="notification-close-btn">
-          <span class="material-symbols-outlined">close</span>
-        </button>
+          <span class="material-symbols-outlined notification-icon">
+        {{ notification()?.tipo === 'success' ? 'check_circle' : (notification()?.tipo === 'error' ? 'error' : 'info') }}
+      </span>
+          <p class="notification-message">{{ notification()?.mensaje }}</p>
+          <button (click)="clearNotification()" class="notification-close-btn">
+              <span class="material-symbols-outlined">close</span>
+          </button>
       </div>
-    </div>
-  
-    <div class="history-container">
+  </div>
+
+  <div class="history-container">
       <h2 class="section-header">
-        <span class="material-symbols-outlined header-icon">history</span>
-        Historial de Todos los Turnos
+          <span class="material-symbols-outlined header-icon">history</span>
+          Historial Completo de Turnos
       </h2>
-  
+
       <!-- Search Bar -->
       <div class="search-bar">
-        <input
-          type="text"
-          placeholder="Buscar por paciente, fecha o estado..."
-          [(ngModel)]="searchQuery"
-          (input)="applyFilter()"
-          class="form-input search-input"
-        />
-        <button (click)="applyFilter()" class="btn btn-primary search-button">
-          <span class="material-symbols-outlined btn-icon">search</span>Buscar
-        </button>
+          <input
+              type="text"
+              placeholder="Buscar por paciente, fecha o estado..."
+              [(ngModel)]="searchQuery"
+              (input)="applyFilter()"
+              class="form-input search-input"
+          />
+          <button (click)="applyFilter()" class="btn btn-primary search-button">
+              <span class="material-symbols-outlined btn-icon">search</span>Buscar
+          </button>
       </div>
-  
+
       <!-- Loading Indicator -->
       <div *ngIf="loading()" class="loading-indicator">
-        <div class="spinner"></div>
-        <p class="loading-text">Cargando historial de turnos...</p>
+          <div class="spinner"></div>
+          <p class="loading-text">Cargando historial de turnos...</p>
       </div>
-  
+
       <ng-container *ngIf="!loading()">
-        <!-- Empty State for Appointments -->
-        <div *ngIf="filteredAppointments().length === 0" class="empty-state">
-          <span class="material-symbols-outlined empty-state-icon">event_busy</span>
-          <p class="empty-state-title">No hay turnos que coincidan con la búsqueda.</p>
-          <p class="empty-state-message">Intenta ajustar tus criterios de búsqueda.</p>
-        </div>
-  
-        <!-- List of Appointments -->
-        <div *ngIf="filteredAppointments().length > 0" class="appointment-list">
-          <div *ngFor="let appointment of filteredAppointments()" class="appointment-item">
-            <div class="appointment-details">
-              <div class="appointment-patient-info">
-                <span class="material-symbols-outlined appointment-icon">person</span>
-                Paciente:
-                <a *ngIf="appointment.patientId" [routerLink]="['/patient-details', appointment.patientId]" class="patient-info-link">
-                  {{ appointment.patientName }} {{ appointment.patientLastName }}
-                </a>
-                <ng-container *ngIf="!appointment.patientId">
-                  {{ appointment.patientName }} {{ appointment.patientLastName }}
-                </ng-container>
+          <!-- Empty State for Appointments -->
+          <div *ngIf="filteredAppointments().length === 0" class="empty-state">
+              <span class="material-symbols-outlined empty-state-icon">event_busy</span>
+              <p class="empty-state-title">No hay turnos que coincidan con la búsqueda.</p>
+              <p class="empty-state-message">Intenta ajustar tus criterios de búsqueda.</p>
+          </div>
+
+          <!-- List of Appointments (now paginated) -->
+          <div *ngIf="pagedAppointments().length > 0" class="appointment-list">
+              <div *ngFor="let appointment of pagedAppointments()" class="appointment-item">
+                  <div class="appointment-details">
+                      <div class="appointment-patient-info">
+                          <span class="material-symbols-outlined appointment-icon">person</span>
+                          Paciente:
+                          <a *ngIf="appointment.patientId" [routerLink]="['/patient-details', appointment.patientId]" class="patient-info-link">
+                              {{ appointment.patientName }} {{ appointment.patientLastName }}
+                          </a>
+                          <ng-container *ngIf="!appointment.patientId">
+                              {{ appointment.patientName }} {{ appointment.patientLastName }}
+                          </ng-container>
+                      </div>
+                      <div class="appointment-date-time">
+                          <span class="material-symbols-outlined appointment-icon">calendar_today</span>
+                          {{ appointment.fecha | date:'dd-MM-yyyy' }}
+                          <span class="material-symbols-outlined appointment-icon">access_time</span>
+                          {{ (appointment.fecha + 'T' + appointment.hora) | date:'shortTime' }}
+                      </div>
+                      <div class="appointment-duration">
+                          Duración: <span>{{ appointment.duration }} minutos</span>
+                      </div>
+                      <div class="appointment-status">
+                          Estado:
+                          <span [ngClass]="{
+                'status-confirmed': getAppointmentDisplayStatus(appointment) === 'Confirmado',
+                'status-in-progress': getAppointmentDisplayStatus(appointment) === 'En curso',
+                'status-cancelled': getAppointmentDisplayStatus(appointment) === 'Cancelado',
+                'status-blocked': getAppointmentDisplayStatus(appointment) === 'Bloqueado',
+                'status-realizado': getAppointmentDisplayStatus(appointment) === 'Realizado'
+              }">{{ getAppointmentDisplayStatus(appointment) }}</span>
+                      </div>
+                  </div>
+                  <div class="button-group">
+                      <button (click)="openNotesModal(appointment)" class="btn btn-purple">
+                          <span class="material-symbols-outlined btn-icon">note_alt</span>Notas de Sesión
+                      </button>
+                  </div>
               </div>
-              <div class="appointment-date-time">
-                <span class="material-symbols-outlined appointment-icon">calendar_today</span>
-                {{ appointment.fecha | date:'dd-MM-yyyy' }}
-                <span class="material-symbols-outlined appointment-icon">access_time</span>
-                {{ (appointment.fecha + 'T' + appointment.hora) | date:'shortTime' }}
-              </div>
-              <div class="appointment-duration">
-                Duración: <span>{{ appointment.duration }} minutos</span>
-              </div>
-              <div class="appointment-status">
-                Estado:
-                <span [ngClass]="{
-                  'status-confirmed': getAppointmentDisplayStatus(appointment) === 'Confirmado',
-                  'status-in-progress': getAppointmentDisplayStatus(appointment) === 'En curso',
-                  'status-cancelled': getAppointmentDisplayStatus(appointment) === 'Cancelado',
-                  'status-blocked': getAppointmentDisplayStatus(appointment) === 'Bloqueado',
-                  'status-realizado': getAppointmentDisplayStatus(appointment) === 'Realizado'
-                }">{{ getAppointmentDisplayStatus(appointment) }}</span>
-              </div>
-            </div>
-            <div class="button-group">
-              <button (click)="openNotesModal(appointment)" class="btn btn-purple">
-                <span class="material-symbols-outlined btn-icon">note_alt</span>Notas de Sesión
+          </div>
+
+          <!-- Pagination Controls -->
+          <div *ngIf="filteredAppointments().length > itemsPerPage()" class="pagination-controls">
+              <button
+                  (click)="previousPage()"
+                  [disabled]="currentPage() === 1"
+                  class="btn btn-secondary pagination-btn"
+              >
+                  <span class="material-symbols-outlined">chevron_left</span> Anterior
               </button>
-            </div>
+              <span class="page-info">Página {{ currentPage() }} de {{ totalPages() }}</span>
+              <button
+                  (click)="nextPage()"
+                  [disabled]="currentPage() === totalPages()"
+                  class="btn btn-secondary pagination-btn"
+              >
+                  Siguiente <span class="material-symbols-outlined">chevron_right</span>
+              </button>
           </div>
-        </div>
       </ng-container>
-    </div>
-  
-    <!-- Notes Modal (reused from PatientDetailsComponent) -->
-    <div *ngIf="showNotesModal()" class="modal-overlay">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Notas del Turno</h2>
-          <button (click)="closeNotesModal()" class="close-btn">
-            <span class="material-symbols-outlined">close</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="modal-appointment-info">
-            Turno del <span>{{ selectedAppointmentForNotes()?.fecha | date:'dd/MM/yyyy' }}</span>
-            a las <span>{{ (selectedAppointmentForNotes()?.fecha + 'T' + selectedAppointmentForNotes()?.hora) | date:'shortTime' }}</span>
-          </div>
-          <textarea
-            class="modal-textarea"
-            rows="8"
-            placeholder="Escribe aquí las notas de la sesión..."
-            [(ngModel)]="currentNotes"
-            name="currentNotes"
-          ></textarea>
-          <div class="button-group modal-button-group">
-            <button (click)="closeNotesModal()" class="btn btn-secondary">
-              <span class="material-symbols-outlined btn-icon">cancel</span>Cancelar
-            </button>
-            <button (click)="saveNotes()" class="btn btn-success">
-              <span class="material-symbols-outlined btn-icon">save</span>Guardar Notas
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
   </div>
-  
+
+  <!-- Notes Modal (reused from PatientDetailsComponent) -->
+  <div *ngIf="showNotesModal()" class="modal-overlay">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h2>Notas del Turno</h2>
+              <button (click)="closeNotesModal()" class="close-btn">
+                  <span class="material-symbols-outlined">close</span>
+              </button>
+          </div>
+          <div class="modal-body">
+              <div class="modal-appointment-info">
+                  Turno del <span>{{ selectedAppointmentForNotes()?.fecha | date:'dd/MM/yyyy' }}</span>
+                  a las <span>{{ (selectedAppointmentForNotes()?.fecha + 'T' + selectedAppointmentForNotes()?.hora) | date:'shortTime' }}</span>
+              </div>
+              <textarea
+                  class="modal-textarea"
+                  rows="8"
+                  placeholder="Escribe aquí las notas de la sesión..."
+                  [(ngModel)]="currentNotes"
+                  name="currentNotes"
+              ></textarea>
+              <div class="button-group modal-button-group">
+                  <button (click)="closeNotesModal()" class="btn btn-secondary">
+                      <span class="material-symbols-outlined btn-icon">cancel</span>Cancelar
+                  </button>
+                  <button (click)="saveNotes()" class="btn btn-success">
+                      <span class="material-symbols-outlined btn-icon">save</span>Guardar Notas
+                  </button>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>

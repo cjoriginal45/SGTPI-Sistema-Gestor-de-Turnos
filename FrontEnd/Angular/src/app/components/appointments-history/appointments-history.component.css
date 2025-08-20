@@ -25,6 +25,7 @@
   .history-container {
     max-width: 72rem; /* Equivalent to max-w-6xl for wider content */
     margin: 2rem auto;
+    margin-top: 4.5rem;
     padding: 1.5rem;
     background-color: var(--card-background);
     border-radius: 1rem;
@@ -126,7 +127,7 @@
     background-color: var(--card-background);
     padding: 1.25rem;
     border-radius: 0.5rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
     border: 1px solid #F3F4F6;
     display: flex;
     flex-direction: column;
@@ -135,8 +136,8 @@
     transition: all 0.2s ease-in-out;
   }
   .appointment-item:hover {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.05);
-    border-color: #BFDBFE;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.05);
+    border-color: #b9cde7;
   }
   
   @media (min-width: 768px) {
@@ -491,3 +492,60 @@
     font-weight: 500;
   }
   
+
+
+  /* Estilos para los controles de paginación */
+.pagination-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  gap: 10px; /* Espacio entre los botones y el texto */
+  font-family: 'Inter', sans-serif;
+}
+
+/* Estilos para los botones de paginación */
+.pagination-btn {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #495057; /* Color de texto más suave */
+  background-color: #e9ecef;
+  border: 1px solid #ced4da;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pagination-btn .material-symbols-outlined {
+  font-size: 18px;
+  margin-right: 5px; /* Espacio entre el icono y el texto */
+  transition: transform 0.2s ease;
+}
+
+/* Efecto hover */
+.pagination-btn:hover:not(:disabled) {
+  background-color: #dee2e6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilo para el botón deshabilitado */
+.pagination-btn:disabled {
+  cursor: not-allowed;
+  background-color: #f8f9fa;
+  color: #adb5bd;
+  border-color: #e9ecef;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Estilos para la información de la página actual */
+.page-info {
+  font-size: 16px;
+  font-weight: 600;
+  color: #495057;
+  white-space: nowrap; /* Evita que el texto se rompa en varias líneas */
+}

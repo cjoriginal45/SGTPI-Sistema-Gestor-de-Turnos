@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -223,5 +224,36 @@ public class AppointmentRepositoryTest {
         assertThat(appointments.size()).isEqualTo(1);
         assertThat(appointments.get(0)).isEqualTo(appointment);
     }
+
+    @Test
+    @DisplayName("test findByDateAndIdIsNotAndStatus")
+    void testFindByDateAndIdIsNotAndStatus(){
+        //given
+        appointment = Appointment.builder()
+                .duration(30)
+                .date(LocalDateTime.of(2025, 9, 2, 10, 0))
+                .status(AppointmentStatus.CANCELADO)
+                .patient(patient)
+                .professional(professional)
+                .build();
+        appointmentRepository.save(appointment);
+
+        LocalDateTime date = LocalDateTime.of(2025, 9, 3, 10, 0);
+        LocalDateTime date2 = LocalDateTime.of(2025, 9, 2, 10, 0);
+        int excludeId = appointment.getId();
+
+        //when
+        Optional<Appointment> patchedAppointment = appointmentRepository
+                .findByDateAndIdIsNotAndStatus(date,excludeId,AppointmentStatus.CONFIRMADO);
+
+        Optional<Appointment> patchedAppointment2 = appointmentRepository
+                .findByDateAndIdIsNotAndStatus(date2,excludeId,AppointmentStatus.CONFIRMADO);
+
+        //then
+        assertThat(patchedAppointment).isEmpty();
+        assertThat(patchedAppointment2).isNotNull();
+    }
+
+
 
 }

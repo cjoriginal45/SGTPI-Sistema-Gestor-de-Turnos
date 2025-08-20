@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
 @Table(name="appointment_tbl")
 public class Appointment {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue()
     private Integer id;
     
     @Column(nullable=false)

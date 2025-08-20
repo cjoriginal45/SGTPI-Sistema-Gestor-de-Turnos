@@ -127,6 +127,7 @@ public class AppointmentService {
         // Guardar la entidad
         Appointment savedAppointment = appRepository.save(appointment);
 
+
         // --- LÓGICA DEL RECORDATORIO ---
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime reminderSendThreshold = savedAppointment.getDate().minusHours(48);

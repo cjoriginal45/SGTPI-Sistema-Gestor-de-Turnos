@@ -150,6 +150,7 @@ body, html {
 .config-icon {
   font-size: 1.8rem; /* Tamaño del icono de configuración */
   vertical-align: middle; /* Alineación vertical */
+  display: none;
 }
 
 .config-dropdown {

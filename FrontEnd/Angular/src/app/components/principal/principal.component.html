@@ -291,7 +291,7 @@
                   </a>
                   <!-- Fallback if patient.id is not available but patient object exists -->
                   <ng-container *ngIf="!turno.paciente?.id && turno.paciente">
-                    {{ turno.paciente?.firstName }} {{ turno.paciente?.lastName }}
+                    {{ turno.paciente?.firstName}} {{ turno.paciente?.lastName }}
                   </ng-container>
                   <!-- Fallback if no patient data at all -->
                   <ng-container *ngIf="!turno.paciente">

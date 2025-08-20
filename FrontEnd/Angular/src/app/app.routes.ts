@@ -9,7 +9,7 @@ import { ReminderComponent } from './components/reminder/reminder.component';
 
 export const routes: Routes = [
     { 
-      path: '', 
+      path: 'principal', 
       component: PrincipalComponent,
       pathMatch: 'full'
     },
