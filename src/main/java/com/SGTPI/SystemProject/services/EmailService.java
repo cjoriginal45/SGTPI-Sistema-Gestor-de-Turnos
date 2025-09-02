@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
 
+//logica de negocio para enviar emails
 @Service
 public class EmailService {
 
@@ -23,61 +24,11 @@ public class EmailService {
     private JavaMailSender mailSender;
     // Define un formateador de fecha para los correos
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-
+    //correo de al app
     private static final String SENDER_EMAIL = "sgtpiofficial@gmail.com";
 
-   /*
-    public void sendConfirmationEmail(Appointment appointment) {
-        String recipientEmail = appointment.getPatient().getEmail();
-        String subject = "Confirmación de Turno #" + appointment.getId();
 
-        // Construcción robusta del cuerpo del correo sin usar String.format()
-        StringBuilder body = new StringBuilder();
-        body.append("<h1>¡Hola, ").append(appointment.getPatient().getFirstName()).append("!</h1>");
-        body.append("<p>Tu turno ha sido <strong>confirmado</strong> con éxito.</p>");
-        body.append("<ul>");
-        body.append("<li><strong>Fecha y Hora:</strong> ").append(appointment.getDate().format(FORMATTER)).append("</li>");
-        body.append("</ul>");
-        body.append("<p>Gracias por confiar en nosotros. Atte, Equipo Médico</p>");
-
-        sendEmail(recipientEmail, subject, body.toString());
-    }
-
-
-    public void sendCancellationEmail(Appointment appointment) {
-        String recipientEmail = appointment.getPatient().getEmail();
-        String subject = "Cancelación de Turno #" + appointment.getId();
-
-        StringBuilder body = new StringBuilder();
-        body.append("<h1>¡Hola, ").append(appointment.getPatient().getFirstName()).append("!</h1>");
-        body.append("<p>Tu turno ha sido <strong>cancelado</strong></p>");
-        body.append("<ul>");
-        body.append("<li><strong>Fecha y Hora:</strong> ").append(appointment.getDate().format(FORMATTER)).append("</li>");
-        body.append("</ul>");
-        body.append("<p>Atentamente, Equipo Médico.</p>");
-
-        sendEmail(recipientEmail, subject, body.toString());
-    }
-
-
-    public void sendModificationEmail(Appointment appointment) {
-        String recipientEmail = appointment.getPatient().getEmail();
-        String subject = "Modificación de Turno #" + appointment.getId();
-
-        StringBuilder body = new StringBuilder();
-        body.append("<h1>¡Hola, ").append(appointment.getPatient().getFirstName()).append("!</h1>");
-        body.append("<p>Tu turno ha sido <strong>modificado</strong>.</p>");
-        body.append("<ul>");
-        body.append("<li><strong>Nueva Fecha y Hora:</strong> ").append(appointment.getDate().format(FORMATTER)).append("</li>");
-        body.append("<li><strong>Estado Actual:</strong> ").append(appointment.getStatus().name()).append("</li>");
-        body.append("</ul>");
-        body.append("<p>Atentamente, Equipo Médico.</p>");
-
-        sendEmail(recipientEmail, subject, body.toString());
-    }
-    */
-
-
+    //metodo asincrono para enviar email
     @Async("emailExecutor")
     @EventListener
     public void handleEmailEvent(EmailEvent event) {

@@ -7,6 +7,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
 
+//clase encargada de enviar emails de forma asincrona
 @Configuration
 @EnableAsync
 public class AsyncEmailConfig {

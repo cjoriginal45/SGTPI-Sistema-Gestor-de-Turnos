@@ -3,6 +3,7 @@ package com.SGTPI.SystemProject.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.*;
 
+//DTO de paciente
 public record PatientDto(
         @JsonProperty("id")
         Integer id,

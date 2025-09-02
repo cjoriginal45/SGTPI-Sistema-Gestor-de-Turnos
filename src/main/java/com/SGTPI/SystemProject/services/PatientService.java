@@ -13,6 +13,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 
+//logica de negocio de paciente
 @Service
 public class PatientService {
 
@@ -85,7 +86,7 @@ public class PatientService {
         return patientRepository.getObservations(phoneNumber);
     }
 
-    //modificar paciente pasando id y datos
+    //modificar/actualizar paciente pasando id y datos
     @Transactional
     public PatientDto partialUpdate(Integer id, Map<String, Object> updates) {
         Patient patient = patientRepository.findById(id)
@@ -112,6 +113,8 @@ public class PatientService {
         return patientMapper.patientToDto(updated);
     }
 
+    //clase estatica observations
+    //se utilizo una clase estatica ya que las observations son parte del objeto paciente
     @Data // Lombok
     @NoArgsConstructor
     @AllArgsConstructor

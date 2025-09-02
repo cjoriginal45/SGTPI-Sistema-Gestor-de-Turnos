@@ -7,6 +7,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 
+//DTO para la lista de reportes
 @Data
 @Builder
 public class ReportMetaDataDto {

@@ -18,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+//controller de appointments
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
 public class AppointmentController {
@@ -102,8 +103,7 @@ public class AppointmentController {
         }
     }
 
-
-
+    //bloquear slot horario
     @PutMapping("/appointments/{slotTime}/{block}")
     public ResponseEntity<?> handleBlockRequest(
             @PathVariable
@@ -119,12 +119,13 @@ public class AppointmentController {
         return ResponseEntity.ok(result);
     }
 
-
+    //set oberservations
     @PatchMapping("/session-notes/{id}")
     public ResponseEntity<?> setObservations(@RequestBody String notes,@PathVariable int id){
         return ResponseEntity.ok(appService.setSessionNotes(notes,id));
     }
 
+    //get observations
     @GetMapping("/get-notes/{id}")
     public ResponseEntity<?> getObservations(@PathVariable int id){
         String notes = appService.getSessionNotes(id);
@@ -135,7 +136,7 @@ public class AppointmentController {
     }
 
 
-    // --- MANEJADORES DE EXCEPCIONES GENERALES (mantenerlos) ---
+    // --- MANEJADORES DE EXCEPCIONES GENERALES ---
     @ExceptionHandler(AppointmentConflictException.class)
     public ResponseEntity<String> handleAppointmentConflictException(AppointmentConflictException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());

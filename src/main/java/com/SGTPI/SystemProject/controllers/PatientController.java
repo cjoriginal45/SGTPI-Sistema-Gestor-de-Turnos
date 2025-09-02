@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+//controller de pacientes
 @RestController
 @CrossOrigin(origins = "http://localhost:4200")
 public class PatientController {
@@ -40,7 +41,7 @@ public class PatientController {
 
     }
 
-//traer un paciente de la BD por id
+    //obtener un paciente por id
     @GetMapping("/patient/{id}")
     public ResponseEntity<?> getPatient(@PathVariable int id) {
         PatientDto dto = patientService.findPatientById(id);
@@ -66,11 +67,13 @@ public class PatientController {
         return ResponseEntity.ok(updatedPatient);
     }
 
+    //guardar observations
     @PostMapping("/patient-observations")
     public ResponseEntity<?> setObservations(@RequestBody Observations observations){
         return ResponseEntity.ok(patientService.setObservations(observations));
     }
-    
+
+    //obtener observations de un paciente
     @GetMapping("/patient-observations/{phoneNumber}")
     public ResponseEntity<?> getObservations(@PathVariable String phoneNumber){
         Optional<String> obser = patientService.getObservations(phoneNumber);

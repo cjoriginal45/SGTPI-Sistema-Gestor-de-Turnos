@@ -4,7 +4,7 @@ package com.SGTPI.SystemProject.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Email;
 
-
+//DTO de respuesta de Appointment
 public record AppointmentResponseDto(
         @JsonProperty("id")
         int id,

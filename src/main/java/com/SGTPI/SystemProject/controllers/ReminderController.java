@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
+//controller de recordatorios
 @RestController
 @RequestMapping("/reminders")
 public class ReminderController {
@@ -25,6 +26,7 @@ public class ReminderController {
         this.reminderService = reminderService;
     }
 
+    //cancelar turno desde un recordatorio
     @GetMapping("/cancel/{reminderId}")
     public ResponseEntity<?> cancelAppointment(@PathVariable Integer reminderId) {
         ReminderDto response = reminderService.cancelAppointmentFromReminder(reminderId);

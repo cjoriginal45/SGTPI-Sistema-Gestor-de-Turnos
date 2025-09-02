@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 import lombok.*;
 
+//clase Entity Reminder
 @Data
 @Builder
 @Entity

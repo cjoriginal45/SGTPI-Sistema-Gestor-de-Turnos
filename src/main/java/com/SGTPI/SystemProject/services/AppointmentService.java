@@ -34,6 +34,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+//Logica de negocio de Appointment
 @Service
 public class AppointmentService {
 
@@ -76,7 +77,7 @@ public class AppointmentService {
             throw new IllegalArgumentException("El DTO de cita no puede ser nulo");
         }
 
-        // Convertir DTO a entidad (sin guardar aún)
+        // Convertir DTO a entidad
         Appointment appointment = appMapper.requestToAppointment(dto);
         if (appointment == null) {
             throw new IllegalStateException("No se pudo mapear la cita. Verifique los datos del paciente/profesional");
@@ -85,7 +86,7 @@ public class AppointmentService {
         // --- LÓGICA DE VALIDACIÓN PARA CREAR TURNO ---
         LocalDateTime requestedDateTime = appointment.getDate(); // Obtiene la fecha y hora del turno a crear
 
-        // 1. Validar si ya existe un turno CONFIRMADO en esa fecha/hora
+        // Validar si ya existe un turno CONFIRMADO en esa fecha/hora
         Optional<Appointment> existingConfirmedAppointment = appRepository.findByDateAndStatus(
                 requestedDateTime,
                 AppointmentStatus.CONFIRMADO
@@ -94,7 +95,7 @@ public class AppointmentService {
             throw new AppointmentConflictException("Ya existe un turno confirmado en la fecha y hora solicitadas.");
         }
 
-        // 2. Validar si la franja horaria está BLOQUEADA
+        // Verificar que la franja horaria no este BLOQUEADA
         Optional<Appointment> existingBlockedAppointment = appRepository.findByDateAndStatus(
                 requestedDateTime,
                 AppointmentStatus.BLOQUEADO
@@ -103,7 +104,7 @@ public class AppointmentService {
             throw new AppointmentBlockedException("La franja horaria solicitada está bloqueada y no se puede asignar un turno.");
         }
 
-        // 3. validar si no hay un turno cancelado
+        // Verificar que no haya un turno cancelado en ese horario
         Optional<Appointment> existingCanceledAppointment = appRepository.findByDateAndStatus(
                 requestedDateTime,
                 AppointmentStatus.CANCELADO
@@ -187,6 +188,7 @@ public class AppointmentService {
                 .collect(Collectors.toList());
     }
 
+    //lista de turnos por id
     public List<AppointmentResponseDto> getAppointmentsById(int id) {
         Optional<Patient> patient = patientRepository.findById(id);
 
@@ -197,7 +199,7 @@ public class AppointmentService {
     }
 
 
-
+    //actualizar turnos (patch)
     @Transactional
     public AppointmentResponseDto patchAppointment(int id, Map<String, Object> updates) {
         Appointment app = appRepository.findById(id)
@@ -208,8 +210,6 @@ public class AppointmentService {
 
 
         updates.forEach((key, value) -> {
-            System.out.println("Processing key: " + key + ", value: " + value + ", type: " + (value != null ? value.getClass().getName() : "null"));
-
             switch (key) {
                 case "duration":
                     if (value instanceof Number) {
@@ -259,15 +259,13 @@ public class AppointmentService {
                         try {
                             PatientDto patientDto = objectMapper.convertValue(value, PatientDto.class);
 
-                            // --- LÓGICA CLAVE: SOLO CAMBIAR EL PACIENTE ASOCIADO (DEBE EXISTIR) ---
                             // Si el PatientDto tiene un ID, busca el paciente existente
-                            if (patientDto.id() != null) { // Ahora patientDto.id() es Integer, puede ser null
+                            if (patientDto.id() != null) {
                                 Patient managedPatient = patientRepository.findById(patientDto.id())
                                         .orElseThrow(() -> new IllegalArgumentException("Paciente asociado no encontrado con ID: " + patientDto.id()));
                                 app.setPatient(managedPatient); // Asigna la entidad Patient manejada
-                                System.out.println("Cambiando el paciente asociado al turno a ID: " + managedPatient.getId());
                             } else {
-                                // Si no hay ID en el PatientDto, es un error en este contexto (no se permite crear nuevos pacientes aquí)
+                                // Si no hay ID en el PatientDto es un error
                                 throw new IllegalArgumentException("Para cambiar el paciente de un turno, debe proporcionar el ID de un paciente existente.");
                             }
                         } catch (IllegalArgumentException e) {
@@ -281,18 +279,17 @@ public class AppointmentService {
                     }
                     break;
                 default:
-                    System.out.println("Campo no reconocido o no manejado en PATCH: " + key);
                     break;
             }
         });
 
         LocalDateTime newDateTime = LocalDateTime.of(tempLocalDateRef.get(), tempLocalTimeRef.get());
         if (!app.getDate().equals(newDateTime)) {
-            // Define los estados que deben considerarse como conflicto
+            // estados que deben considerarse como conflicto
             List<AppointmentStatus> conflictingStatuses = Arrays.asList(
                     AppointmentStatus.CONFIRMADO,
                     AppointmentStatus.BLOQUEADO,
-                    AppointmentStatus.CANCELADO // Incluido CANCELADO en la verificación
+                    AppointmentStatus.CANCELADO
             );
 
             Optional<Appointment> conflictingAppointment = appRepository.findByDateAndIdIsNotAndStatusIn(
@@ -306,7 +303,6 @@ public class AppointmentService {
                 throw new AppointmentConflictException("La fecha y hora seleccionadas ya están ocupadas por otro turno (confirmado, bloqueado o cancelado).");
             }
             app.setDate(newDateTime);
-            System.out.println("LocalDateTime del turno actualizado a: " + newDateTime);
         } else {
             System.out.println("LocalDateTime del turno no cambió.");
         }
@@ -333,17 +329,6 @@ public class AppointmentService {
         return appMapper.entityToResponse(updated);
     }
 
-
-
-
-    //ya veremos como lo implementamos
-    private LocalDate getDate(LocalDateTime datetime) {
-        return datetime.toLocalDate();
-    }
-
-    private LocalTime getTime(LocalDateTime datetime) {
-        return datetime.toLocalTime();
-    }
 
     @Transactional
     public String cancelAppointment(int id) { // El servicio devuelve un String de mensaje de éxito
@@ -372,13 +357,11 @@ public class AppointmentService {
             appointment.setPatient(null); // Desvincula el paciente
             appointment.setSessionNotes(null); // Limpiar observaciones
             message = "Turno cancelado y liberado exitosamente.";
-            System.out.println("Turno ID " + id + " cancelado con más de 48h de antelación. Estado: DISPONIBLE.");
         } else {
             // Si se cancela con menos de 48 horas de antelación: QUEDA CANCELADO
             appointment.setStatus(AppointmentStatus.CANCELADO);
             // Los datos del paciente y observaciones se mantienen
             message = "Turno cancelado exitosamente (quedó en estado CANCELADO).";
-            System.out.println("Turno ID " + id + " cancelado con menos de 48h de antelación. Estado: CANCELADO.");
         }
 
         Appointment appointmentToCancel = appRepository.save(appointment);
@@ -402,7 +385,7 @@ public class AppointmentService {
         return message;
     }
 
-
+    //cancelar un turno desde el reminder
     @Transactional
     public String cancelAppointmentFromReminder(Integer reminderId) {
         // Busca el recordatorio por ID
@@ -432,7 +415,7 @@ public class AppointmentService {
     }
 
 
-
+    //logica para bloquear y desbloquear horas
     @Transactional
     public String toggleBlock(LocalDateTime slotTime, boolean block) {
         Optional<Appointment> existingAppointmentOpt = appRepository.findByDate(slotTime);
@@ -482,7 +465,7 @@ public class AppointmentService {
                     throw new IllegalArgumentException("No se puede desbloquear un turno en estado: " + app.getStatus().name());
                 }
             } else {
-                // ESTE ES EL NUEVO CASO: El frontend quiere desbloquear un slot que no existe en la BD.
+                // El frontend quiere desbloquear un slot que no existe en la BD.
                 // Crear un nuevo turno DISPONIBLE para anular el bloqueo por defecto del frontend.
                 Appointment newAvailableAppointment = new Appointment();
                 newAvailableAppointment.setDate(slotTime);
@@ -501,6 +484,7 @@ public class AppointmentService {
         }
     }
 
+    //asignar session notes
     @Transactional
     public String setSessionNotes(String notes,Integer id) {
         if(notes == null){
@@ -522,7 +506,7 @@ public class AppointmentService {
         return "";
     }
 
-
+    //obtener las session Notes
     public String getSessionNotes(Integer id) {
 
         if(id == null){
@@ -538,30 +522,5 @@ public class AppointmentService {
         return "";
     }
 
-    /*
-    @Scheduled(cron = "0 0 0 * * ?") // Se ejecuta a medianoche todos los días
-    @Transactional // Asegura que la operación de actualización sea atómica
-    public void markPastAppointmentsAsCompleted() {
-        LocalDateTime now = LocalDateTime.now();
-
-        // 1. Encontrar todos los turnos CONFIRMADOS cuya fecha y hora ya pasaron
-        List<Appointment> pastConfirmedAppointments = appRepository.findByStatusAndDateBefore(
-                AppointmentStatus.CONFIRMADO,
-                now
-        );
-
-        if (pastConfirmedAppointments.isEmpty()) {
-            return;
-        }
-
-        // 2. Iterar y actualizar el estado a REALIZADO
-        for (Appointment appointment : pastConfirmedAppointments) {
-            appointment.setStatus(AppointmentStatus.REALIZADO);
-            // Opcional: Puedes añadir una fecha de finalización o similar si tu entidad lo soporta
-            // appointment.setCompletionDate(now);
-            appRepository.save(appointment); // Guarda cada turno actualizado
-        }
-    }
-    */
 
 }

@@ -4,10 +4,11 @@ import com.SGTPI.SystemProject.dto.PatientDto;
 import com.SGTPI.SystemProject.models.Patient;
 import org.springframework.stereotype.Service;
 
+//clase Mapper de paciente
 @Service
 public class PatientMapper {
 
-    //mapper de dto a paciente
+    //mapper de PatientDto a Patient entity
     public Patient dtoToPatient(PatientDto dto) {
 
         return new Patient(
@@ -19,7 +20,7 @@ public class PatientMapper {
 
     }
 
-    //mapper de paciente a dto
+    //mapper de Patient a PatientDto
     public PatientDto patientToDto(Patient patient) {
         return new PatientDto(
                 patient.getId(),

@@ -5,6 +5,7 @@ import com.SGTPI.SystemProject.models.Professional;
 import com.SGTPI.SystemProject.repositories.ProfessionalRepository;
 import org.springframework.stereotype.Service;
 
+//logica de negocio de professional
 @Service
 public class ProfessionalService {
     
@@ -14,11 +15,12 @@ public class ProfessionalService {
         this.professionalRepository = professionalRepository;
     }
 
+    //obtener paciente (solo puede haber uno)
     public Professional findProfessional(){
          return professionalRepository.findById(1);
     }
     
-    
+    //crear professional
     public Professional createProfessional(Professional professional){
         String email = professional.getEmail();
         String password = professional.getPassword();

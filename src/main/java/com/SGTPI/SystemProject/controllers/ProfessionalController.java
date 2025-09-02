@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+//controller del profesional (admin)
 @RestController
 public class ProfessionalController {
     
@@ -18,12 +19,13 @@ public class ProfessionalController {
         this.professionalService = professionalService;
     }
    
-    
+    //crear un professional
     @PostMapping("professional")
     public ResponseEntity<?> createProfessional(@RequestBody Professional professional){
         return ResponseEntity.ok(professionalService.createProfessional(professional));
     }
-    
+
+    //traer al professional
     @GetMapping("professional")
     public ResponseEntity<?> getProfessional(){
         return ResponseEntity.ok().body(professionalService.findProfessional());

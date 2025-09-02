@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+//controller de reportes
 @RestController
 @RequestMapping("/reports")
 @CrossOrigin(origins = "http://localhost:4200")
@@ -27,6 +28,7 @@ public class ReportController {
         this.reportService = reportService;
     }
 
+    //generar reportes
     @PostMapping("/generate")
     public ResponseEntity<?> generateReport(@RequestBody ReportRequestDateDto request) {
         ReportResponseDto response = null;
@@ -40,20 +42,22 @@ public class ReportController {
         }
     }
 
+    //obtener lista de reportes (historial)
     @GetMapping
     public ResponseEntity<List<ReportMetaDataDto>> getAllReportMetadata() {
         List<ReportMetaDataDto> reports = reportService.getAllReportMetadata();
         return ResponseEntity.ok(reports);
     }
 
+    //descargar reporte
     @GetMapping("/download/{reportId}")
     public ResponseEntity<Resource> downloadReport(@PathVariable Integer reportId) {
         try {
             Resource fileResource = reportService.downloadReport(reportId);
-            String contentType = "application/octet-stream"; // Default
+            String contentType = "application/octet-stream";
             String filename = fileResource.getFilename();
 
-            // Determine content type based on file extension
+            //verifica el tipo de reporte antes de descargar
             if (filename != null) {
                 if (filename.endsWith(".pdf")) {
                     contentType = MediaType.APPLICATION_PDF_VALUE;

@@ -16,6 +16,7 @@ import java.time.format.DateTimeParseException;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
+//clase Mapper de appointment
 @Service
 public class AppointmentMapper {
 
@@ -28,7 +29,7 @@ public class AppointmentMapper {
         this.professionalRepository = professionalRepository;
     }
 
-    //dtoRequest a Entity
+    //convertir AppointmentRequestDto a Appointment Entity
     public Appointment requestToAppointment(AppointmentRequestDto dto) {
         Optional<Patient> patient = patientRepository.findByPhoneNumber(dto.patient().phoneNumber());
         Professional professional = professionalRepository.findById(1);
@@ -40,14 +41,14 @@ public class AppointmentMapper {
         return new Appointment(
                 dto.duration(),
                 convertirFechaHora(dto.fecha(), dto.hora()),
-                AppointmentStatus.CONFIRMADO, // Al crear, siempre es CONFIRMADO
+                AppointmentStatus.CONFIRMADO, // Al crear un turno se guarda como CONFIRMADO
                 patient.get(),
                 professional,
                 dto.sessionNotes()
         );
     }
 
-    //Entity a dtoResponse
+    //convertir Appointment Entity a AppointmentResponseDto
     public AppointmentResponseDto entityToResponse(Appointment appointment) {
         // Obtenemos el objeto Patient, que puede ser null si el Appointment esta BLOQUEADO
         Patient patient = appointment.getPatient();

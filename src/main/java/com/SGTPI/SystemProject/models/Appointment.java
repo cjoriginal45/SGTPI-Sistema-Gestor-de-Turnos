@@ -9,8 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
-
+//clase Entity Appointment
 @Data
 @Builder
 @NoArgsConstructor

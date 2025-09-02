@@ -1,7 +1,7 @@
 
 package com.SGTPI.SystemProject.models;
 
-
+//enum con tipo de reportes
 public enum ReportType {
     PACIENTES_TOTAL,
     PACIENTE_MAS_TURNOS,

@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 
 import lombok.*;
 
+//clase Entity Report
 @Data
 @Builder
 @Entity

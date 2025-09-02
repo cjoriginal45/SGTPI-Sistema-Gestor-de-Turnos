@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
 
+//DTO de solicitud para los reportes
 public record ReportRequestDateDto(
         ReportType reportType,
         ReportFormat reportFormat,

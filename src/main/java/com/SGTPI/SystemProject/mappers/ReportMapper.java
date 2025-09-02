@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
+//clase Mapper de reportes
 @Service
 public class ReportMapper {
 
@@ -21,12 +22,13 @@ public class ReportMapper {
         this.professionalRepository = professionalRepository;
     }
 
+    //convertir ReportRequestDateDto en Report
     public Report requestToEntity(ReportRequestDateDto request, Path filePath){
         Report report = Report.builder()
                 .type(request.reportType())
                 .format(request.reportFormat())
                 .date(LocalDateTime.now())
-                .content(filePath.toString()) // Store the file path
+                .content(filePath.toString())
                 .professional(professionalRepository.findById(request.professionalId()))
                 .build();
         Report savedReport = reportRepository.save(report);
@@ -34,6 +36,7 @@ public class ReportMapper {
         return report;
     }
 
+    //convertir Report en ReportResponseDto
     public ReportResponseDto entityToResponse(Report report,String message,String url){
         ReportResponseDto rep = new ReportResponseDto(
                 message,

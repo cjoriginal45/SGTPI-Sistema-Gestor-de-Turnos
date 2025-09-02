@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 
 import static com.SGTPI.SystemProject.models.ReportType.*;
 
+//logica de negocio de los reportes
 @Service
 public class ReportService {
 
@@ -46,6 +47,7 @@ public class ReportService {
 
     private final ReportGenerator reportGenerator;
 
+    //carpeta donde se descargan los reportes
     @Value("${report.storage.path:./generated-reports}")
     private String reportStoragePath;
 
@@ -60,6 +62,7 @@ public class ReportService {
         this.reportMapper=reportMapper;
     }
 
+    //Este método se ejecuta automáticamente después de que el bean es creado
     @PostConstruct
     public void init() {
         try {
@@ -71,16 +74,16 @@ public class ReportService {
 
 
 
-
+    //metodo para generar reporte
     @Transactional
     public ReportResponseDto generateReport(ReportRequestDateDto request) throws IOException, DocumentException {
-        // 1. Validate professional
+        // Validar professional
         Professional professional = professionalRepository.findById(request.professionalId());
 
-        // 2. Prepare data for the report based on ReportType
+        // Preparar data segun ReportType
         Map<String, Object> reportData = fetchDataForReport(request);
 
-        // 3. Generate the report file (PDF or Excel)
+        // Generar el reporte (PDF o Excel)
         byte[] fileBytes;
         String fileName = generateUniqueFileName(request.reportType(), request.reportFormat());
         Path filePath = Paths.get(reportStoragePath, fileName);
@@ -97,18 +100,19 @@ public class ReportService {
             throw new IllegalArgumentException("Unsupported report format: " + request.reportFormat());
         }
 
-        // 4. Save the generated file to disk
+        // guardar el archivo en la ruta
         Files.write(filePath, fileBytes);
 
-        // 5. Save report metadata to the database
+        // guardar el reporte en la BD
         Report savedReport = reportMapper.requestToEntity(request,filePath);
 
 
-        // 6. Return response with download URL
+        // retornar la url para la descarga
         String downloadUrl = "/api/reports/download/" + savedReport.getId();
         return reportMapper.entityToResponse(savedReport,message,downloadUrl);
     }
 
+    //obtener la lista de turnos generados en la BD
     @Transactional
     public List<ReportMetaDataDto> getAllReportMetadata() {
         return reportRepository.findAll().stream()
@@ -123,7 +127,7 @@ public class ReportService {
                 .collect(Collectors.toList());
     }
 
-
+    //Descargar reporte
     @Transactional
     public Resource downloadReport(Integer reportId) throws IOException {
         Report report = reportRepository.findById(reportId)
@@ -319,6 +323,7 @@ public class ReportService {
         return data;
     }
 
+    //generar el tipo de archivo (xlsx o pdf)
     private String generateUniqueFileName(ReportType type, ReportFormat format) {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
         String typeName = type.name().toLowerCase().replace("_", "-");

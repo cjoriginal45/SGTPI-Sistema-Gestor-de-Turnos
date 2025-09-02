@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 
+//generador de reportes
 @Component
 public class ReportGenerator {
 

@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+//logica de negocio de los recordatorios
 @Service
 public class ReminderService {
 
@@ -32,14 +33,12 @@ public class ReminderService {
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
 
 
-    /**
-     * Tarea programada que se ejecuta cada 15 minutos.
-     * Busca recordatorios pendientes de enviar.
-     */
-    // @Scheduled(fixedRate = 900000) // Se ejecuta cada 15 minutos (900000 milisegundos)
-    // Usaremos un cron más específico para evitar que se solape con otras tareas
+
+     // Tarea programada que se ejecuta cada 15 minutos.
+     // Busca recordatorios pendientes de enviar.
+
     @Scheduled(cron = "0 */15 * * * *")
-    @Transactional // Es importante para trabajar con las entidades
+    @Transactional
     public void sendPendingReminders() {
         // Busca todos los recordatorios que no se han enviado
         List<Reminder> pendingReminders = reminderRepository.findAllByIsSentFalse();
@@ -87,15 +86,15 @@ public class ReminderService {
         }
     }
 
-
+    //metodo para cancelar un turno desde un recordatorio
     @Transactional
     public ReminderDto cancelAppointmentFromReminder(Integer reminderId) {
         try {
-            // 1. Busca el recordatorio por ID
+            // Busca el recordatorio por ID
             Reminder reminder = reminderRepository.findById(reminderId)
                     .orElseThrow(() -> new IllegalArgumentException("Recordatorio no encontrado con ID: " + reminderId));
 
-            // 2. Obtiene el turno asociado al recordatorio
+            //  Obtiene el turno asociado al recordatorio
             Appointment appointment = reminder.getAppointment();
             if (appointment == null) {
                 throw new IllegalArgumentException("El recordatorio no está asociado a ningún turno.");
@@ -103,7 +102,7 @@ public class ReminderService {
 
             String cancellationMessage = appointmentService.cancelAppointment(appointment.getId());
 
-            // 4. Después de que el turno ha sido procesado por AppointmentService,
+            // Después de que el turno ha sido procesado por AppointmentService,
             // marca el recordatorio como enviado (para no procesarlo de nuevo).
             reminder.setSent(true);
             reminderRepository.save(reminder);
@@ -115,7 +114,6 @@ public class ReminderService {
             return new ReminderDto("error", e.getMessage());
         } catch (AppointmentCancellationException e) {
             // Captura errores específicos de tu lógica de negocio en AppointmentService
-            // (ej. "No se puede cancelar un turno con estado X", "No se puede cancelar un turno pasado")
             return new ReminderDto("error", e.getMessage());
         } catch (Exception e) {
             // Captura cualquier otro error inesperado
