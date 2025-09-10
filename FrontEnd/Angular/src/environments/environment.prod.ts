@@ -1,4 +1,4 @@
 export const environment = {
     production: true,
-    apiBaseUrl: 'http://backend:8080/SGTPI/api'
+    apiBaseUrl: 'https://sgtpi-sistema-gestor-de-turnos-production.up.railway.app/SGTPI/api'
   };
