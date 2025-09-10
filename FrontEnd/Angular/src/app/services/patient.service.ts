@@ -6,7 +6,7 @@ import { Patient } from '../interfaces/patient'
 import { PatientObservation } from '../interfaces/PatientObservation';
 import { AppointmentRequestDto } from '../interfaces/AppointmentRequestDto';
 import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 import { AppointmentPatientDto } from '../interfaces/AppointmentPatientDto';
 
 

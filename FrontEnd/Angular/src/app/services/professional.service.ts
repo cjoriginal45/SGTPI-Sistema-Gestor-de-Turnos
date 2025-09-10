@@ -1,7 +1,7 @@
 // src/app/services/professional.service.ts
 
 import { inject, Injectable, PLATFORM_ID, signal } from "@angular/core";
-import { environment } from "../environments/environment";
+import { environment } from "../../environments/environment";
 import { HttpClient, HttpErrorResponse } from "@angular/common/http"; // Import HttpErrorResponse
 import { AppointmentResponseDto } from "../interfaces/AppointmentResponseDto"; // Ensure this path is correct
 import { catchError } from "rxjs/operators"; // Correct import for catchError
