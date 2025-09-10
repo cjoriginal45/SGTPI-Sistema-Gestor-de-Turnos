@@ -1,15 +1,18 @@
-# Stage 1: Solo sirve los archivos compilados
+# Stage 0: Build
+FROM node:20-alpine AS build
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+RUN npm run build --configuration production
+
+# Stage 1: Servir con Nginx
 FROM nginx:alpine AS production
 
-# Copiamos los archivos ya compilados de Angular
-# Asegurate de haber hecho `ng build --configuration production` localmente
-COPY ./dist/front-gestor-turnos /usr/share/nginx/html
+COPY --from=build /app/dist/front-gestor-turnos /usr/share/nginx/html
 
-# Opcional: copiar configuración personalizada de Nginx
-# COPY nginx.conf /etc/nginx/nginx.conf
-
-# Exponemos el puerto
 EXPOSE 80
-
-# Comando por defecto
 CMD ["nginx", "-g", "daemon off;"]
