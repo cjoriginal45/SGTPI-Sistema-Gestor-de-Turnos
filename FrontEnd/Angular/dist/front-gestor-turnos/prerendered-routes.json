@@ -1,0 +1,8 @@
+{
+  "routes": {
+    "/historial": {},
+    "/pacientes": {},
+    "/principal": {},
+    "/reportes": {}
+  }
+}
