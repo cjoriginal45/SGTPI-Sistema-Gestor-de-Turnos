@@ -3,30 +3,28 @@ FROM node:20-alpine AS build
 
 WORKDIR /app
 
-# Copy package files first for better caching
+# Copiar package files
 COPY package*.json ./
-RUN npm ci --only=production
+# Instalar Angular CLI globalmente
+RUN npm install -g @angular/cli
+# Instalar dependencias del proyecto
+RUN npm install
 
-# Copy source code
+# Copiar código fuente
 COPY . .
 
-# Build the application
-RUN npm run build --configuration=production
+# Build con Angular CLI
+RUN ng build --configuration=production
 
 # Stage 1: Production server
 FROM nginx:alpine AS production
 
-# Copy built application
+# Copiar aplicación construida - verifica la estructura exacta
 COPY --from=build /app/dist/front-gestor-turnos/browser /usr/share/nginx/html
 
-# Copy custom nginx config (opcional pero recomendado)
-# COPY nginx.conf /etc/nginx/nginx.conf
+# Configuración de Nginx para SPA
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port
 EXPOSE 80
-
-# Health check (opcional pero recomendado)
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
