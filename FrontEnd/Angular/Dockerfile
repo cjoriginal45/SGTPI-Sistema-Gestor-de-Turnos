@@ -22,9 +22,6 @@ FROM nginx:alpine AS production
 # Copiar aplicación construida - verifica la estructura exacta
 COPY --from=build /app/dist/front-gestor-turnos/browser /usr/share/nginx/html
 
-# Configuración de Nginx para SPA
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
