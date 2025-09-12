@@ -30,7 +30,6 @@ COPY --from=build /app/dist/front-gestor-turnos/browser /usr/share/nginx/html
 
 # Eliminar archivos default de nginx y agregar tu configuración básica
 RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
