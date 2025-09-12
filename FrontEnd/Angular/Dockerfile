@@ -25,11 +25,19 @@ RUN pnpm build
 # --------
 FROM nginx:stable-alpine AS production
 
+# Instalar envsubst
+RUN apk add --no-cache gettext
+
 # Borrar config por defecto de Nginx
 RUN rm /etc/nginx/conf.d/default.conf
 
 # Copiar la app compilada al servidor nginx
 COPY --from=build /app/dist/front-gestor-turnos /usr/share/nginx/html
 
+# Copiar plantilla de config de Nginx
+COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
+
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+
+# Reemplazar $PORT con la variable de Railway y arrancar Nginx
+CMD ["sh", "-c", "envsubst '\$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/nginx.conf && nginx -g 'daemon off;'"]
