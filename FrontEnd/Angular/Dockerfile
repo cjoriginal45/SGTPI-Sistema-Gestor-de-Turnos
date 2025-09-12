@@ -11,11 +11,8 @@ RUN npm install -g pnpm
 
 WORKDIR /app
 
-# Copiar archivos esenciales primero para aprovechar cache
-COPY package.json pnpm-lock.yaml angular.json tsconfig*.json ./
-
-# Instalar dependencias usando pnpm (mucho más rápido que npm)
-RUN pnpm install --frozen-lockfile --prefer-offline --reporter=silent
+COPY package.json angular.json tsconfig*.json ./
+RUN pnpm install --prefer-offline --reporter=silent
 
 # Copiar el resto del proyecto
 COPY . .
