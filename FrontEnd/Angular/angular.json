@@ -16,7 +16,7 @@
             "outputPath": "dist/front-gestor-turnos",
             "index": "src/index.html",
             "browser": "src/main.ts",
-            "watch": true,
+            "watch": false,
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "assets": [
