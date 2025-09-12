@@ -11,6 +11,7 @@ RUN npm install -g pnpm
 
 WORKDIR /app
 
+# Copiar archivos esenciales para aprovechar cache de Docker
 COPY package.json angular.json tsconfig*.json ./
 RUN pnpm install --prefer-offline --reporter=silent
 
@@ -28,17 +29,19 @@ FROM nginx:stable-alpine AS production
 # Instalar envsubst
 RUN apk add --no-cache gettext
 
-# Borrar config por defecto de Nginx
+# Crear carpeta de templates (por si no existe)
+RUN mkdir -p /etc/nginx/templates
+
+# Borrar configuración por defecto de Nginx
 RUN rm /etc/nginx/conf.d/default.conf
 
-# Copiar la app compilada al servidor nginx
+# Copiar la app compilada al servidor Nginx
 COPY --from=build /app/dist/front-gestor-turnos /usr/share/nginx/html
 
-# Copiar plantilla de config de Nginx
+# Copiar plantilla de configuración de Nginx
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
 EXPOSE 80
 
 # Reemplazar $PORT con la variable de Railway y arrancar Nginx
-CMD envsubst '$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'
-
+CMD envsubst '$PORT' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'
