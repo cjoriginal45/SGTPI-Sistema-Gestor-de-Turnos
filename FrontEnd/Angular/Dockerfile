@@ -35,9 +35,10 @@ RUN rm /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist/front-gestor-turnos /usr/share/nginx/html
 
 # Copiar plantilla de config de Nginx
-COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
+COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 
 EXPOSE 80
 
 # Reemplazar $PORT con la variable de Railway y arrancar Nginx
-CMD sh -c "envsubst '\$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/nginx.conf && nginx -g 'daemon off;'"
+CMD envsubst '$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'
+
