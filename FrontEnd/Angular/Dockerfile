@@ -18,7 +18,7 @@ RUN pnpm install --prefer-offline --reporter=silent
 COPY . .
 
 # Compilar Angular en modo producción (SPA, sin SSR)
-RUN pnpm build -- --configuration production --progress=false
+RUN pnpm build
 
 # --------
 # Stage 1: Servir con Nginx
