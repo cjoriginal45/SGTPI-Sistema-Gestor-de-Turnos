@@ -40,4 +40,4 @@ COPY nginx.conf.template /etc/nginx/templates/nginx.conf.template
 EXPOSE 80
 
 # Reemplazar $PORT con la variable de Railway y arrancar Nginx
-CMD ["sh", "-c", "envsubst '\$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/nginx.conf && nginx -g 'daemon off;'"]
+CMD sh -c "envsubst '\$PORT' < /etc/nginx/templates/nginx.conf.template > /etc/nginx/conf.d/nginx.conf && nginx -g 'daemon off;'"
