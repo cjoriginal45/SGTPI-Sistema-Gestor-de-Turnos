@@ -21,7 +21,8 @@
             "assets": [{ "glob": "**/*", "input": "public" }],
             "styles": ["src/styles.css"],
             "scripts": [],
-            "watch": false
+            "watch": false,
+            "browser": "src/main.ts"
           },
           "configurations": {
             "production": {
