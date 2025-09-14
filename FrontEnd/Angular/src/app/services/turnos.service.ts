@@ -5,7 +5,7 @@ import { Observable, throwError, Subject, lastValueFrom } from 'rxjs';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { catchError } from 'rxjs/operators';
 import { isPlatformBrowser } from '@angular/common';
-import { environment } from '../environments/environment'; // Adjust path if necessary
+import { environment } from '../../environments/environment'; // Adjust path if necessary
 import { Patient } from '../interfaces/patient'; // Import Patient interface
 import { AppointmentResponseDto } from '../interfaces/AppointmentResponseDto';
 import { AppointmentRequestDto } from '../interfaces/AppointmentRequestDto';

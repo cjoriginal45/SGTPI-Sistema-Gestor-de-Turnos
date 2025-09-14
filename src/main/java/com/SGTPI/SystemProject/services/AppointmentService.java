@@ -50,6 +50,7 @@ public class AppointmentService {
 
     private final ReminderRepository reminderRepository;
 
+
     @Autowired
     private EmailService emailService;
 

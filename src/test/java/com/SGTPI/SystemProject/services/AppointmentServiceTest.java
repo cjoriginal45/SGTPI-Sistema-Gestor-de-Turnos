@@ -12,6 +12,7 @@ import com.SGTPI.SystemProject.models.Professional;
 import com.SGTPI.SystemProject.repositories.AppointmentRepository;
 import com.SGTPI.SystemProject.repositories.PatientRepository;
 import com.SGTPI.SystemProject.repositories.ProfessionalRepository;
+import com.SGTPI.SystemProject.repositories.ReminderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,9 @@ public class AppointmentServiceTest {
     private AppointmentRepository appointmentRepository;
     @Mock
     private PatientRepository patientRepository;
+
+    @Mock
+    private ReminderRepository reminderRepository;
     @Mock
     private ProfessionalRepository professionalRepository;
     @Mock

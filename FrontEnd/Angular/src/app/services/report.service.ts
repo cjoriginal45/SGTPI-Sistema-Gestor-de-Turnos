@@ -6,7 +6,7 @@ import { catchError } from 'rxjs/operators';
 import { ReportMetaDataDto } from '../interfaces/ReportMetaDataDto';
 import { ReportRequestDateDto } from '../interfaces/ReportRequestDateDto';
 import { ReportResponseDto } from '../interfaces/ReportResponseDto';
-import { environment } from '../environments/environment';
+import { environment } from '../../environments/environment';
 
 
 @Injectable({
