@@ -15,18 +15,22 @@
           "options": {
             "outputPath": "dist/front-gestor-turnos",
             "index": "src/index.html",
-            "browser": "src/main.ts",
-            "watch": false,
+            "main": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": [
-              { "glob": "**/*", "input": "public" }
-            ],
+            "assets": [{ "glob": "**/*", "input": "public" }],
             "styles": ["src/styles.css"],
-            "scripts": []
+            "scripts": [],
+            "watch": false
           },
           "configurations": {
             "production": {
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ],
               "budgets": [
                 {
                   "type": "initial",
@@ -39,7 +43,10 @@
                   "maximumError": "4MB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": true,
+              "sourceMap": false,
+              "extractCss": true
             },
             "development": {
               "optimization": false,
