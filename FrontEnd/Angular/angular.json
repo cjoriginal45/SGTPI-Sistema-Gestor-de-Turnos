@@ -16,10 +16,11 @@
             "outputPath": "dist/front-gestor-turnos",
             "index": "src/index.html",
             "main": "src/main.ts",
-            "browser": "src/main.ts",
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
-            "assets": [{ "glob": "**/*", "input": "public" }],
+            "assets": [
+              { "glob": "**/*", "input": "public" }
+            ],
             "styles": ["src/styles.css"],
             "scripts": [],
             "watch": false
@@ -35,7 +36,19 @@
               "outputHashing": "all",
               "optimization": true,
               "sourceMap": false,
-              "extractCss": true
+              "extractCss": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "4MB",
+                  "maximumError": "5MB"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "2MB",
+                  "maximumError": "4MB"
+                }
+              ]
             },
             "development": {
               "optimization": false,
@@ -63,20 +76,10 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
-            "polyfills": [
-              "zone.js",
-              "zone.js/testing"
-            ],
+            "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
-            "assets": [
-              {
-                "glob": "**/*",
-                "input": "public"
-              }
-            ],
-            "styles": [
-              "src/styles.css"
-            ],
+            "assets": [{ "glob": "**/*", "input": "public" }],
+            "styles": ["src/styles.css"],
             "scripts": []
           }
         }
