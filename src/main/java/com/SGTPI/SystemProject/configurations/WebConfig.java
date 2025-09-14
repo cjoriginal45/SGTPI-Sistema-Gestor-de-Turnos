@@ -11,7 +11,7 @@ public class WebConfig implements WebMvcConfigurer{
      @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**") // Aplica a todos los endpoints
-                .allowedOrigins("http://frontend:80") // Orígenes permitidos
+                .allowedOrigins("https://sgtpi.vercel.app") // Orígenes permitidos
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS") // Métodos HTTP permitidos
                 .allowedHeaders("*") // Cabeceras permitidas
                 .allowCredentials(true); // Permite el envío de cookies/credenciales
